@@ -273,11 +273,15 @@ export default function Home() {
       type: "nist" | "aiRmf";
       asiId: string;
       asiName: string;
+      asiDesc: string;
       controlId: string;
       controlText: string;
       family: string;
       familyName: string;
       description: string;
+      implementation: string;
+      rationale: string;
+      evidence: string;
     }[] = [];
 
     OWASP_ASI.forEach((asi) => {
@@ -294,11 +298,15 @@ export default function Home() {
             type: "nist",
             asiId: asi.id,
             asiName: asi.name,
+            asiDesc: asi.desc,
             controlId,
             controlText: ctrl,
             family: fam.id,
             familyName: fam.name,
             description: desc ? desc.description : "",
+            implementation: desc ? desc.implementation : "",
+            rationale: mapping.rationale,
+            evidence: cw.evidence,
           });
         });
       });
@@ -314,11 +322,15 @@ export default function Home() {
             type: "aiRmf",
             asiId: asi.id,
             asiName: asi.name,
+            asiDesc: asi.desc,
             controlId,
             controlText: cat,
             family: func.id,
             familyName: func.name,
             description: desc ? desc.description : "",
+            implementation: desc ? desc.implementation : "",
+            rationale: mapping.rationale,
+            evidence: cw.evidence,
           });
         });
       });
@@ -338,7 +350,11 @@ export default function Home() {
         item.controlText.toLowerCase().includes(q) ||
         item.familyName.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
+        item.implementation.toLowerCase().includes(q) ||
+        item.rationale.toLowerCase().includes(q) ||
+        item.evidence.toLowerCase().includes(q) ||
         item.asiName.toLowerCase().includes(q) ||
+        item.asiDesc.toLowerCase().includes(q) ||
         item.asiId.toLowerCase().includes(q)
       );
     });

@@ -76,23 +76,29 @@ cd OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF
 
 ### Step 2: Install Dependencies
 
-Install the required Node.js packages using npm:
+This project uses [pnpm](https://pnpm.io/) as its package manager. Install it globally if you don't have it:
 
 ```bash
-npm install
+npm install -g pnpm
 ```
 
-This will install React 19, React DOM, and the Parcel bundler (used as the development server and build tool). The full dependency list is defined in `package.json`.
+Then install the project dependencies:
+
+```bash
+pnpm install
+```
+
+This will install React 19, Tailwind CSS 4, shadcn/ui, Radix UI primitives, and all other dependencies. The full dependency list is defined in `package.json`.
 
 ### Step 3: Start the Development Server
 
 Launch the local development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-Parcel will compile the application and serve it at `http://localhost:1234` (or the next available port if 1234 is in use). The terminal output will display the exact URL. Open that URL in your browser to access the crosswalk application.
+Vite will compile the application and serve it at `http://localhost:3000`. The terminal output will display the exact URL. Open that URL in your browser to access the crosswalk application.
 
 The development server supports **hot module replacement (HMR)**, so any changes you make to the source files will be reflected in the browser immediately without a full page reload.
 
@@ -101,45 +107,68 @@ The development server supports **hot module replacement (HMR)**, so any changes
 To create an optimized production build:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 The compiled output will be placed in the `dist/` directory. These static files can be served by any web server (Nginx, Apache, Caddy, or a static hosting service such as GitHub Pages, Netlify, or Vercel).
 
 ### Step 5: Serve the Production Build Locally (Optional)
 
-To preview the production build locally, you can use any static file server. For example, with the `serve` package:
+To preview the production build locally:
 
 ```bash
-npx serve dist
+pnpm preview
 ```
 
-This will serve the production build at `http://localhost:3000`.
+This will serve the production build at `http://localhost:4173`.
 
 ---
 
 ## Project Structure
 
 ```
-├── index.html                  # Entry point HTML file
-├── package.json                # Dependencies and scripts
+├── client/
+│   ├── index.html              # Entry point HTML (OG meta tags, browser title)
+│   └── src/
+│       ├── App.tsx             # Root component with Wouter routing
+│       ├── main.tsx            # React DOM entry point
+│       ├── index.css           # Global styles, design tokens, animations
+│       ├── const.ts            # App-level constants
+│       ├── pages/
+│       │   ├── Home.tsx        # Main page: heatmaps, Evidence Explorer, stat cards
+│       │   ├── ScenarioSimulator.tsx  # Scenario Simulator tab
+│       │   ├── TermsOfService.tsx     # Terms of Service page
+│       │   └── NotFound.tsx    # 404 page
+│       ├── lib/
+│       │   ├── data.ts         # All crosswalk data (OWASP_ASI, NIST_800_53, AI_RMF, CROSSWALK)
+│       │   ├── nist-control-descriptions.ts   # 200+ NIST 800-53 Rev 5 control descriptions
+│       │   ├── nist-ai-rmf-descriptions.ts    # NIST AI-RMF 100-1 control descriptions
+│       │   ├── scrambler-*.ts  # Scenario Simulator engine modules
+│       │   └── utils.ts        # Tailwind class utilities
+│       ├── components/
+│       │   └── ui/             # shadcn/ui component library (40+ components)
+│       ├── contexts/
+│       │   └── ThemeContext.tsx
+│       └── hooks/              # Custom React hooks
+├── server/
+│   └── index.ts                # Minimal Express server (static serving only)
+├── shared/
+│   └── const.ts                # Shared constants
+├── package.json                # Dependencies and scripts (pnpm)
+├── vite.config.ts              # Vite build configuration
+├── tsconfig.json               # TypeScript configuration
+├── components.json             # shadcn/ui configuration
 ├── LICENSE                     # AGPL-3.0 license
 ├── TERMS_OF_SERVICE.md         # Terms of Service for the hosted application
-├── README.md                   # This file
-├── src/
-│   ├── App.jsx                 # Main React component with all data and UI
-│   └── index.jsx               # React DOM entry point
-├── data/                       # (Reserved for future structured data exports)
-└── .github/
-    └── workflows/
-        └── deploy-pages.yml    # GitHub Pages CI/CD workflow
+├── CHANGELOG.md                # Version history
+└── README.md                   # This file
 ```
 
 ---
 
 ## Data Model
 
-The crosswalk data is embedded directly in `src/App.jsx` as JavaScript objects, making the application fully self-contained with no external API dependencies. The data model consists of four primary structures:
+The crosswalk data is embedded directly in `client/src/lib/data.ts` as TypeScript objects, making the application fully self-contained with no external API dependencies. The data model consists of four primary structures:
 
 **`OWASP_ASI`** — An array of 10 risk objects, each containing an identifier (ASI01–ASI10), a human-readable name, a severity rating (Critical, High, or Medium-High), and a description of the threat.
 

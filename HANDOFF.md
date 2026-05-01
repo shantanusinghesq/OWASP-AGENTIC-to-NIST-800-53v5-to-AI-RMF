@@ -17,8 +17,36 @@
 | `pnpm test` | **11 passed, 0 skipped** (was 7+2 at handoff #2) |
 | `pnpm check` | Clean |
 | `pnpm build` | Clean (`dist/public/` 704 KB JS, 128 KB CSS) |
-| GH Pages deploy | Workflow merged via PR; first push of corrected workflow succeeded as `f6ee490`. Live deploy unverified — requires `gh run list` to confirm. |
-| Publish workflow (`crosswalk-v*` trigger) | **Not yet exercised.** Manual `git tag crosswalk-v0.2.0 && git push --tags` to fire the GH Action. |
+| GH Pages deploy | **Blocked — same allowlist issue as Publish workflow** (see below). Workflow file committed at `f6ee490` but no run has executed since the npm→pnpm migration. Total workflow runs ever on this repo: 0. |
+| Publish workflow (`crosswalk-v*` trigger) | **Tag `crosswalk-v0.2.0` pushed but workflow did not run** — repo's `actions/permissions` is set to `selected`, and the allowlist (`actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4`) does not include `pnpm/action-setup@v4`. GitHub silently refuses to schedule the run. Fix below. |
+
+### How to unblock both workflows (one-time settings change, requires user)
+
+GitHub web UI path (recommended, ~30s):
+1. Open `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/settings/actions`
+2. Under **Allow specific actions and reusable workflows** → patterns list, add `pnpm/action-setup@v4`
+3. Save
+
+Or via CLI:
+```bash
+gh api -X PUT repos/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/actions/permissions/selected-actions \
+  -f github_owned_allowed=true -f verified_allowed=true \
+  -f 'patterns_allowed[]=actions/checkout@v4' \
+  -f 'patterns_allowed[]=actions/setup-node@v4' \
+  -f 'patterns_allowed[]=actions/upload-pages-artifact@v3' \
+  -f 'patterns_allowed[]=actions/deploy-pages@v4' \
+  -f 'patterns_allowed[]=pnpm/action-setup@v4'
+```
+
+**After the allowlist is updated, the publish workflow does NOT auto-replay.** Re-fire by deleting + re-pushing the tag, or use the `workflow_dispatch` button in the Actions tab:
+```bash
+git tag -d crosswalk-v0.2.0
+git push origin :refs/tags/crosswalk-v0.2.0
+git tag crosswalk-v0.2.0
+git push origin crosswalk-v0.2.0
+```
+
+The Pages deploy will fire on the next push to `main` (or via `workflow_dispatch`).
 
 ## Commit log this session (top of `main`)
 
@@ -46,9 +74,9 @@ PRs landed: #1, #2, #3 (all squash-merged after a brief accidental-close detour)
 
 ## Newly surfaced issues (from this session, deferred)
 
+- **Repo Actions allowlist blocks both workflows.** `actions/permissions` = `selected`; allowlist excludes `pnpm/action-setup@v4`. Result: 0 workflow runs ever recorded on this repo. Both `publish-crosswalk.yml` and `deploy-pages.yml` (since the npm→pnpm migration in `f6ee490`) silently fail to schedule. **Fix is in the "How to unblock both workflows" section above** — one-time settings change, requires user (the harness blocks API writes to repo Actions permissions for security reasons).
 - **`Home.tsx:97` fallback ordering bug.** `NIST_CONTROL_DESCRIPTIONS[id]` is checked before `NIST_AI_RMF_DESCRIPTIONS[id]`. After v0.2.0 added `MP-1` to the AI-RMF map, search for `"MP-1"` will resolve to NIST 800-53's existing `"MP-1 Media Protection Policy"` first — wrong context. Surface in the next UI session.
 - **Two known-orphan AI-RMF entries** (`GV-7`, `MS-4`). Have correct short-form keys (so T10 passes) but aren't currently referenced from `CROSSWALK`. `MS-4` is a valid AI-RMF cat that AI_RMF.cats lists; CROSSWALK editorial team should decide whether to add a reference. `GV-7` is likely a leftover from an earlier 7-cat GOVERN list (current `AI_RMF.cats` has GV-1..GV-6) — either restore to AI_RMF.cats or delete from descriptions.
-- **`.github/workflows/publish-crosswalk.yml` execution unverified.** Workflow YAML committed via PR #1 + a held-back follow-up after `gh auth refresh -s workflow`. First tag push will be the operational validation.
 - **AEGIS upstream-shim cleanup.** AEGIS prototype branch contains `packages/report/src/obviate-crosswalk.d.ts` — a 26-line ambient type shim added because of the `.js`-extensions bug. Now that v0.2.0 fixes that, the shim should be deleted when AEGIS migrates from the prototype `link:` dep to a real `@obviate/crosswalk@^0.2.0` install.
 
 ## AEGIS local state
@@ -60,12 +88,13 @@ PRs landed: #1, #2, #3 (all squash-merged after a brief accidental-close detour)
 
 ## Next session candidates
 
-1. **Push `crosswalk-v0.2.0` tag** to fire the publish workflow. Verify the package appears in https://github.com/haremantra/.../packages.
-2. **Create AEGIS GitHub remote** (or decide it stays local-only). If remote: `gh repo create haremantra/aegis --private --source=. --push`, then lift the `prototype/obviate-crosswalk-integration` branch into a real PR using `@obviate/crosswalk@^0.2.0` from GH Packages and delete the type shim.
-3. **Fix `Home.tsx:97` fallback ordering** — check AI-RMF descriptions before NIST 800-53 when the prefix matches an AI-RMF function (or unify the two maps with namespaced keys).
-4. **Resolve `GV-7` / `MS-4` orphans** — editorial decision on whether to delete from descriptions or add to CROSSWALK / AI_RMF.cats.
-5. **Verify GH Pages deploy ran** with the corrected pnpm workflow (`gh run list --limit 5`).
-6. **Apps/* layout migration** (deferred from prior plan) — `client/` → `apps/web/`, `server/` → `apps/server/`. Pure cosmetic; reversible. Do anytime.
+1. **[BLOCKER] Add `pnpm/action-setup@v4` to the repo's Actions allowlist.** See "How to unblock both workflows" above. Until this lands, neither the publish workflow nor the Pages deploy will run. Tag `crosswalk-v0.2.0` is already on origin waiting; re-push it after the settings change.
+2. **Verify the publish workflow run** once unblocked. Check https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/actions and https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/packages.
+3. **Verify GH Pages deploy** also fires (it'll trigger on next push to `main` once the allowlist is fixed).
+4. **Create AEGIS GitHub remote** (or decide it stays local-only). If remote: `gh repo create haremantra/aegis --private --source=. --push`, then lift the `prototype/obviate-crosswalk-integration` branch into a real PR using `@obviate/crosswalk@^0.2.0` from GH Packages and delete the type shim.
+5. **Fix `Home.tsx:97` fallback ordering** — check AI-RMF descriptions before NIST 800-53 when the prefix matches an AI-RMF function (or unify the two maps with namespaced keys).
+6. **Resolve `GV-7` / `MS-4` orphans** — editorial decision on whether to delete from descriptions or add to CROSSWALK / AI_RMF.cats.
+7. **Apps/* layout migration** (deferred from prior plan) — `client/` → `apps/web/`, `server/` → `apps/server/`. Pure cosmetic; reversible. Do anytime.
 
 ## Carryover from AEGIS HANDOFF — status
 

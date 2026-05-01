@@ -68,6 +68,12 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     implementation: "Organizations enforce concurrent session limits and implement session management controls. For agentic AI systems, this includes limiting concurrent agent instances, preventing session reuse, and implementing session timeout mechanisms.",
     relatedASI: ["ASI03"],
   },
+  "AC-25": {
+    title: "Reference Monitor",
+    description: "Implements a reference monitor for the system that is always invoked, tamper-proof, and small enough to be subject to analysis and testing, the completeness of which can be assured.",
+    implementation: "Organizations implement a non-bypassable mediation layer that evaluates every access request against policy. For agentic AI systems, the reference monitor is the policy enforcement middleware that intercepts every tool invocation, applies per-tool least-privilege profiles (scopes, rate limits, egress allowlists), and cannot be bypassed by the agent itself.",
+    relatedASI: ["ASI02"],
+  },
 
   // AU — Audit & Accountability
   "AU-1": {
@@ -141,6 +147,12 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Provides mechanisms to generate audit records for system events and user actions.",
     implementation: "Organizations configure systems to automatically generate audit records for security-relevant events. For agentic AI systems, this includes automatic logging of agent initialization, goal changes, tool invocations, permission modifications, and behavioral anomalies.",
     relatedASI: ["ASI01", "ASI08"],
+  },
+  "AU-16": {
+    title: "Cross-Organizational Audit",
+    description: "Employs methods for coordinating audit information among external organizations when audit information is transmitted across organizational boundaries to enable end-to-end traceability of user actions.",
+    implementation: "Organizations establish agreements and technical mechanisms to share and correlate audit records with partner organizations. For agentic AI systems, this includes propagating correlation IDs across agent-to-agent and agent-to-third-party tool calls so that anomalous chaining and cross-tenant tool invocations remain traceable end-to-end.",
+    relatedASI: ["ASI02"],
   },
 
   // CA — Assessment & Authorization
@@ -259,6 +271,12 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Establishes procedures to prevent unauthorized installation of software by users.",
     implementation: "Organizations implement technical controls to prevent unauthorized software installation. For agentic AI systems, this includes preventing agents from installing unauthorized tools or modifying their own execution environment.",
     relatedASI: ["ASI02", "ASI05"],
+  },
+  "CM-14": {
+    title: "Signed Components",
+    description: "Prevents the installation of system components without verifying that the component has been digitally signed using a certificate that is recognized and approved by the organization.",
+    implementation: "Organizations enforce signature verification on all installable components and reject unsigned or untrusted artifacts. For agentic AI systems, this includes validating signed code before agents can load tools, plugins, or model weights, and refusing to execute code generated or fetched at runtime that lacks an approved signature.",
+    relatedASI: ["ASI05"],
   },
 
   // CP — Contingency Planning

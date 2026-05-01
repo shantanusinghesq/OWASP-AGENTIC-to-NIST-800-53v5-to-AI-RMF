@@ -36,7 +36,7 @@ describe("@obviate/crosswalk integrity", () => {
     expect(bad).toEqual([]);
   });
 
-  it.skip("T4 every nist53 control id resolves in NIST_CONTROL_DESCRIPTIONS [TODO: backfill 3 missing — AC-25, AU-16, CM-14]", () => {
+  it("T4 every nist53 control id resolves in NIST_CONTROL_DESCRIPTIONS", () => {
     const bad: string[] = [];
     for (const [asi, entry] of Object.entries(CROSSWALK)) {
       for (const m of entry.nist53) {
@@ -72,7 +72,7 @@ describe("@obviate/crosswalk integrity", () => {
     expect(badCat).toEqual([]);
   });
 
-  it.skip("T6b every aiRmf cat id resolves in NIST_AI_RMF_DESCRIPTIONS [TODO: backfill — file only covers GV-*; missing all MP-*, MS-*, MG-*]", () => {
+  it("T6b every aiRmf cat id resolves in NIST_AI_RMF_DESCRIPTIONS", () => {
     const badDesc: string[] = [];
     for (const [asi, entry] of Object.entries(CROSSWALK)) {
       for (const m of entry.aiRmf) {
@@ -92,5 +92,25 @@ describe("@obviate/crosswalk integrity", () => {
       if (entry.aiRmf.length === 0) thin.push(`${asi} aiRmf=0`);
     }
     expect(thin).toEqual([]);
+  });
+
+  it("T9 every relatedASI in description maps refers to a real OWASP_ASI[].id", () => {
+    const bad: string[] = [];
+    for (const [k, d] of Object.entries(NIST_CONTROL_DESCRIPTIONS)) {
+      for (const asi of d.relatedASI) if (!ASI_IDS.has(asi)) bad.push(`NIST ${k} → ${asi}`);
+    }
+    for (const [k, d] of Object.entries(NIST_AI_RMF_DESCRIPTIONS)) {
+      for (const asi of d.relatedASI) if (!ASI_IDS.has(asi)) bad.push(`AI-RMF ${k} → ${asi}`);
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("T10 NIST_AI_RMF_DESCRIPTIONS keys use canonical short-form (regression guard against MAP-*/MEASURE-* long-form drift)", () => {
+    // Valid prefixes per NIST AI 100-1: GV (GOVERN), MP (MAP), MS (MEASURE), MG (MANAGE).
+    // Why: Home.tsx extracts the short-form id (e.g. "MP-1") from CROSSWALK strings
+    // like "MP-1 Context Establishment". Long-form keys like "MAP-1" never resolve.
+    const validShape = /^(GV|MP|MS|MG)-\d+$/;
+    const malformed = Object.keys(NIST_AI_RMF_DESCRIPTIONS).filter((k) => !validShape.test(k));
+    expect(malformed).toEqual([]);
   });
 });

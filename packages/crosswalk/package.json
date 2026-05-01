@@ -1,6 +1,6 @@
 {
   "name": "@obviate/crosswalk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "OWASP Agentic AI (ASI) ↔ NIST SP 800-53 Rev 5 ↔ NIST AI-RMF (AI 100-1) reference crosswalk data.",
   "license": "MIT",
   "author": "Shantanu Singh <shantsingh1976@gmail.com> (Obviate AI)",

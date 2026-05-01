@@ -7,7 +7,7 @@
 import {
   CROSSWALK,
   OWASP_ASI,
-} from './data';
+} from '@obviate/crosswalk';
 import {
   FAMILY_TO_PRIMARY_BOOLEAN,
   RISK_TO_ASI,

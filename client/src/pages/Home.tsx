@@ -14,8 +14,10 @@ import {
   AI_RMF,
   CROSSWALK,
   severityColor,
-} from "@/lib/data";
-import type { ASIRisk } from "@/lib/data";
+  NIST_CONTROL_DESCRIPTIONS,
+  NIST_AI_RMF_DESCRIPTIONS,
+} from "@obviate/crosswalk";
+import type { ASIRisk } from "@obviate/crosswalk";
 import { Link } from "wouter";
 import {
   Shield,
@@ -37,8 +39,6 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import ScenarioSimulator from "@/pages/ScenarioSimulator";
-import { NIST_CONTROL_DESCRIPTIONS } from "@/lib/nist-control-descriptions";
-import { NIST_AI_RMF_DESCRIPTIONS } from "@/lib/nist-ai-rmf-descriptions";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
 

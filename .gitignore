@@ -23,9 +23,6 @@ client/public/__manus__/
 client/public/version.json
 client/public/.gitkeep
 
-# Lock files
-pnpm-lock.yaml
-
 # Editor
 .vscode/
 .idea/

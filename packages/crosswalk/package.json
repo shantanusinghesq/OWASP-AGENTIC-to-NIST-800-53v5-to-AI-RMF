@@ -23,5 +23,14 @@
     "compliance",
     "crosswalk",
     "security"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF.git",
+    "directory": "packages/crosswalk"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  }
 }

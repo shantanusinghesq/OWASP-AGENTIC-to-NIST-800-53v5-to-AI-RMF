@@ -41,3 +41,29 @@ A Vitest suite at `tests/data.integrity.test.ts` guards against drift: every ref
 MIT. The underlying frameworks (NIST SP 800-53 Rev 5 and NIST AI 100-1) are U.S. Government works in the public domain. The OWASP Top 10 for Agentic Applications is published by OWASP under their open licensing terms. Editorial rationale, mappings, and evidence citations are original work © 2026 Shantanu Singh / Obviate AI, released under MIT.
 
 The parent repository (the React/Vite SPA that consumes this package) is licensed separately under **AGPL-3.0**. See the root `LICENSE` for that.
+
+### Consuming from GitHub Packages
+
+This package is published to the GitHub Packages npm registry under the `@obviate` scope. Consumers need a `GITHUB_TOKEN` env var with at least the `read:packages` scope.
+
+Add a `.npmrc` at the root of your consuming project:
+
+```
+@obviate:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+Then install:
+
+```sh
+pnpm add @obviate/crosswalk
+```
+
+Usage:
+
+```ts
+import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@obviate/crosswalk";
+
+const asi01 = CROSSWALK.ASI01;
+console.log(asi01.nist53, asi01.aiRmf, asi01.evidence);
+```

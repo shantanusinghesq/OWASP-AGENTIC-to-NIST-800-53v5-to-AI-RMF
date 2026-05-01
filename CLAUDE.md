@@ -17,7 +17,19 @@ Package manager is **pnpm** (see `packageManager` field in `package.json`). The 
 | `pnpm test:watch` | Vitest watch mode. |
 | `pnpm format` | Prettier on the entire repo. |
 
-The data-integrity suite (`data.integrity.test.ts`) guards `data.ts` against drift: every referenced NIST control / AI-RMF cat resolves; every ASI has at least one mapping per framework. Two checks (`T4`, `T6b`) are `.skip`'d with TODO markers — three NIST control descriptions (`AC-25`, `AU-16`, `CM-14`) and all `MP-*`/`MS-*`/`MG-*` AI-RMF descriptions are missing from the descriptions files. Backfill the descriptions and unskip.
+The data-integrity suite (`packages/crosswalk/tests/data.integrity.test.ts`) guards the crosswalk against drift: every referenced NIST control / AI-RMF cat resolves to a description entry; every `relatedASI` cross-reference points at a real ASI; AI-RMF description keys must use canonical short-form (`GV|MP|MS|MG-\d+`) — regression guard against the long-form `MAP-*`/`MEASURE-*` orphan pattern that was caught and removed in v0.2.0. 11 tests, 0 skipped.
+
+### Publishing the package
+
+`@obviate/crosswalk` is published to GitHub Packages on tag push. Bump `packages/crosswalk/package.json` `version`, then:
+```bash
+git tag crosswalk-v0.2.0 && git push --tags
+```
+The `.github/workflows/publish-crosswalk.yml` workflow runs `pnpm publish` against `https://npm.pkg.github.com` using `GITHUB_TOKEN`. Consumers add an `.npmrc` line `@obviate:registry=https://npm.pkg.github.com` plus an auth token (see `packages/crosswalk/README.md`).
+
+### Known latent bug — `Home.tsx:97` fallback
+
+`client/src/pages/Home.tsx` falls back from `NIST_CONTROL_DESCRIPTIONS[id]` → `NIST_AI_RMF_DESCRIPTIONS[id]`. Search for `"MP-1"` will resolve to NIST 800-53's `"MP-1 Media Protection Policy"` (in `nist-control-descriptions.ts`) before checking the AI-RMF map. Out of scope for the v0.2.0 cycle; tracked here for future cleanup.
 
 ## Architecture
 

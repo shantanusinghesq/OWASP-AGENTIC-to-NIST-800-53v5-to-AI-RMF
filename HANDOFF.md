@@ -1,79 +1,40 @@
 # Session Handoff — Agentic AI Risks Crosswalk
 
-## Current State — 2026-05-01 (handoff #2)
+## Current State — 2026-05-01 (handoff #3)
 
-**Session goal shipped:** Executed the 3-phase recommended sequence from `scratchpad-aegis-relationship.md`. Added a data-integrity test suite, committed the lockfile, converted the repo to a (asymmetric) pnpm workspace, and extracted the crosswalk data into a separately MIT-licensed `@obviate/crosswalk` package — unblocking AEGIS consumption without inheriting AGPL.
+**Session goal shipped:** Full /batch execution of the AEGIS-integration plan.
+- Phase 0 — bootstrapped repo (license fix, ErrorBoundary restore, CI workflow fix, scratchpads, CLAUDE.md, HANDOFF.md), extracted `@obviate/crosswalk` MIT-licensed workspace package, committed lockfile.
+- Phase 1 — 4 parallel batch agents shipped 3 PRs (publishing setup, NIST descriptions backfill, AI-RMF descriptions backfill +9/-11) and a local-only AEGIS prototype (`prototype/obviate-crosswalk-integration` branch in AEGIS repo).
+- Phase 2 — unskipped T4/T6b, added T9/T10, fixed nodenext compat (`.js` extensions in `index.ts`), bumped to 0.2.0.
 
-**Last commit:** `7ff0262` chore: full codebase sync — migrate from Parcel/JSX to Vite/React 19/TypeScript
-
-**Session commits:** None — all work uncommitted on `main` (working tree dirty). All gates green; ready to commit when authorized.
+**Local main (and origin/main):** `42e4db8 feat(crosswalk): release 0.2.0 — unskip T4/T6b, add T9/T10, fix nodenext compat`
 
 ## Verification status
 
 | Gate | Result |
 |---|---|
-| `pnpm install --frozen-lockfile` | Passes (lockfile present, locked) |
-| `pnpm test` | 9 tests, 7 pass + 2 skipped (T4 + T6b documented TODOs) |
-| `pnpm check` (typecheck) | Clean |
-| `pnpm build` | Vite client → `dist/public/` (704 KB JS, 128 KB CSS); esbuild server → `dist/index.js`. Bundle confirmed to contain `CROSSWALK` data. |
-| `pnpm dev` smoke | **Not run** — long-running command blocked by harness. Visual smoke test deferred to user. |
-| GH Pages deploy | Not pushed; workflow change unverified end-to-end. |
+| `pnpm install --frozen-lockfile` | Passes |
+| `pnpm test` | **11 passed, 0 skipped** (was 7+2 at handoff #2) |
+| `pnpm check` | Clean |
+| `pnpm build` | Clean (`dist/public/` 704 KB JS, 128 KB CSS) |
+| GH Pages deploy | Workflow merged via PR; first push of corrected workflow succeeded as `f6ee490`. Live deploy unverified — requires `gh run list` to confirm. |
+| Publish workflow (`crosswalk-v*` trigger) | **Not yet exercised.** Manual `git tag crosswalk-v0.2.0 && git push --tags` to fire the GH Action. |
 
-## Uncommitted changes (this session, in execution order)
+## Commit log this session (top of `main`)
 
-### Phase 0 — Bootstrap (leftover from previous session)
-| File | Change |
-|---|---|
-| `CLAUDE.md` | New repo guide (subsequently rewritten in Phase 3 to reflect workspace + extraction). |
-| `HANDOFF.md` | New (this file, now updated). |
-| `scratchpad-aegis-relationship.md` | New decision-record covering D-01 through D-07. |
-| `package.json` | `license: "MIT"` → `"AGPL-3.0"`; removed phantom `pnpm.patchedDependencies` block (`patches/wouter@3.7.1.patch` did not exist). |
-| `.github/workflows/deploy-pages.yml` | `npm ci` → `pnpm install`, artifact path `./dist` → `./dist/public`. |
+```
+42e4db8 feat(crosswalk): release 0.2.0 — unskip T4/T6b, add T9/T10, fix nodenext compat
+511f58d feat(crosswalk): add GitHub Packages publishing setup (#1)
+b876d37 feat(crosswalk): backfill MP-*/MS-* AI-RMF descriptions; remove MAP-*/MEASURE-* orphans (#3)
+d2b113c feat(crosswalk): backfill 3 NIST 800-53 descriptions (AC-25, AU-16, CM-14) (#2)
+f6ee490 fix(ci): switch GitHub Pages workflow from npm ci to pnpm; correct artifact path
+4b8383a chore(deps): commit pnpm-lock.yaml
+f7d9e3a refactor: extract @obviate/crosswalk as MIT-licensed workspace package
+59ca2bd chore: bootstrap docs, scratchpads, license fix, ErrorBoundary restore
+7ff0262 chore: full codebase sync — migrate from Parcel/JSX to Vite/React 19/TypeScript
+```
 
-### Phase 1 — Data-integrity tests
-| File | Change |
-|---|---|
-| `vitest.config.ts` | New. Aliases `@`, `@shared`, `@obviate/crosswalk`. Test glob covers `client/src/**/*.test.ts` and `packages/**/tests/**/*.test.ts`. |
-| `client/src/lib/__tests__/scrambler-mappings.test.ts` | New. Single test (T8): `CONTROL_STATE_TO_FAMILIES` values resolve in `NIST_800_53`. |
-| `packages/crosswalk/tests/data.integrity.test.ts` | New. 8 tests (T1–T7 active, T4 + T6b `.skip` with TODO markers). |
-| `package.json` | Added `test` and `test:watch` scripts. |
-| `tsconfig.json` | Removed `**/*.test.ts` exclude so typecheck covers tests. |
-| `client/src/components/ErrorBoundary.tsx` | New. Pre-existing import from `App.tsx` referenced this missing file (likely lost in commit `7ff0262`). Minimal class-based boundary added as a build-fix. |
-
-### Phase 2 — Lockfile + tighten CI
-| File | Change |
-|---|---|
-| `pnpm-lock.yaml` | New (273 KB, 7556 lines). Generated by `pnpm install` in Phase 1. |
-| `.gitignore` | Removed `pnpm-lock.yaml`. |
-| `.github/workflows/deploy-pages.yml` | `pnpm install --no-frozen-lockfile` → `pnpm install --frozen-lockfile`. |
-| `CLAUDE.md` | Removed the "non-reproducible installs" caveat. |
-
-### Phase 3 — Workspace + `@obviate/crosswalk` extraction
-| File | Change |
-|---|---|
-| `pnpm-workspace.yaml` | New. Declares `packages/*`. |
-| `packages/crosswalk/package.json` | New. `"name": "@obviate/crosswalk"`, MIT license, version `0.1.0`, no runtime deps. |
-| `packages/crosswalk/tsconfig.json` | New. Extends root, includes `src/**/*` and `tests/**/*`. |
-| `packages/crosswalk/LICENSE` | New (MIT, © 2026 Shantanu Singh / Obviate AI). |
-| `packages/crosswalk/README.md` | New. Documents exports, dual-license rationale, source attribution. |
-| `packages/crosswalk/src/index.ts` | New barrel re-exporting all symbols + types. |
-| `packages/crosswalk/src/data.ts` | **git mv** from `client/src/lib/data.ts` (rename detected by git). |
-| `packages/crosswalk/src/nist-control-descriptions.ts` | **git mv** from `client/src/lib/nist-control-descriptions.ts`. |
-| `packages/crosswalk/src/nist-ai-rmf-descriptions.ts` | **git mv** from `client/src/lib/nist-ai-rmf-descriptions.ts`. |
-| `packages/crosswalk/tests/data.integrity.test.ts` | New. T1–T7 (T4, T6b skip) — moved out of `client/` after package creation; imports from `../src`. |
-| `package.json` | Added `"@obviate/crosswalk": "workspace:*"` to dependencies. |
-| `tsconfig.json` | Added `@obviate/crosswalk` path alias; included `packages/**/*`. |
-| `vite.config.ts` | Added `@obviate/crosswalk` resolve.alias. |
-| `vitest.config.ts` | Added `@obviate/crosswalk` resolve.alias. |
-| `client/src/pages/Home.tsx` | Consolidated 3 imports (`@/lib/data`, `@/lib/nist-control-descriptions`, `@/lib/nist-ai-rmf-descriptions`) into 1 from `@obviate/crosswalk`. |
-| `client/src/pages/ScenarioSimulator.tsx` | `@/lib/data` → `@obviate/crosswalk`. |
-| `client/src/lib/scrambler-evaluator.ts` | `./data` → `@obviate/crosswalk`. |
-
-## Scope deferred (was in plan, not done this session)
-
-- **Apps/* layout migration** (`client/` → `apps/web/`, `server/` → `apps/server/`). The plan called for it; deferred to keep blast radius small. The asymmetric workspace (single package next to a non-workspace SPA) works correctly. Future migration is purely cosmetic and reversible.
-- **Publishing infrastructure** (GitHub Packages or npm Pro). Per scratchpad D-02, deferred until AEGIS actually consumes — workspace-path is sufficient until then.
-- **AEGIS consumption (D-07)** — happens in the AEGIS repo. Track as a follow-up entry in AEGIS's own `HANDOFF.md`.
+PRs landed: #1, #2, #3 (all squash-merged after a brief accidental-close detour).
 
 ## Pre-existing issues still present
 
@@ -82,63 +43,36 @@
 - **`shared/const.ts` is effectively unused.** Re-exported by `client/src/const.ts` but nothing else imports either. Fold into `client/src/` if the directory is touched.
 - **`@builder.io/vite-plugin-jsx-loc` peer warning.** Plugin expects Vite 4–5; we're on 7.3.2. Cosmetic — install succeeds.
 - **Pre-existing build warnings.** `index.html` references `VITE_ANALYTICS_ENDPOINT` / `VITE_ANALYTICS_WEBSITE_ID` env vars not defined in any `.env` file. Bundle is also >500 KB (chunk-split warning). Both pre-existing, not introduced this session.
-- **Data-integrity TODOs** (`T4`, `T6b`). 3 missing NIST control descriptions (`AC-25`, `AU-16`, `CM-14`); all `MP-*`/`MS-*`/`MG-*` AI-RMF descriptions absent. Tests are `.skip`'d with explicit TODO labels and will fail loudly when un-skipped. Editorial backfill required.
+
+## Newly surfaced issues (from this session, deferred)
+
+- **`Home.tsx:97` fallback ordering bug.** `NIST_CONTROL_DESCRIPTIONS[id]` is checked before `NIST_AI_RMF_DESCRIPTIONS[id]`. After v0.2.0 added `MP-1` to the AI-RMF map, search for `"MP-1"` will resolve to NIST 800-53's existing `"MP-1 Media Protection Policy"` first — wrong context. Surface in the next UI session.
+- **Two known-orphan AI-RMF entries** (`GV-7`, `MS-4`). Have correct short-form keys (so T10 passes) but aren't currently referenced from `CROSSWALK`. `MS-4` is a valid AI-RMF cat that AI_RMF.cats lists; CROSSWALK editorial team should decide whether to add a reference. `GV-7` is likely a leftover from an earlier 7-cat GOVERN list (current `AI_RMF.cats` has GV-1..GV-6) — either restore to AI_RMF.cats or delete from descriptions.
+- **`.github/workflows/publish-crosswalk.yml` execution unverified.** Workflow YAML committed via PR #1 + a held-back follow-up after `gh auth refresh -s workflow`. First tag push will be the operational validation.
+- **AEGIS upstream-shim cleanup.** AEGIS prototype branch contains `packages/report/src/obviate-crosswalk.d.ts` — a 26-line ambient type shim added because of the `.js`-extensions bug. Now that v0.2.0 fixes that, the shim should be deleted when AEGIS migrates from the prototype `link:` dep to a real `@obviate/crosswalk@^0.2.0` install.
+
+## AEGIS local state
+
+`/Users/shantanusingh/Projects/AEGIS` (no git remote):
+- `main` at `38c5f7f` — unchanged this session.
+- `prototype/obviate-crosswalk-integration` at `8c5f13f` — Unit 4's prototype work (RemediationRoadmap evidence citations + AuthoritativeReferences section + ambient type shim). Marked "do not merge as-is" in commit body. Use as seed for the real PR once AEGIS gets a remote.
+- Rendered demo PDF: `~/synthetic-reports/aegis-synthetic-06-laxparents-senior-pm.pdf` (62.5 KB, +24% over baseline).
 
 ## Next session candidates
 
-1. **Commit + push.** Suggested 4-commit sequence with explicit file groupings:
-
-   **Commit 1** — `chore: bootstrap CLAUDE.md, HANDOFF.md, scratchpad; correct license; drop dead wouter patch`
-   ```
-   git add package.json .github/workflows/deploy-pages.yml \
-     CLAUDE.md HANDOFF.md scratchpad-aegis-relationship.md \
-     client/src/components/ErrorBoundary.tsx
-   ```
-   Note: `package.json` here = the license fix + dead-patch removal only. The `@obviate/crosswalk` workspace dep gets added in Commit 4 — but `git add` stages the whole file, so this commit will pull all `package.json` deltas in. Either accept that, or hand-craft via `git add -p`. The workflow file similarly carries both the npm→pnpm change AND the `--frozen-lockfile` change; same caveat. Cleanest path: collapse Commits 1+3 (config plumbing) into a single commit, leaving 3 commits total.
-
-   **Commit 2** — `test: add @obviate/crosswalk data-integrity suite`
-   ```
-   git add vitest.config.ts tsconfig.json \
-     client/src/lib/__tests__/
-   ```
-   (Tests for the package itself land with the package extraction in Commit 4.)
-
-   **Commit 3** — `chore(deps): commit pnpm-lock.yaml`
-   ```
-   git add .gitignore pnpm-lock.yaml
-   ```
-   (CI workflow tightening already in Commit 1.)
-
-   **Commit 4** — `refactor: extract @obviate/crosswalk as MIT-licensed workspace package`
-   ```
-   git add pnpm-workspace.yaml \
-     packages/crosswalk/ \
-     vite.config.ts \
-     client/src/pages/Home.tsx client/src/pages/ScenarioSimulator.tsx \
-     client/src/lib/scrambler-evaluator.ts
-   ```
-   The 3 file renames (`client/src/lib/{data,nist-control-descriptions,nist-ai-rmf-descriptions}.ts` → `packages/crosswalk/src/`) are already staged via `git mv`; they ride with this commit automatically.
-
-   **Realistic alternative:** one big commit (`refactor: extract @obviate/crosswalk; add tests; commit lockfile; restore ErrorBoundary; update docs`) avoids the cross-cutting `package.json` and workflow problem. Less granular history but simpler to execute.
-
-2. **Visual smoke test.** Run `pnpm dev`, visit `/`, `/terms`, an unknown route. Confirm: Home heatmaps render, Evidence Explorer search returns hits for `ASI01`, ScenarioSimulator generates scenarios, 404 fallback works.
-
-3. **Watch first GH Pages deploy** with the corrected workflow.
-
-4. **Backfill missing descriptions** so `T4` and `T6b` can be un-skipped: 3 NIST 800-53 entries + 28 AI-RMF entries (covers entire MAP/MEASURE/MANAGE).
-
-5. **Phase 4 — AEGIS consumption.** Add `@obviate/crosswalk` to AEGIS's `packages/report/package.json` (initially via local `file:` link or workspace path). Render NIST control rationale + AI-RMF mapping + evidence in PDF reports per ASI. Bridges Tony's "0.300 exposure means nothing to a lawyer" gap from AEGIS HANDOFF P1.
-
-6. **Optional — apps/* layout migration** if desired for symmetry. Pure mechanical work; can do anytime.
-
-7. **Optional — publish `@obviate/crosswalk`** to GitHub Packages once AEGIS needs it cross-repo.
+1. **Push `crosswalk-v0.2.0` tag** to fire the publish workflow. Verify the package appears in https://github.com/haremantra/.../packages.
+2. **Create AEGIS GitHub remote** (or decide it stays local-only). If remote: `gh repo create haremantra/aegis --private --source=. --push`, then lift the `prototype/obviate-crosswalk-integration` branch into a real PR using `@obviate/crosswalk@^0.2.0` from GH Packages and delete the type shim.
+3. **Fix `Home.tsx:97` fallback ordering** — check AI-RMF descriptions before NIST 800-53 when the prefix matches an AI-RMF function (or unify the two maps with namespaced keys).
+4. **Resolve `GV-7` / `MS-4` orphans** — editorial decision on whether to delete from descriptions or add to CROSSWALK / AI_RMF.cats.
+5. **Verify GH Pages deploy ran** with the corrected pnpm workflow (`gh run list --limit 5`).
+6. **Apps/* layout migration** (deferred from prior plan) — `client/` → `apps/web/`, `server/` → `apps/server/`. Pure cosmetic; reversible. Do anytime.
 
 ## Carryover from AEGIS HANDOFF — status
 
 | AEGIS item | Status here |
 |---|---|
-| P1.5 — `ASI_CONTROL_MAPPING` in report | **Re-scoped.** CoVE in scratchpad showed the data shapes are complementary, not duplicate. AEGIS keeps its boolean mapping; this repo's rich crosswalk is now consumable by AEGIS via `@obviate/crosswalk` (Phase 4 follow-up). |
-| Differential-oracle / known-findings testing discipline | **Adopted (subset).** Data-integrity suite in `packages/crosswalk/tests/`. |
+| P1.5 — `ASI_CONTROL_MAPPING` in report | Complementary, not duplicate. AEGIS now has a path to consume the rich crosswalk via `@obviate/crosswalk` v0.2.0 (Phase 4 = AEGIS PR1, blocked on AEGIS remote). |
+| Differential-oracle / known-findings testing discipline | **Adopted.** 11-test data-integrity suite at `packages/crosswalk/tests/data.integrity.test.ts`. T10 specifically guards against the known-finding orphan-key pattern. |
 | Quality gate stack (`knip`, `madge`, `verify-deps`, `check:all`) | **Deferred.** Per scratchpad D-05: low marginal value for a single-package SPA. Revisit if/when apps/* migration happens. |
 | F2 `MITIGATION_BY_STATE` decision | Not applicable — this repo has no scoring engine. |
 | Per-package script consolidation under `scripts/*-all.sh` | Not applicable — single-package SPA. |

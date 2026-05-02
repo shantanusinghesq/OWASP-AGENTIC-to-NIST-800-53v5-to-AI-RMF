@@ -16,8 +16,8 @@ import {
   severityColor,
   NIST_CONTROL_DESCRIPTIONS,
   NIST_AI_RMF_DESCRIPTIONS,
-} from "@obviate/crosswalk";
-import type { ASIRisk } from "@obviate/crosswalk";
+} from "@haremantra/crosswalk";
+import type { ASIRisk } from "@haremantra/crosswalk";
 import { Link } from "wouter";
 import {
   Shield,

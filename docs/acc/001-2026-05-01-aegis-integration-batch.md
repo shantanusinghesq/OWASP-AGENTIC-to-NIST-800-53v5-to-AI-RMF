@@ -1,11 +1,11 @@
 # Context Compression — 2026-05-01
-**Focus:** full session — `@obviate/crosswalk` extraction + /batch execution + AEGIS integration prototype
+**Focus:** full session — `@haremantra/crosswalk` extraction + /batch execution + AEGIS integration prototype
 **Token estimate before:** ~150k
 **Token estimate after:** ~3k
 
 ## Decisions
 
-- D: Extract crosswalk data into `@obviate/crosswalk` workspace package (MIT) while SPA stays AGPL-3.0 — dual-license unblocks AEGIS commercial consumption (scratchpad-aegis-relationship.md D-01/D-03)
+- D: Extract crosswalk data into `@haremantra/crosswalk` workspace package (MIT) while SPA stays AGPL-3.0 — dual-license unblocks AEGIS commercial consumption (scratchpad-aegis-relationship.md D-01/D-03)
 - D: Asymmetric workspace — keep `client/` at root (not `apps/web/`) for now; only `packages/crosswalk/` is a workspace member — minimum-blast-radius extraction (deviation from approved plan, surfaced)
 - D: AEGIS coexists with crosswalk, not replaces — `ASI_CONTROL_MAPPING` stays for scoring math (3 of 4 consumers); crosswalk powers rendering only (1 of 4 — `RemediationRoadmap.tsx:161`) (scratchpad-aegis-integration.md D-05)
 - D: Publish to GitHub Packages, not npm Pro or local file: deps — only path that satisfies AEGIS's `frozen-lockfile=true` (scratchpad-aegis-integration.md D-01)
@@ -18,7 +18,7 @@
 ## Current State
 
 - `origin/main`: `18183c6` — 7 new commits this session
-- `@obviate/crosswalk`: v0.2.0, MIT-licensed, workspace package; tag `crosswalk-v0.2.0` pushed
+- `@haremantra/crosswalk`: v0.2.0, MIT-licensed, workspace package; tag `crosswalk-v0.2.0` pushed
 - Tests: **11 passing, 0 skipped** (`packages/crosswalk/tests/data.integrity.test.ts`: T1–T10; `client/src/lib/__tests__/scrambler-mappings.test.ts`)
 - `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm check`, `pnpm build` all green locally
 - Package contents: `OWASP_ASI` (10), `NIST_800_53` (16), `AI_RMF` (4 funcs), `CROSSWALK` (10 entries with rationale + evidence), `NIST_CONTROL_DESCRIPTIONS` (200+ entries inc. AC-25/AU-16/CM-14 from PR #2), `NIST_AI_RMF_DESCRIPTIONS` (GV-1..7 + MP-1..5 + MS-1..4 + MG-1..4 from PR #3)
@@ -52,7 +52,7 @@
 2. **User or me** — re-fire `crosswalk-v0.2.0` tag (delete + re-push, see Open Questions)
 3. **Verify** — `gh run list` confirms publish workflow ran; package appears at `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/packages`
 4. **Verify** — Pages deploy fires on next push (or `workflow_dispatch`)
-5. **User decision** — AEGIS git remote (yes/no). If yes, lift `prototype/obviate-crosswalk-integration` (`/Users/shantanusingh/Projects/AEGIS`) into real AEGIS PR using `@obviate/crosswalk@^0.2.0`; delete the type shim `packages/report/src/obviate-crosswalk.d.ts`
+5. **User decision** — AEGIS git remote (yes/no). If yes, lift `prototype/obviate-crosswalk-integration` (`/Users/shantanusingh/Projects/AEGIS`) into real AEGIS PR using `@haremantra/crosswalk@^0.2.0`; delete the type shim `packages/report/src/obviate-crosswalk.d.ts`
 6. **Editorial** — resolve `GV-7` and `MS-4` (delete from descriptions, OR add to `AI_RMF.cats` / `CROSSWALK` references)
 7. **Fix** — `Home.tsx:97` fallback ordering (check AI-RMF descriptions before NIST 800-53 when prefix matches an AI-RMF function, or unify maps with namespaced keys)
 

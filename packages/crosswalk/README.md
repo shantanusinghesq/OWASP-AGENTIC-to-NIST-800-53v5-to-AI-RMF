@@ -1,4 +1,4 @@
-## @obviate/crosswalk
+## @haremantra/crosswalk
 
 Reference data mapping the **OWASP Top 10 for Agentic Applications (ASI 2026)** to **NIST SP 800-53 Rev 5** security controls and the **NIST AI Risk Management Framework (AI 100-1)**.
 
@@ -21,7 +21,7 @@ Plus the corresponding TypeScript interfaces.
 ### Usage
 
 ```ts
-import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@obviate/crosswalk";
+import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@haremantra/crosswalk";
 
 const asi01 = CROSSWALK.ASI01;
 for (const mapping of asi01.nist53) {
@@ -49,20 +49,20 @@ This package is published to the GitHub Packages npm registry under the `@obviat
 Add a `.npmrc` at the root of your consuming project:
 
 ```
-@obviate:registry=https://npm.pkg.github.com
+@haremantra:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
 Then install:
 
 ```sh
-pnpm add @obviate/crosswalk
+pnpm add @haremantra/crosswalk
 ```
 
 Usage:
 
 ```ts
-import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@obviate/crosswalk";
+import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@haremantra/crosswalk";
 
 const asi01 = CROSSWALK.ASI01;
 console.log(asi01.nist53, asi01.aiRmf, asi01.evidence);

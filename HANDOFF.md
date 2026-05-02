@@ -3,7 +3,7 @@
 ## Current State — 2026-05-01 (handoff #3)
 
 **Session goal shipped:** Full /batch execution of the AEGIS-integration plan.
-- Phase 0 — bootstrapped repo (license fix, ErrorBoundary restore, CI workflow fix, scratchpads, CLAUDE.md, HANDOFF.md), extracted `@obviate/crosswalk` MIT-licensed workspace package, committed lockfile.
+- Phase 0 — bootstrapped repo (license fix, ErrorBoundary restore, CI workflow fix, scratchpads, CLAUDE.md, HANDOFF.md), extracted `@haremantra/crosswalk` MIT-licensed workspace package, committed lockfile.
 - Phase 1 — 4 parallel batch agents shipped 3 PRs (publishing setup, NIST descriptions backfill, AI-RMF descriptions backfill +9/-11) and a local-only AEGIS prototype (`prototype/obviate-crosswalk-integration` branch in AEGIS repo).
 - Phase 2 — unskipped T4/T6b, added T9/T10, fixed nodenext compat (`.js` extensions in `index.ts`), bumped to 0.2.0.
 
@@ -57,7 +57,7 @@ b876d37 feat(crosswalk): backfill MP-*/MS-* AI-RMF descriptions; remove MAP-*/ME
 d2b113c feat(crosswalk): backfill 3 NIST 800-53 descriptions (AC-25, AU-16, CM-14) (#2)
 f6ee490 fix(ci): switch GitHub Pages workflow from npm ci to pnpm; correct artifact path
 4b8383a chore(deps): commit pnpm-lock.yaml
-f7d9e3a refactor: extract @obviate/crosswalk as MIT-licensed workspace package
+f7d9e3a refactor: extract @haremantra/crosswalk as MIT-licensed workspace package
 59ca2bd chore: bootstrap docs, scratchpads, license fix, ErrorBoundary restore
 7ff0262 chore: full codebase sync — migrate from Parcel/JSX to Vite/React 19/TypeScript
 ```
@@ -77,7 +77,7 @@ PRs landed: #1, #2, #3 (all squash-merged after a brief accidental-close detour)
 - **Repo Actions allowlist blocks both workflows.** `actions/permissions` = `selected`; allowlist excludes `pnpm/action-setup@v4`. Result: 0 workflow runs ever recorded on this repo. Both `publish-crosswalk.yml` and `deploy-pages.yml` (since the npm→pnpm migration in `f6ee490`) silently fail to schedule. **Fix is in the "How to unblock both workflows" section above** — one-time settings change, requires user (the harness blocks API writes to repo Actions permissions for security reasons).
 - **`Home.tsx:97` fallback ordering bug.** `NIST_CONTROL_DESCRIPTIONS[id]` is checked before `NIST_AI_RMF_DESCRIPTIONS[id]`. After v0.2.0 added `MP-1` to the AI-RMF map, search for `"MP-1"` will resolve to NIST 800-53's existing `"MP-1 Media Protection Policy"` first — wrong context. Surface in the next UI session.
 - **Two known-orphan AI-RMF entries** (`GV-7`, `MS-4`). Have correct short-form keys (so T10 passes) but aren't currently referenced from `CROSSWALK`. `MS-4` is a valid AI-RMF cat that AI_RMF.cats lists; CROSSWALK editorial team should decide whether to add a reference. `GV-7` is likely a leftover from an earlier 7-cat GOVERN list (current `AI_RMF.cats` has GV-1..GV-6) — either restore to AI_RMF.cats or delete from descriptions.
-- **AEGIS upstream-shim cleanup.** AEGIS prototype branch contains `packages/report/src/obviate-crosswalk.d.ts` — a 26-line ambient type shim added because of the `.js`-extensions bug. Now that v0.2.0 fixes that, the shim should be deleted when AEGIS migrates from the prototype `link:` dep to a real `@obviate/crosswalk@^0.2.0` install.
+- **AEGIS upstream-shim cleanup.** AEGIS prototype branch contains `packages/report/src/obviate-crosswalk.d.ts` — a 26-line ambient type shim added because of the `.js`-extensions bug. Now that v0.2.0 fixes that, the shim should be deleted when AEGIS migrates from the prototype `link:` dep to a real `@haremantra/crosswalk@^0.2.0` install.
 
 ## AEGIS local state
 
@@ -91,7 +91,7 @@ PRs landed: #1, #2, #3 (all squash-merged after a brief accidental-close detour)
 1. **[BLOCKER] Add `pnpm/action-setup@v4` to the repo's Actions allowlist.** See "How to unblock both workflows" above. Until this lands, neither the publish workflow nor the Pages deploy will run. Tag `crosswalk-v0.2.0` is already on origin waiting; re-push it after the settings change.
 2. **Verify the publish workflow run** once unblocked. Check https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/actions and https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/packages.
 3. **Verify GH Pages deploy** also fires (it'll trigger on next push to `main` once the allowlist is fixed).
-4. **Create AEGIS GitHub remote** (or decide it stays local-only). If remote: `gh repo create haremantra/aegis --private --source=. --push`, then lift the `prototype/obviate-crosswalk-integration` branch into a real PR using `@obviate/crosswalk@^0.2.0` from GH Packages and delete the type shim.
+4. **Create AEGIS GitHub remote** (or decide it stays local-only). If remote: `gh repo create haremantra/aegis --private --source=. --push`, then lift the `prototype/obviate-crosswalk-integration` branch into a real PR using `@haremantra/crosswalk@^0.2.0` from GH Packages and delete the type shim.
 5. **Fix `Home.tsx:97` fallback ordering** — check AI-RMF descriptions before NIST 800-53 when the prefix matches an AI-RMF function (or unify the two maps with namespaced keys).
 6. **Resolve `GV-7` / `MS-4` orphans** — editorial decision on whether to delete from descriptions or add to CROSSWALK / AI_RMF.cats.
 7. **Apps/* layout migration** (deferred from prior plan) — `client/` → `apps/web/`, `server/` → `apps/server/`. Pure cosmetic; reversible. Do anytime.
@@ -100,7 +100,7 @@ PRs landed: #1, #2, #3 (all squash-merged after a brief accidental-close detour)
 
 | AEGIS item | Status here |
 |---|---|
-| P1.5 — `ASI_CONTROL_MAPPING` in report | Complementary, not duplicate. AEGIS now has a path to consume the rich crosswalk via `@obviate/crosswalk` v0.2.0 (Phase 4 = AEGIS PR1, blocked on AEGIS remote). |
+| P1.5 — `ASI_CONTROL_MAPPING` in report | Complementary, not duplicate. AEGIS now has a path to consume the rich crosswalk via `@haremantra/crosswalk` v0.2.0 (Phase 4 = AEGIS PR1, blocked on AEGIS remote). |
 | Differential-oracle / known-findings testing discipline | **Adopted.** 11-test data-integrity suite at `packages/crosswalk/tests/data.integrity.test.ts`. T10 specifically guards against the known-finding orphan-key pattern. |
 | Quality gate stack (`knip`, `madge`, `verify-deps`, `check:all`) | **Deferred.** Per scratchpad D-05: low marginal value for a single-package SPA. Revisit if/when apps/* migration happens. |
 | F2 `MITIGATION_BY_STATE` decision | Not applicable — this repo has no scoring engine. |

@@ -21,11 +21,11 @@ The data-integrity suite (`packages/crosswalk/tests/data.integrity.test.ts`) gua
 
 ### Publishing the package
 
-`@obviate/crosswalk` is published to GitHub Packages on tag push. Bump `packages/crosswalk/package.json` `version`, then:
+`@haremantra/crosswalk` is published to GitHub Packages on tag push. Bump `packages/crosswalk/package.json` `version`, then:
 ```bash
 git tag crosswalk-v0.2.0 && git push --tags
 ```
-The `.github/workflows/publish-crosswalk.yml` workflow runs `pnpm publish` against `https://npm.pkg.github.com` using `GITHUB_TOKEN`. Consumers add an `.npmrc` line `@obviate:registry=https://npm.pkg.github.com` plus an auth token (see `packages/crosswalk/README.md`).
+The `.github/workflows/publish-crosswalk.yml` workflow runs `pnpm publish` against `https://npm.pkg.github.com` using `GITHUB_TOKEN`. Consumers add an `.npmrc` line `@haremantra:registry=https://npm.pkg.github.com` plus an auth token (see `packages/crosswalk/README.md`).
 
 ### Known latent bug — `Home.tsx:97` fallback
 
@@ -42,13 +42,13 @@ This is a **fully client-side** interactive crosswalk between three frameworks: 
 - **`client/`** — the React 19 SPA. `client/index.html` is the Vite entry. Build output goes to `dist/public/`.
 - **`server/index.ts`** — a minimal Express server that only serves the static client build. Used solely for production hosting (e.g., the Docker path); the GitHub Pages deploy ignores it. Do not add API routes here without coordinating — the data model assumes 100% client-side rendering.
 - **`shared/`** — tiny constants module re-exported by `client/src/const.ts` (`@shared/*` alias). Effectively unused — fold into `client/src/` if touched.
-- **`packages/crosswalk/`** — `@obviate/crosswalk` workspace dep, **MIT-licensed** (see "Licensing" below).
+- **`packages/crosswalk/`** — `@haremantra/crosswalk` workspace dep, **MIT-licensed** (see "Licensing" below).
 
-Path aliases (defined in `tsconfig.json`, `vite.config.ts`, and `vitest.config.ts`): `@/*` → `client/src/*`, `@shared/*` → `shared/*`, `@assets/*` → `attached_assets/*`, `@obviate/crosswalk` → `packages/crosswalk/src`.
+Path aliases (defined in `tsconfig.json`, `vite.config.ts`, and `vitest.config.ts`): `@/*` → `client/src/*`, `@shared/*` → `shared/*`, `@assets/*` → `attached_assets/*`, `@haremantra/crosswalk` → `packages/crosswalk/src`.
 
 The asymmetric layout (workspace-package next to a non-workspace SPA) is intentional and minimal. A future migration could move `client/` → `apps/web/` and `server/` → `apps/server/`; the path aliases above would need updating.
 
-### Data model is the product — `@obviate/crosswalk`
+### Data model is the product — `@haremantra/crosswalk`
 
 `packages/crosswalk/src/data.ts` is the **single source of truth** for the crosswalk. It exports four structures consumed by every view, plus the description databases:
 
@@ -69,7 +69,7 @@ When adding or editing a mapping, update **both** the mapping in `data.ts` and (
 
 Routing is via **Wouter** in `client/src/App.tsx`.
 
-- **`pages/Home.tsx`** (~1,070 lines) — the 800-53 heatmap, AI-RMF heatmap, and Evidence Explorer. Pure transformations over `@obviate/crosswalk`. The Evidence Explorer search index spans rationale, evidence, implementation, and ASI description fields.
+- **`pages/Home.tsx`** (~1,070 lines) — the 800-53 heatmap, AI-RMF heatmap, and Evidence Explorer. Pure transformations over `@haremantra/crosswalk`. The Evidence Explorer search index spans rationale, evidence, implementation, and ASI description fields.
 - **`pages/ScenarioSimulator.tsx`** (~1,420 lines) — the Scenario Scrambler. Driven by the `lib/scrambler-*.ts` modules:
   - `scrambler-types.ts` — `FactPattern`, `ScenarioResult`, `ControlEvaluation`, `CellState` ('active' | 'broken' | 'irrelevant').
   - `scrambler-generator.ts` — produces random `FactPattern`s using IMDA-derived probability weights and `GovernancePosture` ('Minimal' | 'Standard' | 'Full') for Guided Mode.

@@ -1,4 +1,4 @@
-name: Publish @obviate/crosswalk
+name: Publish @haremantra/crosswalk
 
 on:
   push:
@@ -24,6 +24,6 @@ jobs:
           scope: '@obviate'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @obviate/crosswalk publish --no-git-checks
+      - run: pnpm --filter @haremantra/crosswalk publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

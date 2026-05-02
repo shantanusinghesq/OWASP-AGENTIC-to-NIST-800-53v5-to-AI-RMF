@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NIST_800_53 } from "@obviate/crosswalk";
+import { NIST_800_53 } from "@haremantra/crosswalk";
 import { CONTROL_STATE_TO_FAMILIES } from "../scrambler-mappings";
 
 const NIST_FAMILY_IDS = new Set(NIST_800_53.map((f) => f.id));

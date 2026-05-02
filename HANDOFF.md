@@ -17,36 +17,32 @@
 | `pnpm test` | **11 passed, 0 skipped** (was 7+2 at handoff #2) |
 | `pnpm check` | Clean |
 | `pnpm build` | Clean (`dist/public/` 704 KB JS, 128 KB CSS) |
-| GH Pages deploy | **Blocked — same allowlist issue as Publish workflow** (see below). Workflow file committed at `f6ee490` but no run has executed since the npm→pnpm migration. Total workflow runs ever on this repo: 0. |
-| Publish workflow (`crosswalk-v*` trigger) | **Tag `crosswalk-v0.2.0` pushed but workflow did not run** — repo's `actions/permissions` is set to `selected`, and the allowlist (`actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4`) does not include `pnpm/action-setup@v4`. GitHub silently refuses to schedule the run. Fix below. |
+| GH Pages deploy | **Blocked at user-account level** (see below). Workflow file committed at `f6ee490` but no run has executed since the npm→pnpm migration. Total workflow runs ever on this repo: 0. |
+| Publish workflow (`crosswalk-v*` trigger) | **Workflow blocked, but package published manually instead.** `@haremantra/crosswalk@0.2.0` is LIVE on GH Packages (verified by `+ @haremantra/crosswalk@0.2.0` in `pnpm publish` output, May 1). Verify at https://github.com/haremantra?tab=packages. |
+| Package name | **Renamed** `@obviate/crosswalk` → `@haremantra/crosswalk` — GH Packages requires the npm scope to match the GitHub user/org owning the repo, and there's no `obviate` GH org. Bump back when/if Obviate AI registers as a GH org. |
 
-### How to unblock both workflows (one-time settings change, requires user)
+### How to unblock both workflows (two layers — both required)
 
-GitHub web UI path (recommended, ~30s):
-1. Open `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/settings/actions`
-2. Under **Allow specific actions and reusable workflows** → patterns list, add `pnpm/action-setup@v4`
-3. Save
+**Layer 1 — User-account Actions disable (root cause).** Despite the repo showing `actions.enabled=true`, every workflow dispatch returns `HTTP 422: Actions has been disabled for this user`. The user-level Actions billing endpoint returns 404 (no record exists). Path forward (one of):
+- Wait for billing propagation if a payment method was just added — can take hours.
+- Open https://github.com/dashboard for any account-level banner / required action.
+- Check https://github.com/settings/billing for plan + spending-limit state.
+- Open a GitHub Support ticket: https://support.github.com/contact → "Account & permissions" → "Actions disabled".
 
-Or via CLI:
-```bash
-gh api -X PUT repos/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/actions/permissions/selected-actions \
-  -f github_owned_allowed=true -f verified_allowed=true \
-  -f 'patterns_allowed[]=actions/checkout@v4' \
-  -f 'patterns_allowed[]=actions/setup-node@v4' \
-  -f 'patterns_allowed[]=actions/upload-pages-artifact@v3' \
-  -f 'patterns_allowed[]=actions/deploy-pages@v4' \
-  -f 'patterns_allowed[]=pnpm/action-setup@v4'
-```
+**Layer 2 — Repo Actions allowlist (also fixed by user this session).** `actions/permissions` = `selected`, allowlist now includes `pnpm/action-setup@v4` plus the four Pages/Node actions. This was the first blocker; once Layer 1 clears, no further action needed here.
 
-**After the allowlist is updated, the publish workflow does NOT auto-replay.** Re-fire by deleting + re-pushing the tag, or use the `workflow_dispatch` button in the Actions tab:
+**After Layer 1 clears, re-fire the publish workflow:**
 ```bash
 git tag -d crosswalk-v0.2.0
 git push origin :refs/tags/crosswalk-v0.2.0
-git tag crosswalk-v0.2.0
-git push origin crosswalk-v0.2.0
+git tag crosswalk-v0.2.1   # new version since 0.2.0 already on registry
+# bump packages/crosswalk/package.json version to 0.2.1 first
+git push origin crosswalk-v0.2.1
 ```
 
-The Pages deploy will fire on the next push to `main` (or via `workflow_dispatch`).
+Pages deploy will fire on the next push to `main` (or via `workflow_dispatch`).
+
+**Workaround used this session:** `pnpm publish` from local with a classic PAT (`write:packages` scope) configured in `~/.npmrc` — fully bypasses Actions. Instructions repeat in `packages/crosswalk/README.md`.
 
 ## Commit log this session (top of `main`)
 

@@ -7,7 +7,7 @@
 import {
   CROSSWALK,
   OWASP_ASI,
-} from '@haremantra/crosswalk';
+} from './data';
 import {
   FAMILY_TO_PRIMARY_BOOLEAN,
   RISK_TO_ASI,

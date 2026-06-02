@@ -159,7 +159,6 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
-      "@haremantra/crosswalk": path.resolve(import.meta.dirname, "packages", "crosswalk", "src"),
     },
   },
   envDir: path.resolve(import.meta.dirname),

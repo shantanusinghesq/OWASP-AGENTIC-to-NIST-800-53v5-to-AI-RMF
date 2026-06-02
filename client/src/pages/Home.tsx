@@ -6,7 +6,7 @@
  * JetBrains Mono for identifiers, Inter for body text
  */
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   OWASP_ASI,
@@ -14,10 +14,8 @@ import {
   AI_RMF,
   CROSSWALK,
   severityColor,
-  NIST_CONTROL_DESCRIPTIONS,
-  NIST_AI_RMF_DESCRIPTIONS,
-} from "@haremantra/crosswalk";
-import type { ASIRisk } from "@haremantra/crosswalk";
+} from "@/lib/data";
+import type { ASIRisk } from "@/lib/data";
 import { Link } from "wouter";
 import {
   Shield,
@@ -39,6 +37,9 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import ScenarioSimulator from "@/pages/ScenarioSimulator";
+import { NIST_CONTROL_DESCRIPTIONS } from "@/lib/nist-control-descriptions";
+import { NIST_AI_RMF_DESCRIPTIONS } from "@/lib/nist-ai-rmf-descriptions";
+import { useScenario } from "@/contexts/ScenarioContext";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
 
@@ -266,6 +267,16 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<"all" | "nist" | "aiRmf">("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { pendingEvidenceFilter, clearPendingFilter } = useScenario();
+
+  // Deep-link: when simulator requests navigation to Evidence Explorer
+  useEffect(() => {
+    if (pendingEvidenceFilter) {
+      setView("detail");
+      setSelectedASI(pendingEvidenceFilter.asiId);
+      clearPendingFilter();
+    }
+  }, [pendingEvidenceFilter, clearPendingFilter]);
 
   // Build a flat searchable index of all controls
   const searchIndex = useMemo(() => {

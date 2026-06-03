@@ -40,6 +40,8 @@ import ScenarioSimulator from "@/pages/ScenarioSimulator";
 import { NIST_CONTROL_DESCRIPTIONS } from "@/lib/nist-control-descriptions";
 import { NIST_AI_RMF_DESCRIPTIONS } from "@/lib/nist-ai-rmf-descriptions";
 import { useScenario } from "@/contexts/ScenarioContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import OnboardingController from "@/components/onboarding/OnboardingController";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
 
@@ -268,6 +270,14 @@ export default function Home() {
   const [searchFilter, setSearchFilter] = useState<"all" | "nist" | "aiRmf">("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { pendingEvidenceFilter, clearPendingFilter } = useScenario();
+  const { registerTabSwitcher } = useOnboarding();
+
+  // Register tab switcher for onboarding orchestration
+  useEffect(() => {
+    registerTabSwitcher((tab: string) => {
+      setView(tab as ViewType);
+    });
+  }, [registerTabSwitcher]);
 
   // Deep-link: when simulator requests navigation to Evidence Explorer
   useEffect(() => {
@@ -447,6 +457,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ─── Onboarding Overlay ─── */}
+      <OnboardingController />
       {/* ─── Hero Header ─── */}
       <header
         className="relative overflow-hidden"

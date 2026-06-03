@@ -30,6 +30,7 @@ import { FAMILY_FULL_NAMES } from "@/lib/scrambler-narrative";
 import type { FactPattern, GovernancePosture } from "@/lib/scrambler-types";
 import type { BiasDataPoint } from "@/lib/scrambler-bias-model";
 import { useScenario } from "@/contexts/ScenarioContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import CascadeGraph from "@/components/CascadeGraph";
 import ScenarioComparison from "@/components/ScenarioComparison";
 import AnalysisPanel from "@/components/AnalysisPanel";
@@ -268,6 +269,7 @@ function ActionBar({ onPin, onCompare, isPinned }: { onPin: () => void; onCompar
 
 export default function ScenarioSimulator() {
   const { activeScenario, setActiveScenario, pinScenario, pinnedScenarios, splitMode, setSplitMode, openAnalysisPanel, navigateToEvidence, setReplayStep } = useScenario();
+  const { phase, advance, registerGenerateHandler } = useOnboarding();
 
   const [scenario, setScenario] = useState<FactPattern | null>(null);
   const [result, setResult] = useState<ReturnType<typeof evaluateScenario> | null>(null);
@@ -308,6 +310,38 @@ export default function ScenarioSimulator() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [openTooltipId]);
+
+  // Register onboarding generate handler
+  useEffect(() => {
+    registerGenerateHandler(() => {
+      // Pre-select Erroneous + Sequential + Standard for the tutorial
+      setMode("guided");
+      setGuidedRisk("Erroneous");
+      setGuidedArchetype("Sequential");
+      setGuidedPosture("Standard");
+      setTimeout(() => {
+        const fp = generateFromPreset("Erroneous", "Sequential", "Standard");
+        const res = evaluateScenario(fp);
+        const bias = generateBiasCurve(25);
+        setScenario(fp);
+        setResult(res);
+        setBiasData(bias);
+        setShowCascade(true);
+        setScenarioGenerated(true);
+        setScenarioCount(1);
+        const snapshot = {
+          id: `scenario-${Date.now()}`,
+          timestamp: Date.now(),
+          factPattern: fp,
+          result: res,
+          biasData: bias,
+          label: "Erroneous \u00d7 Sequential #1",
+        };
+        setActiveScenario(snapshot);
+        setReplayStep(0);
+      }, 150);
+    });
+  }, [registerGenerateHandler, setActiveScenario, setReplayStep]);
 
   // Heatmap overflow detection
   useEffect(() => {
@@ -368,7 +402,12 @@ export default function ScenarioSimulator() {
     });
 
     showToast(`Scenario #${newCount} generated — ${fp.risk_category} × ${fp.agent_archetype}`);
-  }, [mode, guidedRisk, guidedArchetype, guidedPosture, scenarioCount, setActiveScenario, setReplayStep]);
+
+    // Advance onboarding if in guided-action phase
+    if (phase === "guided-action") {
+      setTimeout(() => advance(), 800);
+    }
+  }, [mode, guidedRisk, guidedArchetype, guidedPosture, scenarioCount, setActiveScenario, setReplayStep, phase, advance]);
 
   // Computed data
   const heatmapData = useMemo(() => {
@@ -419,7 +458,7 @@ export default function ScenarioSimulator() {
             Generate scenarios, observe cascade failures, and analyze causal control relationships across the OWASP-NIST crosswalk.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div data-onboarding="config-bar" className="flex items-center gap-3">
           <div className="flex rounded-md overflow-hidden border" style={{ borderColor: PALETTE.border }}>
             {(["random", "guided"] as const).map((m) => (
               <button key={m} onClick={() => { setMode(m); setOpenTooltipId(null); }} className="px-3 py-1.5 text-[11px] font-semibold transition-all"
@@ -428,7 +467,7 @@ export default function ScenarioSimulator() {
               </button>
             ))}
           </div>
-          <button onClick={generateScenarioHandler} className="flex items-center gap-2 px-4 py-2 rounded-md text-[12px] font-bold transition-all hover:scale-105"
+          <button data-onboarding="generate-button" onClick={generateScenarioHandler} className="flex items-center gap-2 px-4 py-2 rounded-md text-[12px] font-bold transition-all hover:scale-105"
             style={{ backgroundColor: PALETTE.cobaltMuted, color: PALETTE.cobaltLight, border: `1px solid ${PALETTE.cobalt}40` }}>
             <RefreshCw className="w-3.5 h-3.5" />
             Generate Scenario
@@ -566,7 +605,7 @@ export default function ScenarioSimulator() {
           </div>
 
           {/* ─── Cascade Failure Graph (NEW) ─── */}
-          <div className="mb-6">
+          <div data-onboarding="cascade-topology" className="mb-6">
             <button onClick={() => setShowCascade(!showCascade)} className="flex items-center gap-2 text-xs font-bold transition-colors mb-3" style={{ color: PALETTE.cobaltLight }}>
               {showCascade ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               <Network className="w-3.5 h-3.5" />
@@ -623,31 +662,37 @@ export default function ScenarioSimulator() {
                     </tr>
                   </thead>
                   <tbody>
-                    {heatmapData?.map((row) => (
-                      <tr key={row.asiId} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="p-1.5 text-[11px] font-bold sticky left-0 z-10 whitespace-nowrap cursor-pointer hover:text-blue-400 transition-colors" style={{ color: PALETTE.text, fontFamily: "var(--font-mono)", backgroundColor: PALETTE.bg }} scope="row"
-                          onClick={() => openAnalysisPanel(undefined, row.asiId)}>
-                          {row.asiId}
-                        </td>
-                        {row.cells.map((cell) => {
-                          const colors = CELL_COLORS[cell.state];
-                          return (
-                            <td key={cell.familyId} className="p-0.5 text-center" aria-label={`${row.asiId} × ${cell.familyId}: ${colors.label}`}>
-                              <div
-                                className="flex items-center justify-center transition-all duration-200 rounded-sm cursor-pointer hover:ring-1 hover:ring-blue-400/50"
-                                style={{ width: 32, height: 32, backgroundColor: colors.bg, border: `1px solid ${colors.border}40`, margin: "0 auto" }}
-                                title={`${row.asiId} × ${cell.familyId} (${FAMILY_FULL_NAMES[cell.familyId] || cell.familyId}): ${colors.label}`}
-                                onClick={() => openAnalysisPanel({ asiId: row.asiId, familyId: cell.familyId })}
-                              >
-                                {cell.state === "active" && <ActiveIcon />}
-                                {cell.state === "broken" && <BrokenIcon />}
-                                {cell.state === "irrelevant" && <IrrelevantIcon />}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
+                    {(() => {
+                      let firstBrokenMarked = false;
+                      return heatmapData?.map((row) => (
+                        <tr key={row.asiId} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="p-1.5 text-[11px] font-bold sticky left-0 z-10 whitespace-nowrap cursor-pointer hover:text-blue-400 transition-colors" style={{ color: PALETTE.text, fontFamily: "var(--font-mono)", backgroundColor: PALETTE.bg }} scope="row"
+                            onClick={() => openAnalysisPanel(undefined, row.asiId)}>
+                            {row.asiId}
+                          </td>
+                          {row.cells.map((cell) => {
+                            const colors = CELL_COLORS[cell.state];
+                            const isFirstBroken = cell.state === "broken" && !firstBrokenMarked;
+                            if (isFirstBroken) firstBrokenMarked = true;
+                            return (
+                              <td key={cell.familyId} className="p-0.5 text-center" aria-label={`${row.asiId} \u00d7 ${cell.familyId}: ${colors.label}`}>
+                                <div
+                                  data-onboarding={isFirstBroken ? "first-broken-cell" : undefined}
+                                  className="flex items-center justify-center transition-all duration-200 rounded-sm cursor-pointer hover:ring-1 hover:ring-blue-400/50"
+                                  style={{ width: 32, height: 32, backgroundColor: colors.bg, border: `1px solid ${colors.border}40`, margin: "0 auto" }}
+                                  title={`${row.asiId} \u00d7 ${cell.familyId} (${FAMILY_FULL_NAMES[cell.familyId] || cell.familyId}): ${colors.label}`}
+                                  onClick={() => openAnalysisPanel({ asiId: row.asiId, familyId: cell.familyId })}
+                                >
+                                  {cell.state === "active" && <ActiveIcon />}
+                                  {cell.state === "broken" && <BrokenIcon />}
+                                  {cell.state === "irrelevant" && <IrrelevantIcon />}
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>

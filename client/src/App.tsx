@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ScenarioProvider } from "./contexts/ScenarioContext";
+import { OnboardingProvider } from "./contexts/OnboardingContext";
 import Home from "./pages/Home";
 import TermsOfService from "./pages/TermsOfService";
 
@@ -24,10 +25,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <ScenarioProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <OnboardingProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </OnboardingProvider>
         </ScenarioProvider>
       </ThemeProvider>
     </ErrorBoundary>

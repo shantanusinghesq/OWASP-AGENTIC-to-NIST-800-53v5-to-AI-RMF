@@ -42,6 +42,10 @@ import { NIST_AI_RMF_DESCRIPTIONS } from "@/lib/nist-ai-rmf-descriptions";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import OnboardingController from "@/components/onboarding/OnboardingController";
+import OverviewRoster from "@/components/OverviewRoster";
+import HeatmapExplainer from "@/components/HeatmapExplainer";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ChevronDown } from "lucide-react";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
 
@@ -261,16 +265,28 @@ function StatCard({ label, value, color, subtitle }: { label: string; value: str
 
 // ─── Main Page ──────────────────────────────────────────────────
 
-type ViewType = "matrix" | "aiRmf" | "detail" | "simulator";
+type ViewType = "overview" | "matrix" | "aiRmf" | "detail" | "simulator";
 
 export default function Home() {
   const [selectedASI, setSelectedASI] = useState<string | null>(null);
-  const [view, setView] = useState<ViewType>("matrix");
+  const [view, setView] = useState<ViewType>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    return (tab as ViewType) || "overview";
+  });
+  const [heatmapDropdownOpen, setHeatmapDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<"all" | "nist" | "aiRmf">("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { pendingEvidenceFilter, clearPendingFilter } = useScenario();
   const { registerTabSwitcher } = useOnboarding();
+
+  // Persist view to URL query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", view);
+    window.history.replaceState({}, "", `?${params.toString()}`);
+  }, [view]);
 
   // Register tab switcher for onboarding orchestration
   useEffect(() => {
@@ -278,6 +294,17 @@ export default function Home() {
       setView(tab as ViewType);
     });
   }, [registerTabSwitcher]);
+
+  // Handle URL changes (back/forward navigation)
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab) setView(tab as ViewType);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   // Deep-link: when simulator requests navigation to Evidence Explorer
   useEffect(() => {
@@ -448,9 +475,17 @@ export default function Home() {
   const selected = selectedASI ? CROSSWALK[selectedASI] : null;
   const selectedMeta = selectedASI ? OWASP_ASI.find((a) => a.id === selectedASI) : null;
 
-  const tabs: { key: ViewType; label: string; icon: React.ReactNode }[] = [
-    { key: "matrix", label: "800-53 Heatmap", icon: <Grid3X3 className="w-3.5 h-3.5" /> },
-    { key: "aiRmf", label: "AI-RMF Heatmap", icon: <Brain className="w-3.5 h-3.5" /> },
+  const tabs: { key: ViewType | "heatmaps"; label: string; icon: React.ReactNode; submenu?: { key: ViewType; label: string }[] }[] = [
+    { key: "overview", label: "Overview", icon: <Shield className="w-3.5 h-3.5" /> },
+    {
+      key: "heatmaps",
+      label: "Heatmaps",
+      icon: <Grid3X3 className="w-3.5 h-3.5" />,
+      submenu: [
+        { key: "matrix", label: "800-53 Heatmap" },
+        { key: "aiRmf", label: "AI-RMF Heatmap" },
+      ],
+    },
     { key: "detail", label: "Evidence Explorer", icon: <Search className="w-3.5 h-3.5" /> },
     { key: "simulator", label: "Scenario Simulator", icon: <Zap className="w-3.5 h-3.5" /> },
   ];
@@ -502,30 +537,92 @@ export default function Home() {
       {/* ─── Navigation Tabs ─── */}
       <div className="container">
         <div className="flex gap-0 border-b border-slate-700/50 -mt-px">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => {
-                setView(tab.key);
-                setSelectedASI(null);
-              }}
-              className="flex items-center gap-2 px-5 py-3 text-[13px] font-medium transition-all duration-150 border-b-2"
-              style={{
-                color: view === tab.key ? "#3B82F6" : "#94A3B8",
-                backgroundColor: view === tab.key ? "rgba(59,130,246,0.06)" : "transparent",
-                borderBottomColor: view === tab.key ? "#3B82F6" : "transparent",
-              }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            if (tab.submenu) {
+              // Heatmaps dropdown
+              const isActive = view === "matrix" || view === "aiRmf";
+              return (
+                <Popover key={tab.key} open={heatmapDropdownOpen} onOpenChange={setHeatmapDropdownOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="flex items-center gap-2 px-5 py-3 text-[13px] font-medium transition-all duration-150 border-b-2"
+                      style={{
+                        color: isActive ? "#3B82F6" : "#94A3B8",
+                        backgroundColor: isActive ? "rgba(59,130,246,0.06)" : "transparent",
+                        borderBottomColor: isActive ? "#3B82F6" : "transparent",
+                      }}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    {tab.submenu.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() => {
+                          setView(item.key);
+                          setSelectedASI(null);
+                          setHeatmapDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md text-sm transition-colors"
+                        style={{
+                          backgroundColor: view === item.key ? "rgba(59,130,246,0.2)" : "transparent",
+                          color: view === item.key ? "#60a5fa" : "#94A3B8",
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Regular tabs
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setView(tab.key as ViewType);
+                  setSelectedASI(null);
+                }}
+                className="flex items-center gap-2 px-5 py-3 text-[13px] font-medium transition-all duration-150 border-b-2"
+                style={{
+                  color: view === tab.key ? "#3B82F6" : "#94A3B8",
+                  backgroundColor: view === tab.key ? "rgba(59,130,246,0.06)" : "transparent",
+                  borderBottomColor: view === tab.key ? "#3B82F6" : "transparent",
+                }}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* ─── Content Area ─── */}
       <main className="container py-6">
         <AnimatePresence mode="wait">
+          {/* ─── Overview View ─── */}
+          {view === "overview" && (
+            <motion.div
+              key="overview"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <OverviewRoster
+                onExplore={(asiId) => {
+                  setSelectedASI(asiId);
+                  setView("detail");
+                }}
+              />
+            </motion.div>
+          )}
+
           {/* ─── 800-53 Heatmap View ─── */}
           {view === "matrix" && (
             <motion.div
@@ -540,13 +637,8 @@ export default function Home() {
                   <Layers className="w-4 h-4" />
                   OWASP ASI → NIST 800-53 Rev 5 Control Density
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Each cell shows how many specific 800-53 controls map to that ASI risk. Darker = more controls engaged. Click any row for full detail.
-                </p>
-                <p className="mt-1" style={{ fontSize: 11, color: "#94a3b8", fontStyle: "italic" }}>
-                  Scope: 16 of 20 NIST 800-53 Rev 5 control families are represented. Families AT (Awareness & Training), MA (Maintenance), PS (Personnel Security), and PT (PII Transparency) were excluded as lower relevance to agentic AI threat vectors.
-                </p>
               </div>
+              <HeatmapExplainer type="nist" />
               <TooltipProvider delayDuration={200}>
               <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
                 <table className="w-full border-collapse" role="table" aria-label="OWASP ASI to NIST 800-53 control density heatmap" style={{ fontSize: 11 }}>
@@ -674,10 +766,8 @@ export default function Home() {
                   <Brain className="w-4 h-4" />
                   OWASP ASI → NIST AI-RMF Function Coverage
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Each cell shows how many AI-RMF subcategories map to that ASI risk across GOVERN, MAP, MEASURE, MANAGE. Click any row for full detail.
-                </p>
               </div>
+              <HeatmapExplainer type="aiRmf" />
               <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
                 <table className="w-full border-collapse" role="table" aria-label="OWASP ASI to NIST AI-RMF function coverage heatmap" style={{ fontSize: 12 }}>
                   <thead>

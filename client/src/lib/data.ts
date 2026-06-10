@@ -4,6 +4,12 @@ export interface ASIRisk {
   name: string;
   severity: "Critical" | "High" | "Medium-High";
   desc: string;
+  coverage: {
+    nistFamilies: number;
+    nistControls: number;
+    aiRmfFunctions: number;
+    aiRmfCategories: number;
+  };
 }
 
 export interface NISTFamily {
@@ -39,25 +45,35 @@ export interface CrosswalkEntry {
 
 export const OWASP_ASI: ASIRisk[] = [
   { id: "ASI01", name: "Agent Goal Hijack", severity: "Critical",
-    desc: "Attackers redirect agent objectives through poisoned inputs. Agents cannot reliably distinguish instructions from data." },
+    desc: "Attackers redirect agent objectives through poisoned inputs. Agents cannot reliably distinguish instructions from data.",
+    coverage: { nistFamilies: 4, nistControls: 11, aiRmfFunctions: 4, aiRmfCategories: 8 } },
   { id: "ASI02", name: "Tool Misuse & Exploitation", severity: "High",
-    desc: "Agents misuse legitimate tools due to prompt injection, misalignment, or unsafe delegation within authorized scope." },
+    desc: "Agents misuse legitimate tools due to prompt injection, misalignment, or unsafe delegation within authorized scope.",
+    coverage: { nistFamilies: 4, nistControls: 9, aiRmfFunctions: 4, aiRmfCategories: 6 } },
   { id: "ASI03", name: "Identity & Privilege Abuse", severity: "Critical",
-    desc: "Dynamic trust and delegation exploited to escalate access via cached credentials, role inheritance, or confused deputies." },
+    desc: "Dynamic trust and delegation exploited to escalate access via cached credentials, role inheritance, or confused deputies.",
+    coverage: { nistFamilies: 4, nistControls: 10, aiRmfFunctions: 4, aiRmfCategories: 6 } },
   { id: "ASI04", name: "Supply Chain Vulnerabilities", severity: "High",
-    desc: "Malicious or tampered tools, MCP descriptors, agent personas, or model weights compromise runtime execution." },
+    desc: "Malicious or tampered tools, MCP descriptors, agent personas, or model weights compromise runtime execution.",
+    coverage: { nistFamilies: 4, nistControls: 11, aiRmfFunctions: 4, aiRmfCategories: 6 } },
   { id: "ASI05", name: "Unexpected Code Execution", severity: "High",
-    desc: "Agent-generated or externally influenced code executes in unintended ways — RCE, sandbox escape, persistence." },
+    desc: "Agent-generated or externally influenced code executes in unintended ways — RCE, sandbox escape, persistence.",
+    coverage: { nistFamilies: 4, nistControls: 10, aiRmfFunctions: 4, aiRmfCategories: 6 } },
   { id: "ASI06", name: "Memory & Context Poisoning", severity: "High",
-    desc: "Corrupted RAG stores, long-term memory, or shared contexts persist across sessions and alter autonomous reasoning." },
+    desc: "Corrupted RAG stores, long-term memory, or shared contexts persist across sessions and alter autonomous reasoning.",
+    coverage: { nistFamilies: 4, nistControls: 9, aiRmfFunctions: 4, aiRmfCategories: 5 } },
   { id: "ASI07", name: "Insecure Inter-Agent Comms", severity: "Medium-High",
-    desc: "Agent-to-agent channels lack authentication, encryption, or schema validation — enabling spoofing and replay attacks." },
+    desc: "Agent-to-agent channels lack authentication, encryption, or schema validation — enabling spoofing and replay attacks.",
+    coverage: { nistFamilies: 4, nistControls: 8, aiRmfFunctions: 4, aiRmfCategories: 5 } },
   { id: "ASI08", name: "Cascading Failures", severity: "Critical",
-    desc: "Single fault propagates across autonomous agents, compounding into system-wide harm beyond stepwise human checks." },
+    desc: "Single fault propagates across autonomous agents, compounding into system-wide harm beyond stepwise human checks.",
+    coverage: { nistFamilies: 4, nistControls: 9, aiRmfFunctions: 4, aiRmfCategories: 8 } },
   { id: "ASI09", name: "Human-Agent Trust Exploitation", severity: "High",
-    desc: "Agents abuse anthropomorphism and authority bias to socially engineer users into approving harmful actions." },
+    desc: "Agents abuse anthropomorphism and authority bias to socially engineer users into approving harmful actions.",
+    coverage: { nistFamilies: 4, nistControls: 8, aiRmfFunctions: 4, aiRmfCategories: 6 } },
   { id: "ASI10", name: "Rogue Agents", severity: "Critical",
-    desc: "Compromised or misaligned agents deviate from intended purpose while appearing compliant on the surface." },
+    desc: "Compromised or misaligned agents deviate from intended purpose while appearing compliant on the surface.",
+    coverage: { nistFamilies: 5, nistControls: 12, aiRmfFunctions: 4, aiRmfCategories: 7 } },
 ];
 
 export const NIST_800_53: NISTFamily[] = [

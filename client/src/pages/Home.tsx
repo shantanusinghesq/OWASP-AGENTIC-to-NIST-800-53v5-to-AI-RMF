@@ -72,16 +72,22 @@ function MappingCard({
   title,
   items,
   color,
+  framework,
 }: {
   title: string;
   items: { id: string; text: string }[];
   color: string;
+  framework: "nist53" | "aiRmf";
 }) {
   // Extract control ID from text (e.g., "AC-3 Access Enforcement" -> "AC-3" or "GV-1 Policies & Processes" -> "GV-1")
   const extractControlId = (text: string): string | null => {
     const match = text.match(/^([A-Z]{2,8}-\d{1,2})\s/);
     return match ? match[1] : null;
   };
+
+  // MP-1..MP-5 exist in both frameworks (800-53 Media Protection vs AI-RMF
+  // MAP categories), so the lookup must be scoped to the card's framework.
+  const descriptions = framework === "nist53" ? NIST_CONTROL_DESCRIPTIONS : NIST_AI_RMF_DESCRIPTIONS;
 
   return (
     <motion.div
@@ -101,7 +107,7 @@ function MappingCard({
         </div>
         {items.map((item, i) => {
           const controlId = extractControlId(item.text);
-          const controlDesc = controlId ? (NIST_CONTROL_DESCRIPTIONS[controlId] || NIST_AI_RMF_DESCRIPTIONS[controlId]) : null;
+          const controlDesc = controlId ? descriptions[controlId] : null;
           const isRationale = item.id === "\u21b3";
           
           return (
@@ -1055,6 +1061,7 @@ export default function Home() {
                               key={i}
                               title={`${fam.id} — ${fam.name}`}
                               color={fam.color}
+                              framework="nist53"
                               items={[
                                 ...mapping.controls.map((c) => ({ id: "", text: c })),
                                 { id: "↳", text: mapping.rationale },
@@ -1078,6 +1085,7 @@ export default function Home() {
                               key={i}
                               title={func.name}
                               color={func.color}
+                              framework="aiRmf"
                               items={[
                                 ...mapping.cats.map((c) => ({ id: "", text: c })),
                                 { id: "↳", text: mapping.rationale },

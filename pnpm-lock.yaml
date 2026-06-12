@@ -11,9 +11,6 @@ importers:
 
   .:
     dependencies:
-      '@haremantra/crosswalk':
-        specifier: workspace:*
-        version: link:packages/crosswalk
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.74.0(react@19.2.5))

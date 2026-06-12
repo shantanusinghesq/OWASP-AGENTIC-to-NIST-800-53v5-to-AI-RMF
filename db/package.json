@@ -1,0 +1,14 @@
+{
+  "name": "agentic-patterns-db",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SQLite packaging of the agentic AI architecture pattern taxonomy (seed + query CLI)",
+  "scripts": {
+    "seed": "node seed.mjs",
+    "query": "node query.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1"
+  }
+}

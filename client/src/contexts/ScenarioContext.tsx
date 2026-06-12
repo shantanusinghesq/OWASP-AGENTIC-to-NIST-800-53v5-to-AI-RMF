@@ -22,6 +22,7 @@ export interface ScenarioSnapshot {
   result: ScenarioResult;
   biasData: BiasDataPoint[];
   label: string;
+  resultSource?: "scrambler" | "diagram";
 }
 
 export interface CascadeNode {

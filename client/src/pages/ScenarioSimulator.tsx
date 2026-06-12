@@ -29,11 +29,13 @@ import { generateScenarioPreview } from "@/lib/scrambler-preview";
 import { FAMILY_FULL_NAMES } from "@/lib/scrambler-narrative";
 import type { FactPattern, GovernancePosture } from "@/lib/scrambler-types";
 import type { BiasDataPoint } from "@/lib/scrambler-bias-model";
-import { useScenario } from "@/contexts/ScenarioContext";
+import { useScenario, type ScenarioSnapshot } from "@/contexts/ScenarioContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import CascadeGraph from "@/components/CascadeGraph";
 import ScenarioComparison from "@/components/ScenarioComparison";
 import AnalysisPanel from "@/components/AnalysisPanel";
+import DiagramAnalyzer from "@/components/DiagramAnalyzer";
+import type { PatternEvaluationOutput } from "@/lib/pattern-evaluator";
 import {
   Zap,
   RefreshCw,
@@ -54,6 +56,7 @@ import {
   ArrowLeftRight,
   Layers,
   Network,
+  Upload,
 } from "lucide-react";
 
 // ─── Design Tokens (Swiss/Bauhaus) ──────────────────────────────────────────
@@ -280,6 +283,7 @@ export default function ScenarioSimulator() {
   const [scenarioGenerated, setScenarioGenerated] = useState(false);
   const [isPulsing, setIsPulsing] = useState(false);
   const [showBias, setShowBias] = useState(false);
+  const [diagramSidebarOpen, setDiagramSidebarOpen] = useState(false);
 
   // Guided mode state
   const [guidedRisk, setGuidedRisk] = useState<string>("Erroneous");
@@ -409,6 +413,36 @@ export default function ScenarioSimulator() {
     }
   }, [mode, guidedRisk, guidedArchetype, guidedPosture, scenarioCount, setActiveScenario, setReplayStep, phase, advance]);
 
+  // Diagram analysis result handler — mirrors generateScenarioHandler but
+  // sources the scenario from the Architecture Diagram Analyzer sidebar
+  const handleDiagramResult = useCallback((output: PatternEvaluationOutput) => {
+    const snapshot: ScenarioSnapshot = {
+      id: crypto.randomUUID(),
+      timestamp: Date.now(),
+      factPattern: output.factPattern,
+      result: output.result,
+      biasData: output.biasData,
+      label: output.label,
+      resultSource: "diagram",
+    };
+    setActiveScenario(snapshot);
+    setDiagramSidebarOpen(false);
+
+    // Update local state to show results
+    setScenario(output.factPattern);
+    setResult(output.result);
+    setBiasData(output.biasData);
+    setShowCascade(true);
+    setScenarioGenerated(true);
+    setScenarioCount((c) => c + 1);
+    setReplayStep(0);
+
+    requestAnimationFrame(() => {
+      resultCardsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    showToast(`Diagram analysis applied — ${output.label}`);
+  }, [setActiveScenario, setReplayStep]);
+
   // Computed data
   const heatmapData = useMemo(() => {
     if (!scenario) return null;
@@ -472,6 +506,13 @@ export default function ScenarioSimulator() {
             <RefreshCw className="w-3.5 h-3.5" />
             Generate Scenario
             {scenarioCount > 0 && <span className="text-[10px] ml-1" style={{ color: PALETTE.textCaption }}>#{scenarioCount}</span>}
+          </button>
+          <button
+            onClick={() => setDiagramSidebarOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md transition-colors border border-slate-600"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="text-sm font-medium">Analyze Diagram</span>
           </button>
         </div>
       </div>
@@ -789,6 +830,13 @@ export default function ScenarioSimulator() {
 
       {/* ─── Analysis Panel (slides in from right) ─── */}
       <AnalysisPanel onNavigateToEvidence={handleNavigateToEvidence} />
+
+      {/* ─── Architecture Diagram Analyzer Sidebar ─── */}
+      <DiagramAnalyzer
+        isOpen={diagramSidebarOpen}
+        onClose={() => setDiagramSidebarOpen(false)}
+        onResultReady={handleDiagramResult}
+      />
     </div>
   );
 }

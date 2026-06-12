@@ -21,10 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # pnpm version comes from package.json's packageManager field;
+      # specifying it here too makes pnpm/action-setup@v4 fail hard.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10.4.1
 
       - name: Setup Node
         uses: actions/setup-node@v4

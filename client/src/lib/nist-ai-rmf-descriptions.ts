@@ -56,74 +56,63 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
     relatedASI: ["ASI01", "ASI02", "ASI08"],
   },
 
-  // MAP Function Controls (MAP-1 through MAP-6)
-  "MAP-1": {
-    title: "MAP-1 — Context Establishment",
-    description: "Establishes the context for AI system development and deployment, including intended use, stakeholders, and operational environment.",
-    implementation: "For agentic AI, clearly define the agent's intended goals, authorized actions, decision boundaries, and escalation triggers before deployment.",
-    relatedASI: ["ASI01", "ASI05"],
+  // MAP Function Controls (MP-1 through MP-5)
+  "MP-1": {
+    title: "MP-1 — Context Establishment",
+    description: "Establishes the context in which the AI system will be deployed, including intended purpose, settings, expected users, stakeholders, mission objectives, and the legal, regulatory, and ethical considerations that frame acceptable system behavior.",
+    implementation: "For agentic AI, document the agent's authorized goals, decision boundaries, permitted tool surfaces, deployment environment, and the human stakeholders responsible for accepting risk before any autonomous action is enabled.",
+    relatedASI: ["ASI01", "ASI03", "ASI07"],
   },
-  "MAP-2": {
-    title: "MAP-2 — Impact Characterization",
-    description: "Characterizes the potential impacts of AI system failures or misuse, including direct and indirect consequences.",
-    implementation: "Conduct impact analysis for agentic AI failures, including cascading effects, data exposure risks, unauthorized tool access, and reputational damage.",
-    relatedASI: ["ASI02", "ASI04", "ASI05", "ASI08"],
+  "MP-2": {
+    title: "MP-2 — Categorization",
+    description: "Categorizes the AI system by task, capability, and deployment context so that risk treatment, oversight intensity, and applicable controls can be calibrated to the system's classification.",
+    implementation: "Classify agents and the tools they can invoke by sensitivity tier (read-only vs state-changing, internal vs external, reversible vs destructive); attach control requirements to each tier rather than to the agent as a whole.",
+    relatedASI: ["ASI02", "ASI06", "ASI10"],
   },
-  "MAP-3": {
-    title: "MAP-3 — Risk Assessment",
-    description: "Conducts systematic risk assessments to identify and evaluate AI-specific threats and vulnerabilities.",
-    implementation: "Perform threat modeling for agentic AI including agent goal hijacking, tool misuse, privilege escalation, and supply chain attacks on models and dependencies.",
-    relatedASI: ["ASI01", "ASI02", "ASI03", "ASI04", "ASI05"],
+  "MP-3": {
+    title: "MP-3 — Benefits & Costs",
+    description: "Identifies and analyzes the expected benefits and costs of the AI system — including non-monetary social, environmental, and human-rights costs — so trade-offs are explicit rather than implicit.",
+    implementation: "For agentic AI, weigh productivity gains against the cost of over-trust (rubber-stamped recommendations), oversight burden, and the downstream cost of agent errors that bypass human review.",
+    relatedASI: ["ASI09"],
   },
-  "MAP-4": {
-    title: "MAP-4 — Risk Prioritization",
-    description: "Prioritizes identified risks based on likelihood, impact, and organizational risk tolerance.",
-    implementation: "Prioritize agentic AI risks based on agent autonomy level, access to critical systems, and potential for cascading failures across dependent systems.",
-    relatedASI: ["ASI01", "ASI08"],
+  "MP-4": {
+    title: "MP-4 — Risks from Third Parties",
+    description: "Identifies risks introduced by third-party AI components, data, models, infrastructure, and tools, and the obligations between the organization and those third parties.",
+    implementation: "Inventory third-party model weights, tool descriptors, agent personas, MCP servers, and dependency chains; require provenance, signing, and typosquat scanning before any third-party tool is exposed to an agent.",
+    relatedASI: ["ASI02", "ASI03", "ASI04"],
   },
-  "MAP-5": {
-    title: "MAP-5 — Risk Response Planning",
-    description: "Develops response plans for identified risks, including mitigation, acceptance, or transfer strategies.",
-    implementation: "For agentic AI, develop incident response plans for agent goal drift, unauthorized tool access, and cascading failures; establish rollback procedures and emergency shutdown protocols.",
-    relatedASI: ["ASI01", "ASI02", "ASI08", "ASI10"],
-  },
-  "MAP-6": {
-    title: "MAP-6 — Measurement & Monitoring",
-    description: "Establishes metrics and monitoring mechanisms to track AI system performance and risk indicators.",
-    implementation: "Monitor agentic AI metrics including goal alignment scores, tool access patterns, decision latency, and anomaly detection alerts for unexpected behavior.",
-    relatedASI: ["ASI01", "ASI02", "ASI08"],
+  "MP-5": {
+    title: "MP-5 — Impact Characterization",
+    description: "Characterizes the likelihood and magnitude of impacts — both positive and negative — that the AI system may have on individuals, groups, organizations, and society.",
+    implementation: "Document blast radius for agentic failure modes — goal hijacking, sandbox escape, cascading multi-agent faults, dependency poisoning — including reversibility, affected parties, and worst-case scope.",
+    relatedASI: ["ASI01", "ASI05", "ASI08"],
   },
 
-  // MEASURE Function Controls (MEASURE-1 through MEASURE-5)
-  "MEASURE-1": {
-    title: "MEASURE-1 — Monitoring & Logging",
-    description: "Implements comprehensive monitoring and logging of AI system activities, decisions, and performance metrics.",
-    implementation: "Log all agentic AI decisions, tool invocations, goal updates, and anomalies; ensure logs are tamper-proof and retained for audit purposes.",
-    relatedASI: ["ASI01", "ASI02", "ASI03", "ASI08"],
+  // MEASURE Function Controls (MS-1 through MS-4)
+  "MS-1": {
+    title: "MS-1 — Risk Metrics",
+    description: "Identifies and applies appropriate methods and metrics for measuring identified AI risks, including selection criteria, known limitations, and the conditions under which each metric is valid.",
+    implementation: "For agentic AI, define KRIs such as goal-drift scores, anomalous tool-sequence counts, override rates, credential lifetimes, and dependency integrity scores; document each metric's blind spots before relying on it.",
+    relatedASI: ["ASI01", "ASI02", "ASI03", "ASI05", "ASI06", "ASI09", "ASI10"],
   },
-  "MEASURE-2": {
-    title: "MEASURE-2 — Testing & Evaluation",
-    description: "Conducts ongoing testing and evaluation of AI system performance, including adversarial testing and red-teaming.",
-    implementation: "Perform continuous red-teaming of agentic AI to identify goal hijacking vulnerabilities, tool misuse scenarios, and cascading failure paths.",
-    relatedASI: ["ASI01", "ASI02", "ASI05", "ASI08"],
+  "MS-2": {
+    title: "MS-2 — Trustworthiness Evaluation",
+    description: "Evaluates AI systems for trustworthy characteristics — validity, reliability, safety, security, accountability, transparency, explainability, privacy, and fairness — using both quantitative and qualitative methods.",
+    implementation: "Subject agents to red-team evaluation of prompt-injection resilience, tool-use drift, anti-replay protections, and protocol version pinning; require provenance and signature validation for any third-party component.",
+    relatedASI: ["ASI02", "ASI04", "ASI07"],
   },
-  "MEASURE-3": {
-    title: "MEASURE-3 — Performance Metrics",
-    description: "Establishes and tracks performance metrics aligned with AI system objectives and risk indicators.",
-    implementation: "Track agentic AI metrics: goal achievement rate, decision correctness, tool access appropriateness, and incident frequency.",
-    relatedASI: ["ASI01", "ASI02"],
+  "MS-3": {
+    title: "MS-3 — Risk Tracking",
+    description: "Tracks identified risks over time, including emergent risks, and uses ongoing measurement to inform mitigation decisions and feedback to the MAP and MANAGE functions.",
+    implementation: "Continuously track agent behavioral drift against baseline manifests, cross-tenant memory access attempts, delegation depth, and replay-test outcomes; feed deltas back into risk treatment decisions.",
+    relatedASI: ["ASI01", "ASI03", "ASI06", "ASI08", "ASI10"],
   },
-  "MEASURE-4": {
-    title: "MEASURE-4 — Incident Detection",
-    description: "Implements mechanisms to detect and report AI-related incidents, anomalies, and security events.",
-    implementation: "Deploy anomaly detection for agentic AI behavior, including unusual goal changes, unauthorized tool access, and deviation from expected decision patterns.",
-    relatedASI: ["ASI01", "ASI02", "ASI08", "ASI10"],
-  },
-  "MEASURE-5": {
-    title: "MEASURE-5 — Audit & Accountability",
-    description: "Maintains audit trails and accountability records for all AI system decisions and actions.",
-    implementation: "Maintain immutable audit trails for all agentic AI decisions, including decision rationale, tool invocations, and outcome verification.",
-    relatedASI: ["ASI01", "ASI03"],
+  "MS-4": {
+    title: "MS-4 — Measurement Effectiveness",
+    description: "Assesses the effectiveness of the measurement program itself — whether the chosen metrics, tests, and feedback loops are actually surfacing the risks that matter and informing decisions.",
+    implementation: "Periodically validate that agent KRIs catch real incidents (not just synthetic ones) by replaying historical near-misses; retire metrics that produce no signal and add coverage where post-incident reviews reveal blind spots.",
+    // No CROSSWALK references — listed in AI_RMF.cats but not yet wired into any ASI mapping.
+    relatedASI: [],
   },
 
   // MANAGE Function Controls (MG-1 through MG-4)

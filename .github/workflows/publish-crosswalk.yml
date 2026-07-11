@@ -21,9 +21,13 @@ jobs:
         with:
           node-version: 22
           registry-url: https://npm.pkg.github.com
-          scope: '@obviate'
+          scope: '@haremantra'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Gate publication on the data integrity suite — never publish data
+      # that fails referential-integrity checks.
+      - run: pnpm check
+      - run: pnpm test
       - run: pnpm --filter @haremantra/crosswalk publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

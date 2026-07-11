@@ -2,17 +2,19 @@
 // Fixed bottom bar summarizing the working assessment. Renders NOTHING when
 // the assessment is untouched (no selections + default name) so the app's
 // default DOM is unchanged — App.smoke.test.tsx must stay byte-identical.
-// Collapsed: count + coverage chips + editable name. Expanded: selection
-// list, gap summary, and save/load/import/export actions. Real committee
-// exports (brief/OSCAL) land in PR-4 — JSON roundtrip ships here.
+// Collapsed: count + coverage chips + editable name + committee exports
+// (print brief / scoped OSCAL). Expanded: selection list, gap summary, and
+// save/load/import/export actions (JSON roundtrip).
 
 import { useRef, useState, type ReactElement } from "react";
-import { ChevronDown, ChevronUp, ClipboardList, Download, Upload } from "lucide-react";
+import { ChevronDown, ChevronUp, ClipboardList, Download, FileJson, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { triggerDownload } from "@/lib/download";
 import { useAssessment } from "./AssessmentContext";
+import { BriefExport } from "./BriefExport";
 import { selectionCoverage } from "./coverage";
 import { buildAssessmentExport, parseAssessmentImport } from "./export-json";
+import { exportScopedOscal } from "./export-oscal";
 import { pruneStale } from "./storage";
 import { GapSummary } from "./GapSummary";
 import { TraySelectionList } from "./TraySelectionList";
@@ -204,8 +206,20 @@ export function AssessmentTray({
             className="flex-1 min-w-32 max-w-64 rounded-md border border-slate-700/60 bg-slate-900/60 px-2 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-blue-500/60"
           />
           <span className="flex-1" />
-          <button type="button" disabled className={actionClass} title="Committee exports land in a later release">
-            Export (soon)
+          <BriefExport
+            assessment={assessment}
+            disabled={count === 0}
+            className={actionClass}
+          />
+          <button
+            type="button"
+            onClick={() => exportScopedOscal(assessment)}
+            disabled={count === 0}
+            className={actionClass}
+            title="Download the OSCAL-aligned mapping scoped to the selected mappings"
+          >
+            <FileJson className="w-3 h-3" aria-hidden="true" />
+            OSCAL (scoped)
           </button>
           <button
             type="button"

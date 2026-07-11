@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from "react";
-import { AlertTriangle, ExternalLink, Link2, ShieldQuestion } from "lucide-react";
+import { AlertTriangle, ExternalLink, FileText, Link2, ShieldQuestion } from "lucide-react";
 import { toast } from "sonner";
 import {
   AI_RMF,
@@ -8,6 +8,8 @@ import {
   OWASP_ASI,
   type ValidationStatus,
 } from "@/data/crosswalk";
+import { buildSingleRiskAssessment } from "@/features/assessment/brief";
+import { exportBrief } from "@/features/assessment/BriefExport";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { MappingCard } from "./MappingCard";
 import {
@@ -99,6 +101,19 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <SeverityBadge level={selectedMeta.severity} />
+            <button
+              onClick={() =>
+                // Provider-less by design: builds an ephemeral all-mappings
+                // assessment for this ASI from CROSSWALK (never useAssessment),
+                // so the button works wherever RiskDetail renders.
+                exportBrief(buildSingleRiskAssessment(selectedMeta.id, new Date().toISOString()))
+              }
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border border-slate-600 text-slate-300 hover:bg-slate-800 transition-colors"
+              aria-label={`Export a print-ready brief for ${selectedMeta.id}`}
+            >
+              <FileText className="w-3 h-3" />
+              Export brief
+            </button>
             <button
               onClick={() => {
                 const url = `${window.location.origin}${window.location.pathname}?tab=detail&risk=${selectedMeta.id}`;

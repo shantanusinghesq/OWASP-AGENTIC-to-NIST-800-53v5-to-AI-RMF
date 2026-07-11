@@ -4,79 +4,33 @@
  * Blue (#3B82F6) for NIST 800-53, Emerald (#10B981) for AI-RMF
  * Crimson (#EF4444) for critical severity
  * JetBrains Mono for identifiers, Inter for body text
+ *
+ * Home is a thin composition root: it owns exactly two pieces of state
+ * (view via useTabParam, selectedASI) plus the two effects that write
+ * them (onboarding tab switcher, simulator→explorer deep link). All data
+ * derivations and view JSX live in features/.
  */
 
-import { useState, useMemo, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  OWASP_ASI,
-  NIST_800_53,
-  AI_RMF,
-  CROSSWALK,
-  CROSSWALK_STATS,
-} from "@/data/crosswalk";
-import type { ASIRisk } from "@/data/crosswalk";
-import { Link } from "wouter";
-import {
-  Shield,
-  Grid3X3,
-  Brain,
-  Search,
-  AlertTriangle,
-  ChevronRight,
-  ExternalLink,
-  Layers,
-  Scale,
-  FileText,
-  Zap,
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
-import ScenarioSimulator from "@/features/simulator/ScenarioSimulator";
-import { NIST_CONTROL_DESCRIPTIONS, NIST_AI_RMF_DESCRIPTIONS } from "@/data/crosswalk";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useTabParam } from "@/hooks/useTabParam";
 import OnboardingController from "@/components/onboarding/OnboardingController";
-import OverviewRoster from "@/components/OverviewRoster";
-import HeatmapExplainer from "@/components/HeatmapExplainer";
-import { SeverityBadge } from "@/components/SeverityBadge";
-import { StatCard } from "@/components/StatCard";
-import { MappingCard } from "@/features/explorer/MappingCard";
-import { HeatCell } from "@/features/heatmap/HeatCell";
-import { AIRmfHeatCell } from "@/features/heatmap/AiRmfHeatCell";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { ChevronDown } from "lucide-react";
-
-const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
-
-// ─── Main Page ──────────────────────────────────────────────────
-
-type ViewType = "overview" | "matrix" | "aiRmf" | "detail" | "simulator";
+import { HomeHero } from "@/components/HomeHero";
+import { ViewTabs, type ViewType } from "@/components/ViewTabs";
+import { SiteFooter } from "@/components/SiteFooter";
+import OverviewRoster from "@/features/overview/OverviewRoster";
+import { NistHeatmapView } from "@/features/heatmap/NistHeatmapView";
+import { AiRmfHeatmapView } from "@/features/heatmap/AiRmfHeatmapView";
+import { ExplorerView } from "@/features/explorer/ExplorerView";
+import ScenarioSimulator from "@/features/simulator/ScenarioSimulator";
 
 export default function Home() {
+  const [view, setView] = useTabParam();
   const [selectedASI, setSelectedASI] = useState<string | null>(null);
-  const [view, setView] = useState<ViewType>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get("tab");
-    return (tab as ViewType) || "overview";
-  });
-  const [heatmapDropdownOpen, setHeatmapDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFilter, setSearchFilter] = useState<"all" | "nist" | "aiRmf">("all");
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const { pendingEvidenceFilter, clearPendingFilter } = useScenario();
   const { registerTabSwitcher } = useOnboarding();
-
-  // Persist view to URL query parameter
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    params.set("tab", view);
-    window.history.replaceState({}, "", `?${params.toString()}`);
-  }, [view]);
 
   // Register tab switcher for onboarding orchestration
   useEffect(() => {
@@ -84,17 +38,6 @@ export default function Home() {
       setView(tab as ViewType);
     });
   }, [registerTabSwitcher]);
-
-  // Handle URL changes (back/forward navigation)
-  useEffect(() => {
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab) setView(tab as ViewType);
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
 
   // Deep-link: when simulator requests navigation to Evidence Explorer
   useEffect(() => {
@@ -105,271 +48,24 @@ export default function Home() {
     }
   }, [pendingEvidenceFilter, clearPendingFilter]);
 
-  // Build a flat searchable index of all controls
-  const searchIndex = useMemo(() => {
-    const results: {
-      type: "nist" | "aiRmf";
-      asiId: string;
-      asiName: string;
-      asiDesc: string;
-      controlId: string;
-      controlText: string;
-      family: string;
-      familyName: string;
-      description: string;
-      implementation: string;
-      rationale: string;
-      evidence: string;
-    }[] = [];
+  const handleViewChange = (v: ViewType): void => {
+    setView(v);
+    setSelectedASI(null);
+  };
 
-    OWASP_ASI.forEach((asi) => {
-      const cw = CROSSWALK[asi.id];
-      // NIST 800-53 controls
-      cw.nist53.forEach((mapping) => {
-        const fam = NIST_800_53.find((f) => f.id === mapping.family);
-        if (!fam) return;
-        mapping.controls.forEach((ctrl) => {
-          const match = ctrl.match(/^([A-Z]{2,8}-\d{1,2})\s(.+)/);
-          const controlId = match ? match[1] : ctrl;
-          const desc = NIST_CONTROL_DESCRIPTIONS[controlId];
-          results.push({
-            type: "nist",
-            asiId: asi.id,
-            asiName: asi.name,
-            asiDesc: asi.desc,
-            controlId,
-            controlText: ctrl,
-            family: fam.id,
-            familyName: fam.name,
-            description: desc ? desc.description : "",
-            implementation: desc ? desc.implementation : "",
-            rationale: mapping.rationale,
-            evidence: cw.evidence,
-          });
-        });
-      });
-      // AI-RMF categories
-      cw.aiRmf.forEach((mapping) => {
-        const func = AI_RMF.find((f) => f.id === mapping.func);
-        if (!func) return;
-        mapping.cats.forEach((cat) => {
-          const match = cat.match(/^([A-Z]{2,8}-\d{1,2})\s(.+)/);
-          const controlId = match ? match[1] : cat;
-          const desc = NIST_AI_RMF_DESCRIPTIONS[controlId];
-          results.push({
-            type: "aiRmf",
-            asiId: asi.id,
-            asiName: asi.name,
-            asiDesc: asi.desc,
-            controlId,
-            controlText: cat,
-            family: func.id,
-            familyName: func.name,
-            description: desc ? desc.description : "",
-            implementation: desc ? desc.implementation : "",
-            rationale: mapping.rationale,
-            evidence: cw.evidence,
-          });
-        });
-      });
-    });
-    return results;
-  }, []);
-
-  // Search results
-  const searchResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q || q.length < 2) return [];
-    return searchIndex.filter((item) => {
-      if (searchFilter === "nist" && item.type !== "nist") return false;
-      if (searchFilter === "aiRmf" && item.type !== "aiRmf") return false;
-      return (
-        item.controlId.toLowerCase().includes(q) ||
-        item.controlText.toLowerCase().includes(q) ||
-        item.familyName.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
-        item.implementation.toLowerCase().includes(q) ||
-        item.rationale.toLowerCase().includes(q) ||
-        item.evidence.toLowerCase().includes(q) ||
-        item.asiName.toLowerCase().includes(q) ||
-        item.asiDesc.toLowerCase().includes(q) ||
-        item.asiId.toLowerCase().includes(q)
-      );
-    });
-  }, [searchQuery, searchFilter, searchIndex]);
-
-  // Compute heatmap data
-  const heatmapData = useMemo(() => {
-    const data: Record<string, Record<string, number>> = {};
-    let maxVal = 0;
-    OWASP_ASI.forEach((asi) => {
-      data[asi.id] = {};
-      const cw = CROSSWALK[asi.id];
-      NIST_800_53.forEach((fam) => {
-        const match = cw.nist53.find((n) => n.family === fam.id);
-        const count = match ? match.controls.length : 0;
-        data[asi.id][fam.id] = count;
-        if (count > maxVal) maxVal = count;
-      });
-    });
-    return { data, maxVal };
-  }, []);
-
-  const aiRmfHeatmap = useMemo(() => {
-    const data: Record<string, Record<string, number>> = {};
-    let maxVal = 0;
-    OWASP_ASI.forEach((asi) => {
-      data[asi.id] = {};
-      const cw = CROSSWALK[asi.id];
-      AI_RMF.forEach((func) => {
-        const match = cw.aiRmf.find((a) => a.func === func.id);
-        const count = match ? match.cats.length : 0;
-        data[asi.id][func.id] = count;
-        if (count > maxVal) maxVal = count;
-      });
-    });
-    return { data, maxVal };
-  }, []);
-
-  // Stats — derived from the mappings by the package (pinned by its test
-  // suite), replacing inline counts that drifted from the data: unique
-  // controls counted display strings (56, inflated by the SI-7 dual naming;
-  // true distinct IDs: 55) and unique categories counted the taxonomy
-  // definition (19) rather than what the mappings reference (17).
-  const totalControls = CROSSWALK_STATS.totalNistControlMappings;
-  const totalCategories = CROSSWALK_STATS.totalAiRmfCategoryMappings;
-  const uniqueControls = CROSSWALK_STATS.uniqueNistControls;
-  const uniqueCategories = CROSSWALK_STATS.uniqueAiRmfCategories;
-
-  const selected = selectedASI ? CROSSWALK[selectedASI] : null;
-  const selectedMeta = selectedASI ? OWASP_ASI.find((a) => a.id === selectedASI) : null;
-
-  const tabs: { key: ViewType | "heatmaps"; label: string; icon: React.ReactNode; submenu?: { key: ViewType; label: string }[] }[] = [
-    { key: "overview", label: "Overview", icon: <Shield className="w-3.5 h-3.5" /> },
-    {
-      key: "heatmaps",
-      label: "Heatmaps",
-      icon: <Grid3X3 className="w-3.5 h-3.5" />,
-      submenu: [
-        { key: "matrix", label: "800-53 Heatmap" },
-        { key: "aiRmf", label: "AI-RMF Heatmap" },
-      ],
-    },
-    { key: "detail", label: "Evidence Explorer", icon: <Search className="w-3.5 h-3.5" /> },
-    { key: "simulator", label: "Scenario Simulator", icon: <Zap className="w-3.5 h-3.5" /> },
-  ];
+  const openDetail = (asiId: string): void => {
+    setSelectedASI(asiId);
+    setView("detail");
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* ─── Onboarding Overlay ─── */}
       <OnboardingController />
       {/* ─── Hero Header ─── */}
-      <header
-        className="relative overflow-hidden"
-        style={{
-          backgroundImage: `url(${HERO_IMAGE})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-background" />
-        <div className="relative container py-8 md:py-12">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-[3px] text-blue-400/80 font-medium">
-                Compliance Middleware
-              </div>
-            </div>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">
-            Agentic AI Risks
-          </h1>
-          <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Bridging ASI 2026 → NIST 800-53 Rev 5 → NIST AI-RMF 100-1. Interactive compliance mapping
-            for agentic AI security risks across {OWASP_ASI.length} threat categories.{" "}
-            Severity ratings (Critical, High, Medium-High) are editorially assigned based on OWASP ordinal risk ranking and are not official OWASP severity classifications.
-          </p>
-
-          {/* Stats row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-            <StatCard label="ASI Risks" value={OWASP_ASI.length} color="#3B82F6" subtitle={`across ${OWASP_ASI.length} threat categories`} />
-            <StatCard label="Unique 800-53 Controls" value={uniqueControls} color="#3B82F6" subtitle={`${totalControls} total control mappings across ${OWASP_ASI.length} ASI risks`} />
-            <StatCard label="Unique AI-RMF Categories" value={uniqueCategories} color="#10B981" subtitle={`${totalCategories} total category mappings across ${OWASP_ASI.length} ASI risks`} />
-            <StatCard label="Critical Risks" value={OWASP_ASI.filter((a) => a.severity === "Critical").length} color="#EF4444" subtitle="ASI01, ASI03, ASI08, ASI10 rated Critical severity" />
-          </div>
-        </div>
-      </header>
-
+      <HomeHero />
       {/* ─── Navigation Tabs ─── */}
-      <div className="container">
-        <div className="flex gap-0 border-b border-slate-700/50 -mt-px">
-          {tabs.map((tab) => {
-            if (tab.submenu) {
-              // Heatmaps dropdown
-              const isActive = view === "matrix" || view === "aiRmf";
-              return (
-                <Popover key={tab.key} open={heatmapDropdownOpen} onOpenChange={setHeatmapDropdownOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="flex items-center gap-2 px-5 py-3 text-[13px] font-medium transition-all duration-150 border-b-2"
-                      style={{
-                        color: isActive ? "#3B82F6" : "#94A3B8",
-                        backgroundColor: isActive ? "rgba(59,130,246,0.06)" : "transparent",
-                        borderBottomColor: isActive ? "#3B82F6" : "transparent",
-                      }}
-                    >
-                      {tab.icon}
-                      {tab.label}
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-48 p-2" align="start">
-                    {tab.submenu.map((item) => (
-                      <button
-                        key={item.key}
-                        onClick={() => {
-                          setView(item.key);
-                          setSelectedASI(null);
-                          setHeatmapDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-md text-sm transition-colors"
-                        style={{
-                          backgroundColor: view === item.key ? "rgba(59,130,246,0.2)" : "transparent",
-                          color: view === item.key ? "#60a5fa" : "#94A3B8",
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </PopoverContent>
-                </Popover>
-              );
-            }
-            // Regular tabs
-            return (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  setView(tab.key as ViewType);
-                  setSelectedASI(null);
-                }}
-                className="flex items-center gap-2 px-5 py-3 text-[13px] font-medium transition-all duration-150 border-b-2"
-                style={{
-                  color: view === tab.key ? "#3B82F6" : "#94A3B8",
-                  backgroundColor: view === tab.key ? "rgba(59,130,246,0.06)" : "transparent",
-                  borderBottomColor: view === tab.key ? "#3B82F6" : "transparent",
-                }}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <ViewTabs view={view} onViewChange={handleViewChange} />
 
       {/* ─── Content Area ─── */}
       <main className="container py-6">
@@ -383,12 +79,7 @@ export default function Home() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <OverviewRoster
-                onExplore={(asiId) => {
-                  setSelectedASI(asiId);
-                  setView("detail");
-                }}
-              />
+              <OverviewRoster onExplore={openDetail} />
             </motion.div>
           )}
 
@@ -401,123 +92,7 @@ export default function Home() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="mb-4">
-                <h2 className="text-base font-bold text-blue-400 flex items-center gap-2">
-                  <Layers className="w-4 h-4" />
-                  OWASP ASI → NIST 800-53 Rev 5 Control Density
-                </h2>
-              </div>
-              <HeatmapExplainer type="nist" />
-              <TooltipProvider delayDuration={200}>
-              <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
-                <table className="w-full border-collapse" role="table" aria-label="OWASP ASI to NIST 800-53 control density heatmap" style={{ fontSize: 11 }}>
-                  <thead>
-                    <tr>
-                      <th scope="col" className="text-left p-2 bg-slate-900 text-slate-200 font-semibold sticky left-0 z-10 min-w-[180px]" style={{ fontFamily: "var(--font-sans)" }}>
-                        OWASP ASI Risk
-                      </th>
-                      {NIST_800_53.map((f) => {
-                        const descriptions: Record<string, string> = {
-                          AC: "Access Control: Manages user access, permissions, and authentication to protect systems and data from unauthorized use.",
-                          AU: "Audit & Accountability: Tracks and logs system activities to enable detection of unauthorized actions and accountability.",
-                          CA: "Assessment & Authorization: Evaluates security controls and authorizes systems for operation based on risk assessment.",
-                          CM: "Configuration Management: Controls system configuration changes to maintain baseline integrity and prevent unauthorized modifications.",
-                          CP: "Contingency Planning: Prepares for disruptions through backup, recovery, and continuity procedures.",
-                          IA: "Identification & Authentication: Verifies user and system identities through credentials and multi-factor authentication.",
-                          IR: "Incident Response: Detects, responds to, and recovers from security incidents and breaches.",
-                          MP: "Media Protection: Protects physical and digital media containing sensitive information from unauthorized access.",
-                          PE: "Physical & Environmental: Secures physical facilities, equipment, and environmental controls against threats.",
-                          PL: "Planning: Develops security strategies, policies, and plans aligned with organizational objectives.",
-                          PM: "Program Management: Oversees security program governance, resource allocation, and compliance.",
-                          RA: "Risk Assessment: Identifies, analyzes, and evaluates security risks to inform mitigation strategies.",
-                          SA: "System & Services Acquisition: Ensures security requirements are met in procurement and development of systems and services.",
-                          SC: "System & Comms Protection: Protects system boundaries and communications channels from unauthorized access and interference.",
-                          SI: "System & Info Integrity: Maintains system and information integrity through monitoring, validation, and protection mechanisms.",
-                          SR: "Supply Chain Risk Mgmt: Manages risks from suppliers, vendors, and third-party dependencies.",
-                        };
-                        return (
-                          <th
-                            key={f.id}
-                            scope="col"
-                            className="bg-slate-900 text-slate-300 font-medium"
-                            style={{
-                              padding: "6px 2px",
-                              fontSize: 9,
-                              writingMode: "vertical-rl",
-                              textOrientation: "mixed",
-                              height: 80,
-                              fontFamily: "var(--font-mono)",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help">
-                                  {f.id}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="text-xs font-normal w-80 bg-slate-900 border border-slate-700 text-slate-100">
-                                <div className="space-y-2 p-2">
-                                  <div className="font-mono font-semibold">{f.id} — {f.name}</div>
-                                  <div className="text-slate-300 leading-relaxed whitespace-normal">{descriptions[f.id]}</div>
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {OWASP_ASI.map((asi) => (
-                      <tr
-                        key={asi.id}
-                        onClick={() => {
-                          setSelectedASI(asi.id);
-                          setView("detail");
-                        }}
-                        className="cursor-pointer transition-colors duration-100 hover:bg-[rgba(59,130,246,0.08)] group"
-                        role="row"
-                        tabIndex={0}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedASI(asi.id); setView('detail'); } }}
-                      >
-                        <td scope="row" className="p-2 border-b border-slate-700/30 sticky left-0 bg-background group-hover:bg-[rgba(59,130,246,0.08)] z-10">
-                          <div className="flex items-center gap-2">
-                            <span className="text-blue-400 font-semibold" style={{ fontFamily: "var(--font-mono)" }}>
-                              {asi.id}
-                            </span>
-                            <span className="text-slate-200 font-medium text-[11px]">{asi.name}</span>
-                            <SeverityBadge level={asi.severity} />
-                            <ChevronRight className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
-                          </div>
-                        </td>
-                        {NIST_800_53.map((f) => (
-                          <HeatCell key={f.id} count={heatmapData.data[asi.id][f.id]} max={heatmapData.maxVal} riskId={asi.id} riskName={asi.name} familyCode={f.id} />
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              </TooltipProvider>
-              {/* Legend */}
-              <div className="mt-4 flex gap-3 items-center text-[11px] text-slate-400">
-                <span className="font-medium">Density:</span>
-                {[
-                  { bg: "rgba(15,23,42,0.5)", label: "0" },
-                  { bg: "#3B82F640", label: "1-2" },
-                  { bg: "#3B82F6", label: "3" },
-                  { bg: "#1E40AF", label: "4+" },
-                ].map((l) => (
-                  <span key={l.label} className="inline-flex items-center gap-1.5">
-                    <span
-                      className="w-3.5 h-3.5 rounded-sm border border-slate-600/50"
-                      style={{ backgroundColor: l.bg }}
-                    />
-                    <span className="text-slate-400">{l.label}</span>
-                  </span>
-                ))}
-              </div>
+              <NistHeatmapView onSelectRisk={openDetail} />
             </motion.div>
           )}
 
@@ -530,111 +105,7 @@ export default function Home() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="mb-4">
-                <h2 className="text-base font-bold text-emerald-400 flex items-center gap-2">
-                  <Brain className="w-4 h-4" />
-                  OWASP ASI → NIST AI-RMF Function Coverage
-                </h2>
-              </div>
-              <HeatmapExplainer type="aiRmf" />
-              <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
-                <table className="w-full border-collapse" role="table" aria-label="OWASP ASI to NIST AI-RMF function coverage heatmap" style={{ fontSize: 12 }}>
-                  <thead>
-                    <tr>
-                      <th scope="col" className="text-left p-3 bg-slate-900 text-slate-200 font-semibold min-w-[220px]">
-                        OWASP ASI Risk
-                      </th>
-                      {AI_RMF.map((f) => {
-                        const descriptions: Record<string, string> = {
-                          GOVERN: "Establish AI governance structures, policies, and accountability mechanisms for managing agentic AI systems.",
-                          MAP: "Map and characterize AI risks, including context establishment, categorization, and impact assessment.",
-                          MEASURE: "Measure and track AI risks through metrics, trustworthiness evaluation, and effectiveness monitoring.",
-                          MANAGE: "Manage AI risks through prioritization, treatment, response, recovery, and residual risk acceptance.",
-                        };
-                        return (
-                          <Tooltip key={f.id}>
-                            <TooltipTrigger asChild>
-                              <th
-                                scope="col"
-                                className="text-center text-white font-bold p-3 min-w-[110px] cursor-help"
-                                style={{
-                                  backgroundColor: f.color,
-                                  fontFamily: "var(--font-mono)",
-                                  letterSpacing: "1px",
-                                }}
-                              >
-                                {f.name}
-                              </th>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs font-normal max-w-xs">
-                              {descriptions[f.id]}
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {OWASP_ASI.map((asi) => (
-                      <tr
-                        key={asi.id}
-                        onClick={() => {
-                          setSelectedASI(asi.id);
-                          setView("detail");
-                        }}
-                        className="cursor-pointer transition-colors duration-100 hover:bg-[rgba(34,197,94,0.08)] group"
-                        role="row"
-                        tabIndex={0}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedASI(asi.id); setView('detail'); } }}
-                      >
-                        <td scope="row" className="p-3 border-b border-slate-700/30">
-                          <div className="flex items-center gap-2">
-                            <span className="text-emerald-400 font-semibold" style={{ fontFamily: "var(--font-mono)" }}>
-                              {asi.id}
-                            </span>
-                            <span className="text-slate-200 font-medium">{asi.name}</span>
-                            <SeverityBadge level={asi.severity} />
-                            <ChevronRight className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
-                          </div>
-                        </td>
-                        {AI_RMF.map((f) => (
-                          <AIRmfHeatCell key={f.id} count={aiRmfHeatmap.data[asi.id][f.id]} max={aiRmfHeatmap.maxVal} riskId={asi.id} riskName={asi.name} functionName={f.name} />
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* AI-RMF subcategory legend */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                {AI_RMF.map((f) => (
-                  <div
-                    key={f.id}
-                    className="rounded-lg p-4 border"
-                    style={{
-                      backgroundColor: `${f.color}08`,
-                      borderColor: `${f.color}25`,
-                    }}
-                  >
-                    <div
-                      className="font-bold text-sm mb-2 flex items-center gap-2"
-                      style={{ color: f.color, fontFamily: "var(--font-mono)" }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: f.color }}
-                      />
-                      {f.name}
-                    </div>
-                    {f.cats.map((c) => (
-                      <div key={c} className="text-[10px] text-slate-400 leading-relaxed pl-4">
-                        {c}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
+              <AiRmfHeatmapView onSelectRisk={openDetail} />
             </motion.div>
           )}
 
@@ -647,243 +118,7 @@ export default function Home() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="mb-4">
-                <h2 className="text-base font-bold text-purple-400 flex items-center gap-2">
-                  <Search className="w-4 h-4" />
-                  Evidence Explorer
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Select an ASI risk to see the full crosswalk with NIST 800-53 controls, AI-RMF categories, rationale, and real-world evidence.
-                </p>
-              </div>
-
-              {/* ─── Search Bar ─── */}
-              <div className="mb-5">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: '#dc2626' }} />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for specific controls or standards..."
-                    className="w-full pl-9 pr-10 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all duration-150"
-                    style={{
-                      backgroundColor: '#0f172a',
-                      border: '2px solid #334155',
-                      fontFamily: 'var(--font-sans)',
-                    }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.boxShadow = 'none'; }}
-                  />
-                  <style>{`input::placeholder { color: #dc2626 !important; font-style: italic; font-weight: 500; }`}</style>
-                  {searchQuery && (
-                    <button
-                      onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                      aria-label="Clear search"
-                    >
-                      <span className="text-lg leading-none">&times;</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Filter tabs */}
-                <div className="flex gap-2 mt-2">
-                  {([['all', 'All Controls'], ['nist', '800-53 Only'], ['aiRmf', 'AI-RMF Only']] as const).map(([key, label]) => (
-                    <button
-                      key={key}
-                      onClick={() => setSearchFilter(key)}
-                      className="px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-150 border"
-                      style={{
-                        borderColor: searchFilter === key ? '#2563eb' : '#334155',
-                        backgroundColor: searchFilter === key ? 'rgba(37,99,235,0.15)' : 'transparent',
-                        color: searchFilter === key ? '#60a5fa' : '#64748b',
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                  {searchResults.length > 0 && (
-                    <span className="ml-auto text-[11px] text-slate-400 self-center">
-                      {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
-                    </span>
-                  )}
-                  {searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-                    <span className="ml-auto text-[11px] text-slate-500 self-center">
-                      No results — try 'access', 'encryption', or 'governance'
-                    </span>
-                  )}
-                </div>
-
-                {/* Search results */}
-                {searchResults.length > 0 && (
-                  <div className="mt-3 rounded-lg border border-slate-700/50 overflow-hidden">
-                    <div className="bg-slate-900 px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold border-b border-slate-700/50">
-                      Search Results
-                    </div>
-                    <div className="divide-y divide-slate-700/30 max-h-72 overflow-y-auto">
-                      {searchResults.slice(0, 50).map((item, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => { setSelectedASI(item.asiId); setSearchQuery(''); }}
-                          className="w-full text-left px-3 py-2.5 hover:bg-slate-800/60 transition-colors flex items-start gap-3 group"
-                        >
-                          <span
-                            className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded mt-0.5"
-                            style={{
-                              backgroundColor: item.type === 'nist' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)',
-                              color: item.type === 'nist' ? '#60a5fa' : '#34d399',
-                              fontFamily: 'var(--font-mono)',
-                            }}
-                          >
-                            {item.type === 'nist' ? '800-53' : 'AI-RMF'}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-[11px] font-semibold" style={{ color: item.type === 'nist' ? '#60a5fa' : '#34d399', fontFamily: 'var(--font-mono)' }}>
-                                {item.controlId}
-                              </span>
-                              <span className="text-[10px] text-slate-400 truncate">{item.familyName}</span>
-                            </div>
-                            <div className="text-[11px] text-slate-300 truncate">{item.controlText}</div>
-                            <div className="text-[10px] text-slate-500 mt-0.5">
-                              {item.asiId} — {item.asiName}
-                            </div>
-                          </div>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
-                        </button>
-                      ))}
-                      {searchResults.length > 50 && (
-                        <div className="px-3 py-2 text-[10px] text-slate-500 text-center">
-                          Showing 50 of {searchResults.length} results — refine your search
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* ASI selector pills */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {OWASP_ASI.map((asi) => (
-                  <button
-                    key={asi.id}
-                    onClick={() => setSelectedASI(asi.id)}
-                    className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-150 border"
-                    style={{
-                      borderColor: selectedASI === asi.id ? "#3B82F6" : "#334155",
-                      backgroundColor: selectedASI === asi.id ? "rgba(59,130,246,0.15)" : "transparent",
-                      color: selectedASI === asi.id ? "#60A5FA" : "#94A3B8",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    {asi.id}
-                  </button>
-                ))}
-              </div>
-
-              <AnimatePresence mode="wait">
-                {selected && selectedMeta ? (
-                  <motion.div
-                    key={selectedASI}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {/* Header card */}
-                    <div className="bg-slate-900 rounded-lg p-5 mb-5 border border-slate-700/50 glow-blue">
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3">
-                        <div>
-                          <div className="text-sm text-blue-400/70 mb-1" style={{ fontFamily: "var(--font-mono)" }}>
-                            {selectedMeta.id}
-                          </div>
-                          <h3 className="text-xl font-bold text-white mb-2">{selectedMeta.name}</h3>
-                          <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
-                            {selectedMeta.desc}
-                          </p>
-                        </div>
-                        <SeverityBadge level={selectedMeta.severity} />
-                      </div>
-                    </div>
-
-                    {/* Two-column layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                      {/* 800-53 column */}
-                      <div>
-                        <h3 className="text-sm font-bold text-blue-400 mb-3 flex items-center gap-2">
-                          <span className="w-1 h-5 rounded-full bg-blue-500" />
-                          NIST 800-53 Rev 5 Controls
-                        </h3>
-                        {selected.nist53.map((mapping, i) => {
-                          const fam = NIST_800_53.find((f) => f.id === mapping.family);
-                          if (!fam) return null;
-                          return (
-                            <MappingCard
-                              key={i}
-                              title={`${fam.id} — ${fam.name}`}
-                              color={fam.color}
-                              framework="nist"
-                              items={[
-                                ...mapping.controls.map((c) => ({ id: "", text: c })),
-                                { id: "↳", text: mapping.rationale },
-                              ]}
-                            />
-                          );
-                        })}
-                      </div>
-
-                      {/* AI-RMF column */}
-                      <div>
-                        <h3 className="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
-                          <span className="w-1 h-5 rounded-full bg-emerald-500" />
-                          NIST AI-RMF 100-1 Categories
-                        </h3>
-                        {selected.aiRmf.map((mapping, i) => {
-                          const func = AI_RMF.find((f) => f.id === mapping.func);
-                          if (!func) return null;
-                          return (
-                            <MappingCard
-                              key={i}
-                              title={func.name}
-                              color={func.color}
-                              framework="aiRmf"
-                              items={[
-                                ...mapping.cats.map((c) => ({ id: "", text: c })),
-                                { id: "↳", text: mapping.rationale },
-                              ]}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Evidence strip */}
-                    <div className="mt-5 p-4 rounded-md border border-red-500/30 bg-red-500/5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                        <span className="font-bold text-xs text-red-400 uppercase tracking-wider">
-                          Real-World Evidence
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-red-300/80 leading-relaxed">
-                        {selected.evidence}
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center py-16 text-slate-400"
-                  >
-                    <Shield className="w-12 h-12 mx-auto mb-4 text-slate-500" />
-                    <div className="text-sm">Select an ASI risk above to explore its crosswalk</div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <ExplorerView selectedASI={selectedASI} onSelectASI={setSelectedASI} />
             </motion.div>
           )}
 
@@ -903,52 +138,7 @@ export default function Home() {
       </main>
 
       {/* ─── Footer ─── */}
-      <footer className="container pb-8">
-        <div className="rounded-lg bg-slate-900/50 border border-slate-700/30 px-5 py-4">
-          {/* License badge */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-700/30">
-            <div className="flex items-center gap-2">
-              <Scale className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-[11px] text-slate-300 font-medium">Licensed under</span>
-              <a
-                href="https://www.gnu.org/licenses/agpl-3.0.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 transition-colors"
-              >
-                AGPL-3.0
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/terms"
-                className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-blue-400 transition-colors"
-              >
-                <FileText className="w-3 h-3" />
-                Terms of Service
-              </Link>
-              <span className="text-slate-700">|</span>
-              <a
-                href="https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-blue-400 transition-colors"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Source Code
-              </a>
-            </div>
-          </div>
-          {/* Sources */}
-          <p className="text-[11px] text-slate-400 leading-relaxed text-center">
-            Sources: OWASP Top 10 for Agentic Applications v2026 (CC BY-SA 4.0) | NIST SP 800-53 Rev 5 | NIST AI 100-1 (AI RMF 1.0) | NIST AI 600-1 GenAI Profile
-          </p>
-          <p className="text-[11px] text-slate-400 mt-1 text-center">
-            Copyright &copy; {new Date().getFullYear()} haremantra. All rights reserved for the hosted service. Source code available under AGPL-3.0.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

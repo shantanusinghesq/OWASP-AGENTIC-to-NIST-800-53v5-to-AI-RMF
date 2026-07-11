@@ -24,6 +24,7 @@ export {
   UPSTREAM_VERSIONS,
   buildCsv,
   buildJson,
+  buildOscalMapping,
   evidenceText,
   parseControlRef,
   severityColor,
@@ -38,6 +39,8 @@ export {
   type EvidenceItem,
   type NISTFamily,
   type NISTMapping,
+  type OscalMapping,
+  type OscalMappingEntry,
   type ValidationStatus,
 } from "@haremantra/crosswalk";
 

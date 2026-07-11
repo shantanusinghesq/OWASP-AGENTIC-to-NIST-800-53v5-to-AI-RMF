@@ -6,6 +6,14 @@
  * 
  * Persists completion state in localStorage (key: agentic_risk_onboarding_v1)
  * Coordinates cross-component actions via registered callbacks.
+ *
+ * Imperative registration pattern (deliberately kept): components hand this
+ * context a callback via registerGenerateHandler / registerTabSwitcher, and the
+ * onboarding flow fires them via triggerGenerate / switchToSimulator. This lets
+ * onboarding drive UI it does not own, without prop drilling or event buses.
+ * Registration sites:
+ *   - features/simulator/ScenarioSimulator.tsx → registerGenerateHandler
+ *   - pages/Home.tsx → registerTabSwitcher
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";

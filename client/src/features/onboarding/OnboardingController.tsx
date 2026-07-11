@@ -17,7 +17,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useOnboarding } from "./OnboardingContext";
 import Scrim from "./Scrim";
 import SpotlightTooltip from "./SpotlightTooltip";
 import HookModal from "./HookModal";

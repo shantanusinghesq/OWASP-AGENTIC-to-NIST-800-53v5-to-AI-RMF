@@ -1,5 +1,5 @@
 /**
- * @file scrambler-evaluator.ts
+ * @file evaluator.ts
  * @description Evaluates a generated FactPattern to produce a complete ScenarioResult.
  * Determines Active/Broken/Irrelevant cell states for the Scrambler heatmap.
  */
@@ -11,13 +11,13 @@ import {
 import {
   FAMILY_TO_PRIMARY_BOOLEAN,
   RISK_TO_ASI,
-} from './scrambler-mappings';
+} from './mappings';
 import type {
   CellState,
   ControlEvaluation,
   FactPattern,
   ScenarioResult,
-} from './scrambler-types';
+} from './types';
 
 /**
  * Determines the state of a single cell in the Scrambler heatmap.

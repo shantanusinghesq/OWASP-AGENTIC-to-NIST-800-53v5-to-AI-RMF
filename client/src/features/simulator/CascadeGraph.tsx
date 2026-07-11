@@ -14,7 +14,8 @@
 
 import { useMemo, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useScenario, type CascadeNode, type CascadeEdge } from "@/contexts/ScenarioContext";
+import { useScenario } from "./ScenarioContext";
+import type { CascadeNode, CascadeEdge } from "./engine/cascade-graph";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 
 // ─── Design Tokens (Swiss/Bauhaus) ──────────────────────────────────────────

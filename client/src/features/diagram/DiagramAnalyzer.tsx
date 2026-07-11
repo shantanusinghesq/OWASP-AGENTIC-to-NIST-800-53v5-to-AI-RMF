@@ -41,7 +41,7 @@ import {
   PATTERN_TAXONOMY_VERSION,
   getPatternById,
   type PatternId,
-} from "@/lib/agentic-patterns";
+} from "./engine/agentic-patterns";
 import {
   analyzeDiagram,
   generateThumbnail,
@@ -49,10 +49,10 @@ import {
   VISION_AVAILABLE,
   type DiagramAnalysisResult,
   type LLMPatternMatch,
-} from "@/lib/diagram-analyzer";
-import { addToHistory, getHistory, clearHistory, type HistoryEntry } from "@/lib/diagram-history";
-import { evaluatePatterns, type PatternEvaluationOutput } from "@/lib/pattern-evaluator";
-import type { GovernancePosture } from "@/lib/scrambler-types";
+} from "./engine/diagram-analyzer";
+import { addToHistory, getHistory, clearHistory, type HistoryEntry } from "./engine/diagram-history";
+import { evaluatePatterns, type PatternEvaluationOutput } from "./engine/pattern-evaluator";
+import type { GovernancePosture } from "@/features/simulator/engine/types";
 
 // ─── Types & Constants ──────────────────────────────────────────────────────
 

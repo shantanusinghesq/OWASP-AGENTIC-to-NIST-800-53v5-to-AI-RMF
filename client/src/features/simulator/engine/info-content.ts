@@ -1,5 +1,5 @@
 /**
- * @file scrambler-info-content.ts
+ * @file info-content.ts
  * @description Provides educational content for the AI Security Scrambler's interactive cards.
  * This constant object, CARD_INFO, maps each selectable card in the Scenario Simulator
  * to its corresponding title, description, real-world examples, and related OWASP Agentic AI risks.

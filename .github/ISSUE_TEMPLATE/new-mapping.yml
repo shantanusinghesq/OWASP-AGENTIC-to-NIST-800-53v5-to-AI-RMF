@@ -1,0 +1,78 @@
+name: New mapping proposal
+description: Propose a new ASI ↔ 800-53 control or ASI ↔ AI-RMF category mapping.
+title: "[new-mapping] "
+labels: ["new-mapping"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Propose a **new** crosswalk mapping. Every new mapping must meet the
+        [Mapping Provenance Standard](../../GOVERNANCE.md) — at least one authoritative
+        citation beyond editorial judgment. Data changes land in
+        `packages/crosswalk/src` only.
+  - type: input
+    id: asi-id
+    attributes:
+      label: Affected ASI risk ID(s)
+      description: OWASP Agentic AI risk identifier(s), e.g. ASI06.
+      placeholder: ASI06
+    validations:
+      required: true
+  - type: input
+    id: control-id
+    attributes:
+      label: Affected 800-53 control ID(s)
+      description: NIST SP 800-53 Rev 5 control ID(s), e.g. MP-6. Leave "n/a" if this is an AI-RMF-only mapping.
+      placeholder: MP-6
+    validations:
+      required: true
+  - type: input
+    id: airmf-id
+    attributes:
+      label: Affected AI-RMF subcategory ID(s)
+      description: NIST AI 100-1 subcategory ID(s), e.g. MS-3. Leave "n/a" if this is an 800-53-only mapping.
+      placeholder: MS-3
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Proposed change
+      description: Describe the mapping to add and the exact rationale string you propose.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Why is this mapping appropriate? Make the causal link between the ASI risk and the control/category explicit.
+    validations:
+      required: true
+  - type: textarea
+    id: citations
+    attributes:
+      label: Authoritative citation(s)
+      description: At least one URL, CVE (CVE-YYYY-NNNN+), or named publication/section per the Mapping Provenance Standard.
+      placeholder: |
+        - https://csrc.nist.gov/...
+        - CVE-2026-12345
+    validations:
+      required: true
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Confidence estimate
+      description: Your confidence that this mapping is correct and load-bearing.
+      options:
+        - High (0.8–1.0)
+        - Medium (0.5–0.8)
+        - Low (below 0.5)
+    validations:
+      required: true
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Stated assumptions
+      description: Any assumptions your proposal depends on (scope, interpretation, threat model).
+    validations:
+      required: true

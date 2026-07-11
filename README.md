@@ -188,7 +188,13 @@ The crosswalk data lives in the `@haremantra/crosswalk` workspace package (`pack
 
 ## Contributing
 
-Contributions are welcome under the terms of the AGPL-3.0 license. If you identify a missing control mapping, an inaccurate rationale, or a new real-world evidence citation, please open an issue or submit a pull request. When contributing crosswalk data, please include a rationale explaining why the mapping is appropriate and cite authoritative sources where possible.
+Contributions are welcome under the terms of the AGPL-3.0 license. Start with **[GOVERNANCE.md](GOVERNANCE.md)**, which defines the roles, the merge gate, and the evidentiary standard for data changes.
+
+- **Propose or correct a mapping** using the issue forms: [New mapping proposal](.github/ISSUE_TEMPLATE/new-mapping.yml) or [Mapping correction](.github/ISSUE_TEMPLATE/mapping-correction.yml). Each requires the affected ASI / 800-53 / AI-RMF IDs, a rationale, at least one citation, a confidence estimate, and your stated assumptions.
+- **Meet the [Mapping Provenance Standard](GOVERNANCE.md#mapping-provenance-standard)** — every new or modified mapping must cite at least one authoritative source (a URL, a `CVE-YYYY-NNNN+` identifier, or a named publication/section) beyond editorial judgment, alongside the rationale.
+- **Edit data in the canonical location only** — `packages/crosswalk/src`. The client consumes this data through the `@haremantra/crosswalk` package; a CI guard rejects any duplicate copy under `client/src/lib`.
+
+The project runs in **Solo Mode**: the maintainer's review plus a green CI run (`pnpm check && pnpm test && pnpm build` and the repository guards) is the sole merge gate — **no external approval is required yet**. A multi-reviewer Board Mode activates only when the trigger documented in [GOVERNANCE.md](GOVERNANCE.md#board-mode-inactive) is met. Which control families could enter scope, and under what conditions, is tracked in the [Scope Expansion Roadmap](docs/EXPANSION_ROADMAP.md).
 
 ---
 

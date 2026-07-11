@@ -13,9 +13,12 @@ import {
   NIST_800_53,
   AI_RMF,
   CROSSWALK,
+  CROSSWALK_STATS,
   severityColor,
-} from "@/lib/data";
-import type { ASIRisk } from "@/lib/data";
+  getControlDescription,
+  type Framework,
+} from "@/data/crosswalk";
+import type { ASIRisk } from "@/data/crosswalk";
 import { Link } from "wouter";
 import {
   Shield,
@@ -37,8 +40,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import ScenarioSimulator from "@/pages/ScenarioSimulator";
-import { NIST_CONTROL_DESCRIPTIONS } from "@/lib/nist-control-descriptions";
-import { NIST_AI_RMF_DESCRIPTIONS } from "@/lib/nist-ai-rmf-descriptions";
+import { NIST_CONTROL_DESCRIPTIONS, NIST_AI_RMF_DESCRIPTIONS } from "@/data/crosswalk";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import OnboardingController from "@/components/onboarding/OnboardingController";
@@ -72,10 +74,12 @@ function MappingCard({
   title,
   items,
   color,
+  framework,
 }: {
   title: string;
   items: { id: string; text: string }[];
   color: string;
+  framework: Framework;
 }) {
   // Extract control ID from text (e.g., "AC-3 Access Enforcement" -> "AC-3" or "GV-1 Policies & Processes" -> "GV-1")
   const extractControlId = (text: string): string | null => {
@@ -100,8 +104,11 @@ function MappingCard({
           {title}
         </div>
         {items.map((item, i) => {
+          // Framework-scoped lookup — never fall back across frameworks: 800-53
+          // owns MP-1..MP-8 (Media Protection) while AI-RMF MAP categories use
+          // the same MP-* IDs, so a fallback chain shows wrong-framework text.
           const controlId = extractControlId(item.text);
-          const controlDesc = controlId ? (NIST_CONTROL_DESCRIPTIONS[controlId] || NIST_AI_RMF_DESCRIPTIONS[controlId]) : null;
+          const controlDesc = controlId ? getControlDescription(framework, controlId) : null;
           const isRationale = item.id === "\u21b3";
           
           return (
@@ -441,36 +448,15 @@ export default function Home() {
     return { data, maxVal };
   }, []);
 
-  // Stats
-  const totalControls = useMemo(() => {
-    let total = 0;
-    Object.values(CROSSWALK).forEach((cw) => {
-      cw.nist53.forEach((m) => (total += m.controls.length));
-    });
-    return total;
-  }, []);
-
-  const totalCategories = useMemo(() => {
-    let total = 0;
-    Object.values(CROSSWALK).forEach((cw) => {
-      cw.aiRmf.forEach((m) => (total += m.cats.length));
-    });
-    return total;
-  }, []);
-
-  const uniqueControls = useMemo(() => {
-    const ids = new Set<string>();
-    Object.values(CROSSWALK).forEach((cw) => {
-      cw.nist53.forEach((m) => m.controls.forEach((c) => ids.add(c)));
-    });
-    return ids.size;
-  }, []);
-
-  const uniqueCategories = useMemo(() => {
-    const ids = new Set<string>();
-    AI_RMF.forEach((func) => func.cats.forEach((c) => ids.add(c)));
-    return ids.size;
-  }, []);
+  // Stats — derived from the mappings by the package (pinned by its test
+  // suite), replacing inline counts that drifted from the data: unique
+  // controls counted display strings (56, inflated by the SI-7 dual naming;
+  // true distinct IDs: 55) and unique categories counted the taxonomy
+  // definition (19) rather than what the mappings reference (17).
+  const totalControls = CROSSWALK_STATS.totalNistControlMappings;
+  const totalCategories = CROSSWALK_STATS.totalAiRmfCategoryMappings;
+  const uniqueControls = CROSSWALK_STATS.uniqueNistControls;
+  const uniqueCategories = CROSSWALK_STATS.uniqueAiRmfCategories;
 
   const selected = selectedASI ? CROSSWALK[selectedASI] : null;
   const selectedMeta = selectedASI ? OWASP_ASI.find((a) => a.id === selectedASI) : null;
@@ -1055,6 +1041,7 @@ export default function Home() {
                               key={i}
                               title={`${fam.id} — ${fam.name}`}
                               color={fam.color}
+                              framework="nist"
                               items={[
                                 ...mapping.controls.map((c) => ({ id: "", text: c })),
                                 { id: "↳", text: mapping.rationale },
@@ -1078,6 +1065,7 @@ export default function Home() {
                               key={i}
                               title={func.name}
                               color={func.color}
+                              framework="aiRmf"
                               items={[
                                 ...mapping.cats.map((c) => ({ id: "", text: c })),
                                 { id: "↳", text: mapping.rationale },

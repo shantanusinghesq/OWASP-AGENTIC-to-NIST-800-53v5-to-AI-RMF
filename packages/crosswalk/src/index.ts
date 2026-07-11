@@ -28,3 +28,5 @@ export {
   NIST_AI_RMF_DESCRIPTIONS,
   type AIRMFControlDesc,
 } from "./nist-ai-rmf-descriptions.js";
+
+export { CROSSWALK_DATA_VERSION } from "./version.js";

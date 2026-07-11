@@ -7,6 +7,12 @@ dist/
 build/
 *.dist
 
+# ...but keep the crosswalk artifact-emitter SOURCE tracked. The bare `build/`
+# rule above would otherwise swallow packages/crosswalk/build/emit-artifacts.ts.
+# Its emitted output lives under packages/crosswalk/dist/ and stays ignored.
+!packages/crosswalk/build/
+!packages/crosswalk/build/**
+
 # Environment variables
 .env
 .env.local

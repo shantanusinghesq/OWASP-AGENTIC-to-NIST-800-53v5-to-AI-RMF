@@ -36,6 +36,27 @@ console.log(ac3.title, ac3.description);
 
 A Vitest suite at `tests/data.integrity.test.ts` guards against drift: every referenced family / control / AI-RMF cat resolves; every ASI has at least one mapping per framework. Companion suites `tests/data.contract.test.ts` and `tests/derive.test.ts` pin distinct-count invariants and the derived coverage table. All checks are active (none skipped).
 
+### Versioning
+
+This package follows [Semantic Versioning](https://semver.org/). Because it ships **data**, not just code, the contract is defined over both the TypeScript interface *and* the mapping content:
+
+| Change | Bump |
+|---|---|
+| Key renames or interface / type changes (rename a field, change an export's shape) | **MAJOR** |
+| New ASI risks, new NIST controls, or new mappings added | **MINOR** |
+| Rationale / description / evidence text edits (no structural change) | **PATCH** |
+
+The generated `dist/crosswalk.json` carries a `dataVersion` field that always equals the package version, so consumers of the raw JSON can pin the exact data revision they built against. The exported constant `CROSSWALK_DATA_VERSION` mirrors the same value, and `tests/version.test.ts` pins the two together so they can never drift.
+
+### Distribution artifacts
+
+`pnpm --filter @haremantra/crosswalk build` (also run automatically on publish via `prepublishOnly`) emits, alongside the ESM/CJS/`.d.ts` bundles:
+
+- `dist/crosswalk.json` — the full data payload (also exposed to published consumers as `@haremantra/crosswalk/data.json`).
+- `dist/crosswalk.csv` — one row per `(ASI, family, control)` mapping pair, for spreadsheet / non-TS tooling.
+
+These artifacts are build outputs and are **not** committed. The workspace SPA keeps consuming the raw `src/` TypeScript; only the *published* package points at `dist/` (via `publishConfig`).
+
 ### License
 
 MIT. The underlying frameworks (NIST SP 800-53 Rev 5 and NIST AI 100-1) are U.S. Government works in the public domain. The OWASP Top 10 for Agentic Applications is published by OWASP under their open licensing terms. Editorial rationale, mappings, and evidence citations are original work © 2026 Shantanu Singh / Obviate AI, released under MIT.

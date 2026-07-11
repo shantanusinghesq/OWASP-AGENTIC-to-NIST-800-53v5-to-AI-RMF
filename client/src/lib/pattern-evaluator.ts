@@ -29,7 +29,7 @@ import {
   CONTROL_STATE_TO_FAMILIES,
   FAMILY_TO_PRIMARY_BOOLEAN,
 } from "./scrambler-mappings";
-import { OWASP_ASI, NIST_800_53 } from "./data";
+import { OWASP_ASI, NIST_800_53 } from "@/data/crosswalk";
 
 // ─── Contracts ──────────────────────────────────────────────────────────────
 

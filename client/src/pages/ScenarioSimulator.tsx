@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   OWASP_ASI,
   NIST_800_53,
-} from "@/lib/data";
+} from "@/data/crosswalk";
 import { generateFactPattern, generateFromPreset } from "@/lib/scrambler-generator";
 import { evaluateScenario, getCellState } from "@/lib/scrambler-evaluator";
 import { RISK_TO_ASI, FAMILY_TO_PRIMARY_BOOLEAN } from "@/lib/scrambler-mappings";

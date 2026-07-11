@@ -14,8 +14,7 @@
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useScenario } from "@/contexts/ScenarioContext";
-import { CROSSWALK, OWASP_ASI, NIST_800_53 } from "@/lib/data";
-import { NIST_CONTROL_DESCRIPTIONS } from "@/lib/nist-control-descriptions";
+import { CROSSWALK, OWASP_ASI, NIST_800_53, NIST_CONTROL_DESCRIPTIONS } from "@/data/crosswalk";
 import { X, ExternalLink, AlertTriangle, Shield, ArrowRight } from "lucide-react";
 
 const COLORS = {

@@ -14,7 +14,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useScenario, type ScenarioSnapshot } from "@/contexts/ScenarioContext";
-import { OWASP_ASI, NIST_800_53 } from "@/lib/data";
+import { OWASP_ASI, NIST_800_53 } from "@/data/crosswalk";
 import { getCellState } from "@/lib/scrambler-evaluator";
 import { Pin, PinOff, ArrowLeftRight, X } from "lucide-react";
 

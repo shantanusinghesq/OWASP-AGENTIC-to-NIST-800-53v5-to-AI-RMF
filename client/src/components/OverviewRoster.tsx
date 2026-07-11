@@ -11,7 +11,7 @@
  * Layer 0 context ("what are the 15 risks?") before exposing the dense heatmap.
  */
 
-import { OWASP_ASI, severityColor } from "@/lib/data";
+import { COVERAGE, OWASP_ASI, severityColor } from "@/data/crosswalk";
 import { ChevronRight } from "lucide-react";
 
 interface OverviewRosterProps {
@@ -55,15 +55,15 @@ function RiskCard({ asi, onExplore }: { asi: typeof OWASP_ASI[0]; onExplore: () 
         <div className="flex items-center gap-2">
           <span className="text-blue-400/70">📋</span>
           <span>
-            <span className="font-semibold text-slate-300">{asi.coverage.nistFamilies}</span> NIST families,{" "}
-            <span className="font-semibold text-slate-300">{asi.coverage.nistControls}</span> controls
+            <span className="font-semibold text-slate-300">{COVERAGE[asi.id].nistFamilies}</span> NIST families,{" "}
+            <span className="font-semibold text-slate-300">{COVERAGE[asi.id].nistControls}</span> controls
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-emerald-400/70">🎯</span>
           <span>
-            <span className="font-semibold text-slate-300">{asi.coverage.aiRmfFunctions}</span> AI-RMF functions,{" "}
-            <span className="font-semibold text-slate-300">{asi.coverage.aiRmfCategories}</span> categories
+            <span className="font-semibold text-slate-300">{COVERAGE[asi.id].aiRmfFunctions}</span> AI-RMF functions,{" "}
+            <span className="font-semibold text-slate-300">{COVERAGE[asi.id].aiRmfCategories}</span> categories
           </span>
         </div>
       </div>

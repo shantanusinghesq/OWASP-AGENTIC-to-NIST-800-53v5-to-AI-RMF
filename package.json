@@ -9,6 +9,8 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
+    "refresh:oscal": "node scripts/refresh-oscal.mjs",
+    "drift:oscal": "node scripts/drift-oscal.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write ."

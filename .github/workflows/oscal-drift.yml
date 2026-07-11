@@ -1,0 +1,28 @@
+name: OSCAL upstream drift watch
+
+# Non-blocking: reports when the NIST 800-53 OSCAL catalog upstream drifts from
+# the vendored index. Never mutates data, never gates CI/deploy. Runs monthly
+# and on demand. Local parity: `pnpm drift:oscal`.
+on:
+  schedule:
+    - cron: "0 6 1 * *" # 06:00 UTC on the 1st of each month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Resolve latest oscal-content release
+        run: echo "LATEST_TAG=$(gh api repos/usnistgov/oscal-content/releases/latest --jq .tag_name)" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Diff vendored index vs latest catalog
+        run: node scripts/drift-oscal.mjs | tee "$GITHUB_STEP_SUMMARY"

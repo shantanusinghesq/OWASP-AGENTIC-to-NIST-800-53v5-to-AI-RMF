@@ -304,12 +304,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     implementation: "Organizations conduct periodic contingency plan tests and exercises to validate procedures and identify gaps. For agentic AI systems, testing should include agent failure scenarios and goal state recovery procedures.",
     relatedASI: ["ASI08"],
   },
-  "CP-5": {
-    title: "Contingency Plan Update",
-    description: "Updates the contingency plan to reflect changes in system architecture, procedures, or organizational requirements.",
-    implementation: "Organizations review and update contingency plans periodically or when significant system changes occur. For agentic AI systems, updates should reflect changes to agent architecture, tool integrations, or behavioral controls.",
-    relatedASI: [],
-  },
   "CP-6": {
     title: "Alternate Processing Site",
     description: "Establishes an alternate processing site to enable system recovery and continued operation in case of primary site failure.",
@@ -487,12 +481,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Implements procedures to respond to information spillage incidents where sensitive information is disclosed.",
     implementation: "Organizations establish procedures for responding to information spillage including containment, notification, and remediation. For agentic AI systems, this includes responding to incidents where agents disclose sensitive information.",
     relatedASI: ["ASI06"],
-  },
-  "IR-10": {
-    title: "Integrated Information Security Operations Center",
-    description: "Establishes an integrated security operations center for monitoring and responding to security incidents.",
-    implementation: "Organizations establish security operations centers with tools and procedures for monitoring and responding to security incidents. For agentic AI systems, SOCs should include monitoring of agent behavior and incident response capabilities.",
-    relatedASI: [],
   },
 
   // MP — Media Protection
@@ -999,12 +987,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Implements cryptographic protection for information at rest and in transit.",
     implementation: "Organizations implement cryptographic protection using approved algorithms. For agentic AI systems, this includes encrypting agent data and communications.",
     relatedASI: ["ASI06", "ASI07"],
-  },
-  "SC-14": {
-    title: "Public Access Protections",
-    description: "Protects publicly accessible systems from unauthorized access.",
-    implementation: "Organizations implement enhanced security controls for publicly accessible systems. For agentic AI systems, this includes protecting publicly accessible agent interfaces.",
-    relatedASI: [],
   },
   "SC-15": {
     title: "Collaborative Computing Devices & Applications",

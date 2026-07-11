@@ -12,6 +12,14 @@ export {
   type NISTMapping,
 } from "./data.js";
 
+export {
+  computeCoverage,
+  computeStats,
+  parseControlRef,
+  type Coverage,
+  type CrosswalkStats,
+} from "./derive.js";
+
 export { NIST_CONTROL_DESCRIPTIONS } from "./nist-control-descriptions.js";
 export {
   NIST_AI_RMF_DESCRIPTIONS,

@@ -19,7 +19,7 @@ const EXPLAINERS = {
     details: [
       "Darker cells = more controls engaged for that risk-family pair",
       "Click any row to see the full control list with rationale",
-      "Scope: 16 of 20 NIST 800-53 Rev 5 families are represented",
+      "Scope: 16 of the 20 NIST 800-53 Rev 5 families are in scope; 14 carry mapped controls (MP and PE are defined but currently unmapped)",
       "Excluded families (AT, MA, PS, PT) have lower relevance to agentic AI threat vectors",
     ],
   },

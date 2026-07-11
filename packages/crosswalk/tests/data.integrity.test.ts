@@ -210,4 +210,55 @@ describe("@haremantra/crosswalk integrity", () => {
       .map(([id, strings]) => `${id}: ${[...strings].join(" | ")}`);
     expect(inconsistent, `controls with inconsistent display strings: ${inconsistent.join("; ")}`).toEqual([]);
   });
+
+  it("T-validation every nist53/aiRmf mapping declares a valid validationStatus; confidence (if set) is ordinal, never numeric", () => {
+    const ALLOWED_STATUS = new Set(["editorial", "practitioner-reviewed", "empirically-validated"]);
+    const ALLOWED_CONFIDENCE = new Set(["provisional", "moderate", "high"]);
+    const badStatus: string[] = [];
+    const badConfidence: string[] = [];
+    const numericConfidence: string[] = [];
+
+    for (const [asiId, entry] of Object.entries(CROSSWALK)) {
+      const mappings = [
+        ...entry.nist53.map((m) => [`${asiId} nist53 ${m.family}`, m] as const),
+        ...entry.aiRmf.map((m) => [`${asiId} aiRmf ${m.func}`, m] as const),
+      ];
+      for (const [label, m] of mappings) {
+        if (!ALLOWED_STATUS.has(m.validationStatus)) badStatus.push(`${label}: "${m.validationStatus}"`);
+        // Constraint AD-3: confidence is an ORDINAL enum, never a numeric float.
+        // A numeric would smuggle the scrambler's DP scores back in — assert typeof.
+        if (m.confidence !== undefined) {
+          if (typeof (m.confidence as unknown) === "number") numericConfidence.push(label);
+          else if (!ALLOWED_CONFIDENCE.has(m.confidence)) badConfidence.push(`${label}: "${m.confidence}"`);
+        }
+      }
+    }
+
+    expect(badStatus, `mappings with invalid validationStatus: ${badStatus.join("; ")}`).toEqual([]);
+    expect(badConfidence, `mappings with invalid confidence: ${badConfidence.join("; ")}`).toEqual([]);
+    expect(numericConfidence, `mappings with NUMERIC confidence (AD-3 violation): ${numericConfidence.join("; ")}`).toEqual([]);
+  });
+
+  it("T-validation-review no mapping is promoted above 'editorial' without a reviewIssue string", () => {
+    // Documents the promotion rule (see VALIDATION.md): any mapping whose
+    // validationStatus is 'practitioner-reviewed' or 'empirically-validated'
+    // MUST carry a `reviewIssue` string referencing the external sign-off.
+    // At launch every mapping is 'editorial', so this passes trivially — the
+    // rule is implemented now so a future promotion cannot skip its provenance.
+    const violations: string[] = [];
+    for (const [asiId, entry] of Object.entries(CROSSWALK)) {
+      const mappings = [
+        ...entry.nist53.map((m) => [`${asiId} nist53 ${m.family}`, m] as const),
+        ...entry.aiRmf.map((m) => [`${asiId} aiRmf ${m.func}`, m] as const),
+      ];
+      for (const [label, m] of mappings) {
+        if (m.validationStatus !== "editorial") {
+          if (typeof m.reviewIssue !== "string" || m.reviewIssue.trim().length === 0) {
+            violations.push(`${label} (${m.validationStatus}) has no reviewIssue`);
+          }
+        }
+      }
+    }
+    expect(violations, `promoted mappings missing reviewIssue: ${violations.join("; ")}`).toEqual([]);
+  });
 });

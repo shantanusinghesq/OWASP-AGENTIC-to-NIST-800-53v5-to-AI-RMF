@@ -7,32 +7,19 @@
 //   node db/query.mjs --all
 
 import Database from "better-sqlite3";
+import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const db = new Database(resolve(__dirname, "patterns.db"), { readonly: true });
 
-// Mirrors FAMILY_TO_PRIMARY_BOOLEAN in client/src/lib/scrambler-mappings.ts:
-// given a NIST 800-53 family, which control boolean governs it.
-const FAMILY_TO_PRIMARY_BOOLEAN = {
-  AC: "has_agent_limits",
-  AU: "has_monitoring",
-  CA: "has_testing",
-  CM: "has_dev_controls",
-  CP: "has_phased_deployment",
-  IA: "has_identity_management",
-  IR: "has_monitoring",
-  MP: "has_dev_controls",
-  PE: "has_dev_controls",
-  PL: "has_oversight_design",
-  PM: "has_oversight_design",
-  RA: "has_testing",
-  SA: "has_dev_controls",
-  SC: "has_agent_limits",
-  SI: "has_monitoring",
-  SR: "has_dev_controls",
-};
+// FAMILY_TO_PRIMARY_BOOLEAN — which control boolean governs each NIST 800-53 family.
+// Generated from client/src/features/simulator/engine/mappings.ts (the single source
+// of truth); a CI drift test asserts family-boolean.json still matches it. See db/README.md.
+const FAMILY_TO_PRIMARY_BOOLEAN = JSON.parse(
+  readFileSync(resolve(__dirname, "family-boolean.json"), "utf-8"),
+);
 
 function usage(code = 1) {
   console.log(`Usage:

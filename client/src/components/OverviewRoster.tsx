@@ -11,28 +11,12 @@
  * Layer 0 context ("what are the 15 risks?") before exposing the dense heatmap.
  */
 
-import { COVERAGE, OWASP_ASI, severityColor } from "@/data/crosswalk";
+import { COVERAGE, OWASP_ASI } from "@/data/crosswalk";
 import { ChevronRight } from "lucide-react";
+import { SeverityBadge } from "@/components/SeverityBadge";
 
 interface OverviewRosterProps {
   onExplore: (asiId: string) => void;
-}
-
-function SeverityBadge({ level }: { level: string }) {
-  const isCritical = level === "Critical";
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase ${isCritical ? "pulse-critical" : ""}`}
-      style={{
-        backgroundColor: `${severityColor[level]}20`,
-        color: severityColor[level],
-        border: `1px solid ${severityColor[level]}40`,
-      }}
-    >
-      {isCritical && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-      {level}
-    </span>
-  );
 }
 
 function RiskCard({ asi, onExplore }: { asi: typeof OWASP_ASI[0]; onExplore: () => void }) {

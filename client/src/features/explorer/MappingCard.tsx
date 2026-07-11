@@ -8,6 +8,8 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { ValidationBadge } from "./ValidationBadge";
+import { SelectToggle } from "@/features/assessment/SelectToggle";
+import type { MappingRef } from "@/features/assessment/types";
 
 export function MappingCard({
   title,
@@ -15,12 +17,15 @@ export function MappingCard({
   color,
   framework,
   validationStatus,
+  mappingRef,
 }: {
   title: string;
   items: { id: string; text: string }[];
   color: string;
   framework: Framework;
   validationStatus: ValidationStatus;
+  /** When provided, the card header offers an assessment-tray select toggle. */
+  mappingRef?: MappingRef;
 }) {
   // Click-to-expand set (by item index) — accessible alternative to the
   // hover-only tooltip (works on touch, projectors, and keyboards).
@@ -55,7 +60,10 @@ export function MappingCard({
           <div className="font-bold text-xs" style={{ color, fontFamily: "var(--font-mono)" }}>
             {title}
           </div>
-          <ValidationBadge status={validationStatus} />
+          <div className="flex items-center gap-2">
+            <ValidationBadge status={validationStatus} />
+            {mappingRef && <SelectToggle refr={mappingRef} />}
+          </div>
         </div>
         {items.map((item, i) => {
           // Framework-scoped lookup — never fall back across frameworks: 800-53

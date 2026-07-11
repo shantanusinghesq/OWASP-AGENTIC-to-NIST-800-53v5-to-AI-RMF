@@ -26,6 +26,7 @@ import { NistHeatmapView } from "@/features/heatmap/NistHeatmapView";
 import { AiRmfHeatmapView } from "@/features/heatmap/AiRmfHeatmapView";
 import { ExplorerView } from "@/features/explorer/ExplorerView";
 import ScenarioSimulator from "@/features/simulator/ScenarioSimulator";
+import { AssessmentTray } from "@/features/assessment/AssessmentTray";
 
 type SeverityFilter = "all" | "Critical" | "High" | "Medium-High";
 const VALID_ASI = new Set(OWASP_ASI.map((a) => a.id));
@@ -177,6 +178,9 @@ export default function Home() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* ─── Assessment Tray (null until the user selects a mapping) ─── */}
+      <AssessmentTray onNavigate={openDetail} />
 
       {/* ─── Footer ─── */}
       <SiteFooter />

@@ -5,6 +5,7 @@ import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ScenarioProvider } from "./features/simulator/ScenarioContext";
 import { OnboardingProvider } from "./features/onboarding/OnboardingContext";
+import { AssessmentProvider } from "./features/assessment/AssessmentContext";
 import Home from "./pages/Home";
 import TermsOfService from "./pages/TermsOfService";
 
@@ -27,10 +28,12 @@ function App() {
     <ErrorBoundary>
       <ScenarioProvider>
         <OnboardingProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <AssessmentProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </AssessmentProvider>
         </OnboardingProvider>
       </ScenarioProvider>
     </ErrorBoundary>

@@ -138,8 +138,8 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
   },
   ASI04: {
     nist53: [
-      { family: "SR", controls: ["SR-1 Policy & Procedures", "SR-2 Supply Chain Risk Mgmt Plan", "SR-3 Supply Chain Controls", "SR-4 Provenance", "SR-11 Component Authenticity"], rationale: "Direct mapping: AIBOM governance, provenance verification, signature validation, and kill-switch procedures are SR controls." },
-      { family: "SA", controls: ["SA-9 External System Services", "SA-12 Supply Chain Protection"], rationale: "Third-party MCP server vetting, agent persona validation, and runtime integrity checks." },
+      { family: "SR", controls: ["SR-1 Policy & Procedures", "SR-2 Supply Chain Risk Mgmt Plan", "SR-3 Supply Chain Controls", "SR-4 Provenance", "SR-11 Component Authenticity"], rationale: "Direct mapping: AIBOM governance, provenance verification, signature validation, and kill-switch procedures are SR controls — which in 800-53 Rev 5 supersede the withdrawn SA-12 Supply Chain Protection, covering component authenticity and runtime integrity." },
+      { family: "SA", controls: ["SA-9 External System Services"], rationale: "Third-party MCP server vetting, agent persona validation, and runtime integrity checks." },
       { family: "CM", controls: ["CM-2 Baseline Configuration", "CM-3 Configuration Change Control"], rationale: "Pinning prompts, tools, and configs by content hash and commit ID with staged rollout." },
       { family: "SI", controls: ["SI-7 Software & Information Integrity"], rationale: "Runtime signature re-validation and behavioral monitoring for tampered components." },
     ],

@@ -14,7 +14,7 @@ import {
 } from "../src";
 
 describe("data contract", () => {
-  it("C1: distinct 800-53 control IDs === 55 (strings === 56 — SI-7 appears under two display names)", () => {
+  it("C1: distinct 800-53 control IDs === 54 (strings === 55 — SI-7 appears under two display names)", () => {
     const ids = new Set<string>();
     const strings = new Set<string>();
     for (const entry of Object.values(CROSSWALK)) {
@@ -27,11 +27,11 @@ describe("data contract", () => {
         }
       }
     }
-    expect(ids.size).toBe(55);
-    // Documents the SI-7 naming inconsistency ("Software Integrity" vs
-    // "Software & Information Integrity"). When the editorial data fix lands
-    // (TRD WS3), this drops to 55 and the assertion should be updated.
-    expect(strings.size).toBe(56);
+    expect(ids.size).toBe(54);
+    // strings > ids by exactly one: the SI-7 naming inconsistency ("Software
+    // Integrity" vs "Software & Information Integrity"). PR-3 normalizes SI-7,
+    // after which strings drops to 54 and this assertion is updated to 54.
+    expect(strings.size).toBe(55);
   });
 
   it("C2: every aiRmf category reference resolves in NIST_AI_RMF_DESCRIPTIONS via the canonical ID parser", () => {

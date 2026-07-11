@@ -6,6 +6,20 @@ This project follows a philosophy of **transparent provenance**: every editorial
 
 ---
 
+## [Unreleased] — 2026-07-11 — Data Integrity Corrections (TRD WS3)
+
+A series of data-accuracy corrections closing the gap-analysis remediation backlog (`docs/trd/TRD-GAP-REMEDIATION.md`). Each is landed with a regression test so it cannot recur.
+
+### Decision Point: Withdrawn Rev-4 controls purged; SA-12 remapped to the SR family
+
+**What changed.** The control-descriptions database — labelled "NIST 800-53 Rev 5" — contained eleven controls that were *withdrawn* in Rev 5, their intent redistributed to other families: SA-6, SA-7, SA-12, SA-13, SA-14, SA-18, SA-19, SC-9, SC-19, SC-33, SI-9. Ten were description-only (never referenced by a mapping) and have been deleted. The eleventh, **SA-12 Supply Chain Protection**, was live in the ASI04 (Supply Chain Vulnerabilities) mapping. It has been removed and its intent folded into ASI04's existing SR-family mapping, which in Rev 5 supersedes SA-12 via SR-3 (Supply Chain Controls), SR-4 (Provenance), and SR-11 (Component Authenticity).
+
+**Why it matters.** A crosswalk asserting Rev 5 alignment cannot cite controls Rev 5 withdrew — an auditor mapping a citation back to the catalog would find no such control. A new `withdrawn-controls` test now fails CI if any withdrawn ID reappears as a mapping reference or a description key.
+
+**Effect on statistics.** Removing the withdrawn SA-12 citation lowers the distinct-control count from 55 to **54** (89 total mappings). This is the honest count of *valid Rev 5 controls* referenced; the previous 55 counted a withdrawn control.
+
+---
+
 ## [0.5.2] — 2026-03-26
 
 ### Tier 2 Accessibility & UX Consistency — Fixes 6–10

@@ -8,10 +8,18 @@ import {
 } from "@/components/ui/tooltip";
 import { NIST_800_53, OWASP_ASI } from "@/data/crosswalk";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { bySeverity } from "@/lib/severity";
 import { HeatCell } from "./HeatCell";
 import HeatmapExplainer from "./HeatmapExplainer";
 import { NIST_HEATMAP } from "./heatmap-data";
 import { NIST_FAMILY_DESCRIPTIONS } from "./descriptions";
+
+const ROW_TOTAL = Object.fromEntries(
+  OWASP_ASI.map((a) => [a.id, NIST_800_53.reduce((s, f) => s + NIST_HEATMAP.data[a.id][f.id], 0)]),
+) as Record<string, number>;
+const MAX_TOTAL = Math.max(...Object.values(ROW_TOTAL));
+const RANKED_ROWS = OWASP_ASI.slice().sort(bySeverity);
+const TOP_EXPOSURE = OWASP_ASI.slice().sort((a, b) => ROW_TOTAL[b.id] - ROW_TOTAL[a.id])[0];
 
 export function NistHeatmapView({
   onSelectRisk,
@@ -25,6 +33,13 @@ export function NistHeatmapView({
           <Layers className="w-4 h-4" />
           OWASP ASI → NIST 800-53 Rev 5 Control Density
         </h2>
+      </div>
+      <div className="mb-3 text-[11px] text-slate-400">
+        Rows ranked by severity (Critical first). Highest control exposure:{" "}
+        <span className="font-semibold text-blue-300" style={{ fontFamily: "var(--font-mono)" }}>
+          {TOP_EXPOSURE.id}
+        </span>{" "}
+        {TOP_EXPOSURE.name} — {ROW_TOTAL[TOP_EXPOSURE.id]} mapped controls.
       </div>
       <HeatmapExplainer type="nist" />
       <TooltipProvider delayDuration={200}>
@@ -65,10 +80,13 @@ export function NistHeatmapView({
                   </Tooltip>
                 </th>
               ))}
+              <th scope="col" className="bg-slate-900 text-slate-300 font-semibold text-center px-2" style={{ fontSize: 9, minWidth: 64, fontFamily: "var(--font-sans)" }}>
+                Exposure
+              </th>
             </tr>
           </thead>
           <tbody>
-            {OWASP_ASI.map((asi) => (
+            {RANKED_ROWS.map((asi) => (
               <tr
                 key={asi.id}
                 onClick={() => onSelectRisk(asi.id)}
@@ -90,6 +108,17 @@ export function NistHeatmapView({
                 {NIST_800_53.map((f) => (
                   <HeatCell key={f.id} count={NIST_HEATMAP.data[asi.id][f.id]} max={NIST_HEATMAP.maxVal} riskId={asi.id} riskName={asi.name} familyCode={f.id} />
                 ))}
+                <td
+                  className="border-b border-slate-700/30 px-2"
+                  aria-label={`${asi.id} total exposure: ${ROW_TOTAL[asi.id]} mapped controls`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-blue-300 font-bold text-[11px]" style={{ fontFamily: "var(--font-mono)" }}>
+                      {ROW_TOTAL[asi.id]}
+                    </span>
+                    <span className="h-1.5 rounded-sm bg-blue-500/60" style={{ width: `${(ROW_TOTAL[asi.id] / MAX_TOTAL) * 40}px` }} />
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

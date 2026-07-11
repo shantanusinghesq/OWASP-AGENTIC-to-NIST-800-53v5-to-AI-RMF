@@ -7,10 +7,18 @@ import {
 } from "@/components/ui/tooltip";
 import { AI_RMF, OWASP_ASI } from "@/data/crosswalk";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { bySeverity } from "@/lib/severity";
 import { AIRmfHeatCell } from "./AiRmfHeatCell";
 import HeatmapExplainer from "./HeatmapExplainer";
 import { AI_RMF_HEATMAP } from "./heatmap-data";
 import { AI_RMF_FUNCTION_DESCRIPTIONS } from "./descriptions";
+
+const ROW_TOTAL = Object.fromEntries(
+  OWASP_ASI.map((a) => [a.id, AI_RMF.reduce((s, f) => s + AI_RMF_HEATMAP.data[a.id][f.id], 0)]),
+) as Record<string, number>;
+const MAX_TOTAL = Math.max(...Object.values(ROW_TOTAL));
+const RANKED_ROWS = OWASP_ASI.slice().sort(bySeverity);
+const TOP_EXPOSURE = OWASP_ASI.slice().sort((a, b) => ROW_TOTAL[b.id] - ROW_TOTAL[a.id])[0];
 
 export function AiRmfHeatmapView({
   onSelectRisk,
@@ -24,6 +32,13 @@ export function AiRmfHeatmapView({
           <Brain className="w-4 h-4" />
           OWASP ASI → NIST AI-RMF Function Coverage
         </h2>
+      </div>
+      <div className="mb-3 text-[11px] text-slate-400">
+        Rows ranked by severity (Critical first). Broadest AI-RMF engagement:{" "}
+        <span className="font-semibold text-emerald-300" style={{ fontFamily: "var(--font-mono)" }}>
+          {TOP_EXPOSURE.id}
+        </span>{" "}
+        {TOP_EXPOSURE.name} — {ROW_TOTAL[TOP_EXPOSURE.id]} mapped subcategories.
       </div>
       <HeatmapExplainer type="aiRmf" />
       <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
@@ -53,10 +68,13 @@ export function AiRmfHeatmapView({
                   </TooltipContent>
                 </Tooltip>
               ))}
+              <th scope="col" className="text-center text-slate-200 font-semibold p-3 min-w-[80px] bg-slate-900">
+                Coverage
+              </th>
             </tr>
           </thead>
           <tbody>
-            {OWASP_ASI.map((asi) => (
+            {RANKED_ROWS.map((asi) => (
               <tr
                 key={asi.id}
                 onClick={() => onSelectRisk(asi.id)}
@@ -78,6 +96,17 @@ export function AiRmfHeatmapView({
                 {AI_RMF.map((f) => (
                   <AIRmfHeatCell key={f.id} count={AI_RMF_HEATMAP.data[asi.id][f.id]} max={AI_RMF_HEATMAP.maxVal} riskId={asi.id} riskName={asi.name} functionName={f.name} />
                 ))}
+                <td
+                  className="border-b border-slate-700/30 px-3 text-center"
+                  aria-label={`${asi.id} total AI-RMF coverage: ${ROW_TOTAL[asi.id]} mapped subcategories`}
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="text-emerald-300 font-bold text-[12px]" style={{ fontFamily: "var(--font-mono)" }}>
+                      {ROW_TOTAL[asi.id]}
+                    </span>
+                    <span className="h-1.5 rounded-sm bg-emerald-500/60" style={{ width: `${(ROW_TOTAL[asi.id] / MAX_TOTAL) * 32}px` }} />
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

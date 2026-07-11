@@ -3,8 +3,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { ScenarioProvider } from "./contexts/ScenarioContext";
-import { OnboardingProvider } from "./contexts/OnboardingContext";
+import { ScenarioProvider } from "./features/simulator/ScenarioContext";
+import { OnboardingProvider } from "./features/onboarding/OnboardingContext";
 import Home from "./pages/Home";
 import TermsOfService from "./pages/TermsOfService";
 

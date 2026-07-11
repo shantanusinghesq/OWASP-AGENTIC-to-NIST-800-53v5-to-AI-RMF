@@ -1,4 +1,4 @@
-import type { ASIRelevance } from './scrambler-types';
+import type { ASIRelevance } from './types';
 
 // ─── CONTROL_STATE_TO_FAMILIES ──────────────────────────────────────
 // Maps each control_state boolean to the NIST 800-53 families it governs.

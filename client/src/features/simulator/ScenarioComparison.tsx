@@ -13,9 +13,9 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { useScenario, type ScenarioSnapshot } from "@/contexts/ScenarioContext";
+import { useScenario, type ScenarioSnapshot } from "./ScenarioContext";
 import { OWASP_ASI, NIST_800_53 } from "@/data/crosswalk";
-import { getCellState } from "@/lib/scrambler-evaluator";
+import { getCellState } from "./engine/evaluator";
 import { Pin, PinOff, ArrowLeftRight, X } from "lucide-react";
 
 const COLORS = {

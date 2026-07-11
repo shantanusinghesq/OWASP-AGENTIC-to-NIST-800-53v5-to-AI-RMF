@@ -20,22 +20,22 @@ import {
   OWASP_ASI,
   NIST_800_53,
 } from "@/data/crosswalk";
-import { generateFactPattern, generateFromPreset } from "@/lib/scrambler-generator";
-import { evaluateScenario, getCellState } from "@/lib/scrambler-evaluator";
-import { RISK_TO_ASI, FAMILY_TO_PRIMARY_BOOLEAN } from "@/lib/scrambler-mappings";
-import { generateBiasCurve, getOversightLoad, isCapacityExceeded } from "@/lib/scrambler-bias-model";
-import { CARD_INFO } from "@/lib/scrambler-info-content";
-import { generateScenarioPreview } from "@/lib/scrambler-preview";
-import { FAMILY_FULL_NAMES } from "@/lib/scrambler-narrative";
-import type { FactPattern, GovernancePosture } from "@/lib/scrambler-types";
-import type { BiasDataPoint } from "@/lib/scrambler-bias-model";
-import { useScenario, type ScenarioSnapshot } from "@/contexts/ScenarioContext";
-import { useOnboarding } from "@/contexts/OnboardingContext";
-import CascadeGraph from "@/components/CascadeGraph";
-import ScenarioComparison from "@/components/ScenarioComparison";
-import AnalysisPanel from "@/components/AnalysisPanel";
-import DiagramAnalyzer from "@/components/DiagramAnalyzer";
-import type { PatternEvaluationOutput } from "@/lib/pattern-evaluator";
+import { generateFactPattern, generateFromPreset } from "./engine/generator";
+import { evaluateScenario, getCellState } from "./engine/evaluator";
+import { RISK_TO_ASI, FAMILY_TO_PRIMARY_BOOLEAN } from "./engine/mappings";
+import { generateBiasCurve, getOversightLoad, isCapacityExceeded } from "./engine/bias-model";
+import { CARD_INFO } from "./engine/info-content";
+import { generateScenarioPreview } from "./engine/preview";
+import { FAMILY_FULL_NAMES } from "./engine/narrative";
+import type { FactPattern, GovernancePosture } from "./engine/types";
+import type { BiasDataPoint } from "./engine/bias-model";
+import { useScenario, type ScenarioSnapshot } from "./ScenarioContext";
+import { useOnboarding } from "@/features/onboarding/OnboardingContext";
+import CascadeGraph from "./CascadeGraph";
+import ScenarioComparison from "./ScenarioComparison";
+import AnalysisPanel from "./AnalysisPanel";
+import DiagramAnalyzer from "@/features/diagram/DiagramAnalyzer";
+import type { PatternEvaluationOutput } from "@/features/diagram/engine/pattern-evaluator";
 import {
   Zap,
   RefreshCw,

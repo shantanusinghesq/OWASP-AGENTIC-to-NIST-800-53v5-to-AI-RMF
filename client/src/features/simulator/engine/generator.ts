@@ -1,6 +1,6 @@
 
 /**
- * @file scrambler-generator.ts
+ * @file generator.ts
  * @description Generates random but realistic FactPatterns for the Agentic AI Security Scrambler.
  * This module contains the logic for creating scenarios based on weighted probabilities derived
  * from the IMDA framework and pedagogical requirements.
@@ -10,9 +10,9 @@ import type {
   FactPattern,
   ConstraintRule,
   GovernancePosture,
-} from './scrambler-types';
+} from './types';
 
-// Extracted sub-types from FactPattern (they are inline in scrambler-types.ts)
+// Extracted sub-types from FactPattern (they are inline in types.ts)
 type ImpactProfile = FactPattern['impact_profile'];
 type LikelihoodProfile = FactPattern['likelihood_profile'];
 type ControlState = FactPattern['control_state'];

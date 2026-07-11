@@ -13,7 +13,7 @@
 
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useScenario } from "@/contexts/ScenarioContext";
+import { useScenario } from "./ScenarioContext";
 import { CROSSWALK, OWASP_ASI, NIST_800_53, NIST_CONTROL_DESCRIPTIONS } from "@/data/crosswalk";
 import { X, ExternalLink, AlertTriangle, Shield, ArrowRight } from "lucide-react";
 

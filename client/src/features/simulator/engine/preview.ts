@@ -1,4 +1,4 @@
-// scrambler-preview.ts
+// preview.ts
 
 // --- DATA MAPPINGS ---
 

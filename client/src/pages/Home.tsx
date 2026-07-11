@@ -13,10 +13,10 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useScenario } from "@/contexts/ScenarioContext";
-import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useScenario } from "@/features/simulator/ScenarioContext";
+import { useOnboarding } from "@/features/onboarding/OnboardingContext";
 import { useTabParam } from "@/hooks/useTabParam";
-import OnboardingController from "@/components/onboarding/OnboardingController";
+import OnboardingController from "@/features/onboarding/OnboardingController";
 import { HomeHero } from "@/components/HomeHero";
 import { ViewTabs, type ViewType } from "@/components/ViewTabs";
 import { SiteFooter } from "@/components/SiteFooter";

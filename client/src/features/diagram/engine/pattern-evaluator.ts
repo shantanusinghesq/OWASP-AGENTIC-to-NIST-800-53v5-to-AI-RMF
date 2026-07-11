@@ -8,6 +8,9 @@
  * patterns) rather than IMDA-risk-category-driven, while cell breakage uses the
  * same FAMILY_TO_PRIMARY_BOOLEAN governance model so diagram-sourced scenarios
  * stay consistent with the rest of the platform.
+ *
+ * It MAY import types/mappings/bias-model from features/simulator/engine/* —
+ * that is the allowed one-way diagram → simulator/engine dependency edge.
  */
 
 import type {
@@ -17,8 +20,8 @@ import type {
   FactPattern,
   GovernancePosture,
   ScenarioResult,
-} from "./scrambler-types";
-import { generateBiasCurve, type BiasDataPoint } from "./scrambler-bias-model";
+} from "@/features/simulator/engine/types";
+import { generateBiasCurve, type BiasDataPoint } from "@/features/simulator/engine/bias-model";
 import {
   getPatternById,
   type LLMPatternMatch,
@@ -28,7 +31,7 @@ import {
 import {
   CONTROL_STATE_TO_FAMILIES,
   FAMILY_TO_PRIMARY_BOOLEAN,
-} from "./scrambler-mappings";
+} from "@/features/simulator/engine/mappings";
 import { OWASP_ASI, NIST_800_53 } from "@/data/crosswalk";
 
 // ─── Contracts ──────────────────────────────────────────────────────────────

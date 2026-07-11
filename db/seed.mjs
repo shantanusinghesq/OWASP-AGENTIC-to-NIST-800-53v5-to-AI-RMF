@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Generates patterns.db from the pattern taxonomy.
 //
-// patterns.json is the JSON mirror of client/src/lib/agentic-patterns.ts
+// patterns.json is the JSON mirror of client/src/features/diagram/engine/agentic-patterns.ts
 // (the TypeScript file is the source of truth; regenerate the JSON with:
-//   npx tsx -e "import { AGENTIC_PATTERNS, PATTERN_TAXONOMY_VERSION } from './client/src/lib/agentic-patterns'; import { writeFileSync } from 'fs'; writeFileSync('db/patterns.json', JSON.stringify({ taxonomyVersion: PATTERN_TAXONOMY_VERSION, patterns: AGENTIC_PATTERNS }, null, 2) + '\n');"
+//   npx tsx -e "import { AGENTIC_PATTERNS, PATTERN_TAXONOMY_VERSION } from './client/src/features/diagram/engine/agentic-patterns'; import { writeFileSync } from 'fs'; writeFileSync('db/patterns.json', JSON.stringify({ taxonomyVersion: PATTERN_TAXONOMY_VERSION, patterns: AGENTIC_PATTERNS }, null, 2) + '\n');"
 // from the repo root).
 //
 // Run: node db/seed.mjs   (after `npm install` inside db/)

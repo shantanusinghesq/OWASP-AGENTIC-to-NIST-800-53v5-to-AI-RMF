@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import {
   AI_RMF,
   CROSSWALK,
+  FRAMEWORK_REFS,
   NIST_800_53,
   OWASP_ASI,
   type ValidationStatus,
@@ -131,6 +132,44 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
           </div>
         </div>
       </div>
+
+      {/* ─── Governance framework bridge (editorial v1) ─── */}
+      {FRAMEWORK_REFS[selectedMeta.id] && (
+        <div className="mb-5 p-4 rounded-md border border-slate-700/50 bg-slate-900/40">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="font-bold text-xs text-amber-300 uppercase tracking-wider">
+              Governance framework bridge
+            </span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider">Editorial v1 · verify before use</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
+            <div>
+              <div className="text-slate-400 font-semibold mb-1">ISO/IEC 42001</div>
+              <div className="flex flex-wrap gap-1">
+                {(FRAMEWORK_REFS[selectedMeta.id].iso42001 ?? []).map((r) => (
+                  <span key={r} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">{r}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-slate-400 font-semibold mb-1">EU AI Act</div>
+              <div className="flex flex-wrap gap-1">
+                {(FRAMEWORK_REFS[selectedMeta.id].euAiAct ?? []).map((r) => (
+                  <span key={r} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">{r}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-slate-400 font-semibold mb-1">SR 11-7 lifecycle</div>
+              {FRAMEWORK_REFS[selectedMeta.id].sr117Lifecycle && (
+                <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 capitalize">
+                  {FRAMEWORK_REFS[selectedMeta.id].sr117Lifecycle!.replace("-", " ")}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── Validation legend + status filter ─── */}
       <div className="mb-5 p-4 rounded-md border border-slate-700/50 bg-slate-900/40">

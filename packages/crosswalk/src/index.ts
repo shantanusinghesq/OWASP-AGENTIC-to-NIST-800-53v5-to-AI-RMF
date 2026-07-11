@@ -1,6 +1,7 @@
 export {
   AI_RMF,
   CROSSWALK,
+  FRAMEWORK_REFS,
   NIST_800_53,
   OWASP_ASI,
   severityColor,
@@ -10,6 +11,7 @@ export {
   type ConfidenceLevel,
   type CrosswalkEntry,
   type EvidenceItem,
+  type FrameworkRefs,
   type NISTFamily,
   type NISTMapping,
   type ValidationStatus,

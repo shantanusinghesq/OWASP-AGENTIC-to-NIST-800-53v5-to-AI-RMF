@@ -11,7 +11,7 @@
  * derivations and view JSX live in features/.
  */
 
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { OWASP_ASI } from "@/data/crosswalk";
 import { useScenario } from "@/features/simulator/ScenarioContext";
@@ -25,8 +25,11 @@ import OverviewRoster from "@/features/overview/OverviewRoster";
 import { NistHeatmapView } from "@/features/heatmap/NistHeatmapView";
 import { AiRmfHeatmapView } from "@/features/heatmap/AiRmfHeatmapView";
 import { ExplorerView } from "@/features/explorer/ExplorerView";
-import ScenarioSimulator from "@/features/simulator/ScenarioSimulator";
 import { AssessmentTray } from "@/features/assessment/AssessmentTray";
+
+// Code-split: the simulator (plus its DiagramAnalyzer sidebar) is the heaviest
+// view and not part of the default Overview render — load it on tab entry.
+const ScenarioSimulator = lazy(() => import("@/features/simulator/ScenarioSimulator"));
 
 type SeverityFilter = "all" | "Critical" | "High" | "Medium-High";
 const VALID_ASI = new Set(OWASP_ASI.map((a) => a.id));
@@ -173,7 +176,9 @@ export default function Home() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <ScenarioSimulator />
+              <Suspense fallback={<div className="py-16 text-center text-slate-400 text-sm">Loading simulator…</div>}>
+                <ScenarioSimulator />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>

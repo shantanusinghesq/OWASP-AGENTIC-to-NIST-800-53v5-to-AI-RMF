@@ -33,10 +33,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Self-hosted hero — literal GH Pages base path (index.html is not processed for import.meta) -->
+    <link rel="preload" as="image" href="/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/hero-banner.webp" />
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- First-paint skeleton: replaced wholesale when createRoot().render() mounts. -->
+    <style>
+      body { margin: 0; background: #0F172A; }
+      .boot-skel { min-height: 100vh; font-family: system-ui, sans-serif; }
+      .boot-skel-header { height: 220px; background: #1E293B; border-bottom: 1px solid #334155; }
+      .boot-skel-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+      @media (min-width: 768px) { .boot-skel-cards { grid-template-columns: repeat(4, 1fr); } }
+      .boot-skel-card { height: 96px; border-radius: 8px; background: #1E293B; border: 1px solid #334155; animation: boot-pulse 1.4s ease-in-out infinite; }
+      @keyframes boot-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
+    </style>
+    <div id="root">
+      <div class="boot-skel" aria-hidden="true">
+        <div class="boot-skel-header"></div>
+        <div class="boot-skel-cards">
+          <div class="boot-skel-card"></div>
+          <div class="boot-skel-card"></div>
+          <div class="boot-skel-card"></div>
+          <div class="boot-skel-card"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 

@@ -5,7 +5,9 @@ import { StatCard } from "@/components/StatCard";
 import { TrustBar } from "@/components/TrustBar";
 import type { ViewType } from "@/components/ViewTabs";
 
-const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
+// Self-hosted (client/public/) so first paint doesn't depend on a third-party
+// CDN; BASE_URL keeps the path correct under the GitHub Pages subpath.
+const HERO_IMAGE = `${import.meta.env.BASE_URL}hero-banner.webp`;
 
 // Featured incident — the worked-example front door. A real, cited breach
 // (EchoLeak/ASI01) that maps to concrete controls; the CTA jumps straight

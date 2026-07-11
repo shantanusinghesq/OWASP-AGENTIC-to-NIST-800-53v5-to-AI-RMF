@@ -74,6 +74,22 @@ export interface CrosswalkEntry {
   evidence: EvidenceItem[];
 }
 
+/**
+ * Editorial bridge to the governance frameworks a regulated firm reports
+ * against, beyond 800-53 / AI-RMF. This is a **v1 editorial pass** — not an
+ * authoritative mapping, not externally reviewed, and roadmap-flagged (see
+ * docs/EXPANSION_ROADMAP.md). It exists so a second-line risk manager can
+ * start from the frameworks they actually report against; verify before use.
+ */
+export interface FrameworkRefs {
+  /** ISO/IEC 42001:2023 Annex A control references. */
+  iso42001?: string[];
+  /** EU AI Act article references (high-risk-system obligations). */
+  euAiAct?: string[];
+  /** The SR 11-7 / OCC 2011-12 model-risk lifecycle stage most implicated. */
+  sr117Lifecycle?: "development" | "validation" | "ongoing-monitoring";
+}
+
 export const OWASP_ASI: ASIRisk[] = [
   { id: "ASI01", name: "Agent Goal Hijack", severity: "Critical",
     desc: "Attackers redirect agent objectives through poisoned inputs. Agents cannot reliably distinguish instructions from data." },
@@ -96,6 +112,23 @@ export const OWASP_ASI: ASIRisk[] = [
   { id: "ASI10", name: "Rogue Agents", severity: "Critical",
     desc: "Compromised or misaligned agents deviate from intended purpose while appearing compliant on the surface." },
 ];
+
+// Editorial v1 governance bridge (see FrameworkRefs). NOT authoritative —
+// roadmap-flagged, pending practitioner review. Verify against the primary
+// texts (ISO/IEC 42001:2023 Annex A; EU AI Act high-risk obligations) before
+// relying on any citation.
+export const FRAMEWORK_REFS: Record<string, FrameworkRefs> = {
+  ASI01: { iso42001: ["A.6.2.4 Operation & monitoring", "A.5.2 AI system impact assessment"], euAiAct: ["Art. 15 Accuracy, robustness & cybersecurity", "Art. 14 Human oversight"], sr117Lifecycle: "ongoing-monitoring" },
+  ASI02: { iso42001: ["A.6.2.4 Operation & monitoring", "A.9.2 Responsible use of AI systems"], euAiAct: ["Art. 15 Robustness & cybersecurity", "Art. 14 Human oversight"], sr117Lifecycle: "ongoing-monitoring" },
+  ASI03: { iso42001: ["A.6.2.4 Operation & monitoring", "A.10.2 Third-party responsibilities"], euAiAct: ["Art. 15 Cybersecurity", "Art. 12 Record-keeping (logging)"], sr117Lifecycle: "ongoing-monitoring" },
+  ASI04: { iso42001: ["A.10.2 Third-party & supplier responsibilities", "A.7.2 Data for AI systems"], euAiAct: ["Art. 15 Cybersecurity", "Art. 10 Data & data governance"], sr117Lifecycle: "development" },
+  ASI05: { iso42001: ["A.6.2.3 AI system verification & validation", "A.6.2.4 Operation & monitoring"], euAiAct: ["Art. 15 Accuracy, robustness & cybersecurity"], sr117Lifecycle: "validation" },
+  ASI06: { iso42001: ["A.7.2 Data for AI systems", "A.7.4 Data quality"], euAiAct: ["Art. 10 Data & data governance", "Art. 15 Robustness"], sr117Lifecycle: "ongoing-monitoring" },
+  ASI07: { iso42001: ["A.6.2.4 Operation & monitoring"], euAiAct: ["Art. 15 Cybersecurity"], sr117Lifecycle: "development" },
+  ASI08: { iso42001: ["A.5.2 AI system impact assessment", "A.6.2.4 Operation & monitoring"], euAiAct: ["Art. 9 Risk management system", "Art. 14 Human oversight"], sr117Lifecycle: "ongoing-monitoring" },
+  ASI09: { iso42001: ["A.8.2 Information for interested parties", "A.9.2 Responsible use of AI systems"], euAiAct: ["Art. 13 Transparency & provision of information", "Art. 14 Human oversight"], sr117Lifecycle: "ongoing-monitoring" },
+  ASI10: { iso42001: ["A.6.2.4 Operation & monitoring", "A.5.2 AI system impact assessment"], euAiAct: ["Art. 14 Human oversight", "Art. 72 Post-market monitoring"], sr117Lifecycle: "ongoing-monitoring" },
+};
 
 export const NIST_800_53: NISTFamily[] = [
   { id: "AC", name: "Access Control", color: "#3B82F6" },

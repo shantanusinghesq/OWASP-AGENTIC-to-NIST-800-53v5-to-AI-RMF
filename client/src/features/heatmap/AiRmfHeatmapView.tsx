@@ -41,7 +41,36 @@ export function AiRmfHeatmapView({
         {TOP_EXPOSURE.name} — {ROW_TOTAL[TOP_EXPOSURE.id]} mapped subcategories.
       </div>
       <HeatmapExplainer type="aiRmf" />
-      <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
+      {/* Mobile fallback: severity-ranked stacked list instead of the wide matrix */}
+      <div className="md:hidden space-y-2">
+        {RANKED_ROWS.map((asi) => (
+          <div key={asi.id} className="rounded-lg border border-slate-700/50 bg-slate-900/50 p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-emerald-400 font-semibold text-[12px]" style={{ fontFamily: "var(--font-mono)" }}>
+                {asi.id}
+              </span>
+              <span className="text-slate-200 font-medium text-[12px]">{asi.name}</span>
+              <SeverityBadge level={asi.severity} />
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] text-slate-400">
+                Coverage:{" "}
+                <span className="text-emerald-300 font-bold" style={{ fontFamily: "var(--font-mono)" }}>
+                  {ROW_TOTAL[asi.id]}
+                </span>{" "}
+                mapped subcategories
+              </span>
+              <button
+                onClick={() => onSelectRisk(asi.id)}
+                className="shrink-0 rounded border border-emerald-500/40 px-2 py-1 text-[11px] font-medium text-emerald-300 transition hover:bg-emerald-500/10"
+              >
+                View mappings
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
         <table className="w-full border-collapse" role="table" aria-label="OWASP ASI to NIST AI-RMF function coverage heatmap" style={{ fontSize: 12 }}>
           <thead>
             <tr>

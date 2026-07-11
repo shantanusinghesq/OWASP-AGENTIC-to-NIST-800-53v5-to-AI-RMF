@@ -42,8 +42,37 @@ export function NistHeatmapView({
         {TOP_EXPOSURE.name} — {ROW_TOTAL[TOP_EXPOSURE.id]} mapped controls.
       </div>
       <HeatmapExplainer type="nist" />
+      {/* Mobile fallback: severity-ranked stacked list instead of the wide matrix */}
+      <div className="md:hidden space-y-2">
+        {RANKED_ROWS.map((asi) => (
+          <div key={asi.id} className="rounded-lg border border-slate-700/50 bg-slate-900/50 p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-blue-400 font-semibold text-[12px]" style={{ fontFamily: "var(--font-mono)" }}>
+                {asi.id}
+              </span>
+              <span className="text-slate-200 font-medium text-[12px]">{asi.name}</span>
+              <SeverityBadge level={asi.severity} />
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] text-slate-400">
+                Exposure:{" "}
+                <span className="text-blue-300 font-bold" style={{ fontFamily: "var(--font-mono)" }}>
+                  {ROW_TOTAL[asi.id]}
+                </span>{" "}
+                mapped controls
+              </span>
+              <button
+                onClick={() => onSelectRisk(asi.id)}
+                className="shrink-0 rounded border border-blue-500/40 px-2 py-1 text-[11px] font-medium text-blue-300 transition hover:bg-blue-500/10"
+              >
+                View mappings
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
       <TooltipProvider delayDuration={200}>
-      <div className="overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-slate-700/50 scanline-overlay">
         <table className="w-full border-collapse" role="table" aria-label="OWASP ASI to NIST 800-53 control density heatmap" style={{ fontSize: 11 }}>
           <thead>
             <tr>
@@ -125,8 +154,8 @@ export function NistHeatmapView({
         </table>
       </div>
       </TooltipProvider>
-      {/* Legend */}
-      <div className="mt-4 flex gap-3 items-center text-[11px] text-slate-400">
+      {/* Legend — describes the desktop density grid, so hidden alongside it */}
+      <div className="mt-4 hidden md:flex gap-3 items-center text-[11px] text-slate-400">
         <span className="font-medium">Density:</span>
         {[
           { bg: "rgba(15,23,42,0.5)", label: "0" },

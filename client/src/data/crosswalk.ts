@@ -31,12 +31,14 @@ export {
   type AIRMFFunction,
   type AIRMFMapping,
   type ASIRisk,
+  type ConfidenceLevel,
   type Coverage,
   type CrosswalkEntry,
   type CrosswalkStats,
   type EvidenceItem,
   type NISTFamily,
   type NISTMapping,
+  type ValidationStatus,
 } from "@haremantra/crosswalk";
 
 export type Framework = "nist" | "aiRmf";

@@ -7,10 +7,12 @@ export {
   type AIRMFFunction,
   type AIRMFMapping,
   type ASIRisk,
+  type ConfidenceLevel,
   type CrosswalkEntry,
   type EvidenceItem,
   type NISTFamily,
   type NISTMapping,
+  type ValidationStatus,
 } from "./data.js";
 
 export {
@@ -48,3 +50,10 @@ export {
 } from "./nist-ai-rmf-descriptions.js";
 
 export { CROSSWALK_DATA_VERSION } from "./version.js";
+
+export {
+  INCIDENT_REGISTER,
+  buildRegisterReport,
+  type IncidentRecord,
+  type RegisterReport,
+} from "./incident-register.js";

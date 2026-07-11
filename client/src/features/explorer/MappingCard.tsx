@@ -1,21 +1,24 @@
 import { motion } from "framer-motion";
-import { getControlDescription, type Framework } from "@/data/crosswalk";
+import { getControlDescription, type Framework, type ValidationStatus } from "@/data/crosswalk";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { ValidationBadge } from "./ValidationBadge";
 
 export function MappingCard({
   title,
   items,
   color,
   framework,
+  validationStatus,
 }: {
   title: string;
   items: { id: string; text: string }[];
   color: string;
   framework: Framework;
+  validationStatus: ValidationStatus;
 }) {
   // Extract control ID from text (e.g., "AC-3 Access Enforcement" -> "AC-3" or "GV-1 Policies & Processes" -> "GV-1")
   const extractControlId = (text: string): string | null => {
@@ -36,8 +39,11 @@ export function MappingCard({
       }}
     >
       <div className="px-3 py-2">
-        <div className="font-bold text-xs mb-1.5" style={{ color, fontFamily: "var(--font-mono)" }}>
-          {title}
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <div className="font-bold text-xs" style={{ color, fontFamily: "var(--font-mono)" }}>
+            {title}
+          </div>
+          <ValidationBadge status={validationStatus} />
         </div>
         {items.map((item, i) => {
           // Framework-scoped lookup — never fall back across frameworks: 800-53

@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@haremantra/crosswalk": path.resolve(import.meta.dirname, "packages", "crosswalk", "src"),
+      // @haremantra/crosswalk resolves via the workspace:* dependency — no alias needed.
     },
   },
   test: {

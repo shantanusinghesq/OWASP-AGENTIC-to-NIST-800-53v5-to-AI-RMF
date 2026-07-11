@@ -120,7 +120,7 @@ To preview the production build locally:
 pnpm preview
 ```
 
-This will serve the production build at `http://localhost:4173`.
+This will serve the production build at `http://localhost:4173/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/` (the app is built for the GitHub Pages project subpath).
 
 ---
 
@@ -130,35 +130,41 @@ This will serve the production build at `http://localhost:4173`.
 ├── client/
 │   ├── index.html              # Entry point HTML (OG meta tags, browser title)
 │   └── src/
-│       ├── App.tsx             # Root component with Wouter routing
+│       ├── App.tsx             # Root component with Wouter routing (providers + routes)
 │       ├── main.tsx            # React DOM entry point
 │       ├── index.css           # Global styles, design tokens, animations
-│       ├── const.ts            # App-level constants
-│       ├── pages/
-│       │   ├── Home.tsx        # Main page: heatmaps, Evidence Explorer, stat cards
-│       │   ├── ScenarioSimulator.tsx  # Scenario Simulator tab
-│       │   ├── TermsOfService.tsx     # Terms of Service page
-│       │   └── NotFound.tsx    # 404 page
-│       ├── lib/
-│       │   ├── data.ts         # All crosswalk data (OWASP_ASI, NIST_800_53, AI_RMF, CROSSWALK)
-│       │   ├── nist-control-descriptions.ts   # 200+ NIST 800-53 Rev 5 control descriptions
-│       │   ├── nist-ai-rmf-descriptions.ts    # NIST AI-RMF 100-1 control descriptions
-│       │   ├── scrambler-*.ts  # Scenario Simulator engine modules
-│       │   └── utils.ts        # Tailwind class utilities
-│       ├── components/
-│       │   └── ui/             # shadcn/ui component library (40+ components)
-│       ├── contexts/
-│       │   └── ThemeContext.tsx
-│       └── hooks/              # Custom React hooks
-├── server/
-│   └── index.ts                # Minimal Express server (static serving only)
-├── shared/
-│   └── const.ts                # Shared constants
-├── package.json                # Dependencies and scripts (pnpm)
-├── vite.config.ts              # Vite build configuration
+│       ├── pages/              # Route components only
+│       │   ├── Home.tsx        # Thin composition root: view state + the five tab views
+│       │   ├── TermsOfService.tsx
+│       │   └── NotFound.tsx
+│       ├── data/
+│       │   └── crosswalk.ts    # Data adapter — the ONLY importer of @haremantra/crosswalk
+│       ├── components/         # Shared shell: SeverityBadge, StatCard, HomeHero,
+│       │   │                   #   ViewTabs, SiteFooter, ErrorBoundary
+│       │   └── ui/             # shadcn/ui (pruned to the 8 components in use)
+│       ├── features/
+│       │   ├── overview/       # OverviewRoster landing view
+│       │   ├── heatmap/        # 800-53 + AI-RMF heatmap views, cells, static derivations
+│       │   ├── explorer/       # Evidence Explorer: search, risk detail, mapping cards
+│       │   ├── simulator/      # Scenario Simulator + ScenarioContext
+│       │   │   └── engine/     # Pure simulation logic (generator, evaluator, mappings…)
+│       │   ├── diagram/        # Architecture Diagram Analyzer
+│       │   │   └── engine/     # Pattern taxonomy + evaluators (pure)
+│       │   └── onboarding/     # Guided-tour context + components
+│       ├── hooks/              # useMobile, useTabParam
+│       └── lib/
+│           └── utils.ts        # Tailwind class utilities
+├── packages/
+│   └── crosswalk/              # @haremantra/crosswalk — the crosswalk data package (MIT)
+│       ├── src/                # Data, descriptions, derived statistics (single source of truth)
+│       └── tests/              # Referential-integrity, contract, and derivation pins
+├── db/                         # Offline SQLite analyst tooling for the pattern taxonomy
+├── package.json                # App dependencies and scripts (pnpm workspace root)
+├── vite.config.ts              # Vite build configuration (GitHub Pages base path)
+├── vitest.config.ts            # Test configuration
 ├── tsconfig.json               # TypeScript configuration
 ├── components.json             # shadcn/ui configuration
-├── LICENSE                     # AGPL-3.0 license
+├── LICENSE                     # AGPL-3.0 license (app; data package is MIT)
 ├── TERMS_OF_SERVICE.md         # Terms of Service for the hosted application
 ├── CHANGELOG.md                # Version history
 └── README.md                   # This file
@@ -168,7 +174,7 @@ This will serve the production build at `http://localhost:4173`.
 
 ## Data Model
 
-The crosswalk data is embedded directly in `client/src/lib/data.ts` as TypeScript objects, making the application fully self-contained with no external API dependencies. The data model consists of four primary structures:
+The crosswalk data lives in the `@haremantra/crosswalk` workspace package (`packages/crosswalk/src/data.ts`) as TypeScript objects — the single source of truth consumed by the application through the `client/src/data/crosswalk.ts` adapter, and independently publishable for downstream tools. The application remains fully self-contained with no external API dependencies. The data model consists of four primary structures:
 
 **`OWASP_ASI`** — An array of 10 risk objects, each containing an identifier (ASI01–ASI10), a human-readable name, a severity rating (Critical, High, or Medium-High), and a description of the threat.
 

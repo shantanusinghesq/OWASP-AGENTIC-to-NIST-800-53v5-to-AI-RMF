@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from "react";
-import { AlertTriangle, ExternalLink, ShieldQuestion } from "lucide-react";
+import { AlertTriangle, ExternalLink, Link2, ShieldQuestion } from "lucide-react";
+import { toast } from "sonner";
 import {
   AI_RMF,
   CROSSWALK,
@@ -80,7 +81,23 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
               {selectedMeta.desc}
             </p>
           </div>
-          <SeverityBadge level={selectedMeta.severity} />
+          <div className="flex items-center gap-2 shrink-0">
+            <SeverityBadge level={selectedMeta.severity} />
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}${window.location.pathname}?tab=detail&risk=${selectedMeta.id}`;
+                navigator.clipboard?.writeText(url).then(
+                  () => toast.success("Link copied", { description: `Deep link to ${selectedMeta.id}` }),
+                  () => toast.error("Could not copy link"),
+                );
+              }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border border-slate-600 text-slate-300 hover:bg-slate-800 transition-colors"
+              aria-label={`Copy deep link to ${selectedMeta.id}`}
+            >
+              <Link2 className="w-3 h-3" />
+              Copy link
+            </button>
+          </div>
         </div>
       </div>
 

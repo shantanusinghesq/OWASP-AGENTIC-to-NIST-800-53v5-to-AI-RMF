@@ -14,10 +14,19 @@
 import { COVERAGE, OWASP_ASI } from "@/data/crosswalk";
 import { ChevronRight } from "lucide-react";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { bySeverity } from "@/lib/severity";
+
+type SeverityFilter = "all" | "Critical" | "High" | "Medium-High";
 
 interface OverviewRosterProps {
   onExplore: (asiId: string) => void;
+  severityFilter: SeverityFilter;
+  onSeverityChange: (s: SeverityFilter) => void;
 }
+
+const SEVERITY_FILTERS: SeverityFilter[] = ["all", "Critical", "High", "Medium-High"];
+const severityCount = (s: SeverityFilter): number =>
+  s === "all" ? OWASP_ASI.length : OWASP_ASI.filter((a) => a.severity === s).length;
 
 function RiskCard({ asi, onExplore }: { asi: typeof OWASP_ASI[0]; onExplore: () => void }) {
   return (
@@ -64,20 +73,45 @@ function RiskCard({ asi, onExplore }: { asi: typeof OWASP_ASI[0]; onExplore: () 
   );
 }
 
-export default function OverviewRoster({ onExplore }: OverviewRosterProps) {
+export default function OverviewRoster({ onExplore, severityFilter, onSeverityChange }: OverviewRosterProps) {
+  const rows = OWASP_ASI.filter((a) => severityFilter === "all" || a.severity === severityFilter)
+    .slice()
+    .sort(bySeverity);
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-2">15 Agentic AI Risks</h2>
+        <h2 className="text-lg font-bold text-white mb-2">{OWASP_ASI.length} Agentic AI Risks</h2>
         <p className="text-sm text-slate-400 leading-relaxed">
-          Each risk maps to specific NIST 800-53 controls and AI-RMF categories. Select any risk to explore the full crosswalk with rationale and real-world evidence.
+          Ranked by severity. Each risk maps to specific NIST 800-53 controls and AI-RMF categories. Select any risk to explore the full crosswalk with rationale and real-world evidence.
         </p>
+      </div>
+
+      {/* Severity filter */}
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by severity">
+        {SEVERITY_FILTERS.map((s) => {
+          const active = severityFilter === s;
+          return (
+            <button
+              key={s}
+              onClick={() => onSeverityChange(s)}
+              aria-pressed={active}
+              className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+                active
+                  ? "border-blue-500 bg-blue-500/15 text-blue-300"
+                  : "border-slate-700 text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              {s === "all" ? "All" : s} ({severityCount(s)})
+            </button>
+          );
+        })}
       </div>
 
       {/* Risk Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {OWASP_ASI.map((asi) => (
+        {rows.map((asi) => (
           <RiskCard
             key={asi.id}
             asi={asi}

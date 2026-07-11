@@ -1,7 +1,8 @@
 import type { ReactElement } from "react";
-import { Shield } from "lucide-react";
+import { AlertTriangle, Search, Shield } from "lucide-react";
 import { CROSSWALK_STATS, OWASP_ASI } from "@/data/crosswalk";
 import { StatCard } from "@/components/StatCard";
+import type { ViewType } from "@/components/ViewTabs";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
 
@@ -13,8 +14,15 @@ const totalControls = CROSSWALK_STATS.totalNistControlMappings;
 const totalCategories = CROSSWALK_STATS.totalAiRmfCategoryMappings;
 const uniqueControls = CROSSWALK_STATS.uniqueNistControls;
 const uniqueCategories = CROSSWALK_STATS.uniqueAiRmfCategories;
+const criticalCount = OWASP_ASI.filter((a) => a.severity === "Critical").length;
 
-export function HomeHero(): ReactElement {
+export function HomeHero({
+  onOpenView,
+  onShowCritical,
+}: {
+  onOpenView: (v: ViewType) => void;
+  onShowCritical: () => void;
+}): ReactElement {
   return (
     <header
       className="relative overflow-hidden"
@@ -45,12 +53,30 @@ export function HomeHero(): ReactElement {
           Severity ratings (Critical, High, Medium-High) are editorially assigned based on OWASP ordinal risk ranking and are not official OWASP severity classifications.
         </p>
 
-        {/* Stats row */}
+        {/* Primary actions — give the hero a spine */}
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            onClick={onShowCritical}
+            className="px-4 py-2.5 rounded-md text-sm font-semibold bg-red-500/20 text-red-200 border border-red-500/40 hover:bg-red-500/30 transition inline-flex items-center gap-2"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            See the {criticalCount} Critical risks →
+          </button>
+          <button
+            onClick={() => onOpenView("detail")}
+            className="px-4 py-2.5 rounded-md text-sm font-medium bg-slate-100/10 text-slate-100 border border-slate-400/30 hover:bg-slate-100/15 transition inline-flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+            Explore the evidence
+          </button>
+        </div>
+
+        {/* Stats row — each card is a doorway into the matching view */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-          <StatCard label="ASI Risks" value={OWASP_ASI.length} color="#3B82F6" subtitle={`across ${OWASP_ASI.length} threat categories`} />
-          <StatCard label="Unique 800-53 Controls" value={uniqueControls} color="#3B82F6" subtitle={`${totalControls} total control mappings across ${OWASP_ASI.length} ASI risks`} />
-          <StatCard label="Unique AI-RMF Categories" value={uniqueCategories} color="#10B981" subtitle={`${totalCategories} total category mappings across ${OWASP_ASI.length} ASI risks`} />
-          <StatCard label="Critical Risks" value={OWASP_ASI.filter((a) => a.severity === "Critical").length} color="#EF4444" subtitle="ASI01, ASI03, ASI08, ASI10 rated Critical severity" />
+          <StatCard label="ASI Risks" value={OWASP_ASI.length} color="#3B82F6" subtitle={`across ${OWASP_ASI.length} threat categories`} onClick={() => onOpenView("overview")} />
+          <StatCard label="Unique 800-53 Controls" value={uniqueControls} color="#3B82F6" subtitle={`${totalControls} total control mappings across ${OWASP_ASI.length} ASI risks`} onClick={() => onOpenView("matrix")} />
+          <StatCard label="Unique AI-RMF Categories" value={uniqueCategories} color="#10B981" subtitle={`${totalCategories} total category mappings across ${OWASP_ASI.length} ASI risks`} onClick={() => onOpenView("aiRmf")} />
+          <StatCard label="Critical Risks" value={criticalCount} color="#EF4444" subtitle="ASI01, ASI03, ASI08, ASI10 rated Critical severity" onClick={onShowCritical} />
         </div>
       </div>
     </header>

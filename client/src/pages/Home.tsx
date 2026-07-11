@@ -13,6 +13,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { OWASP_ASI } from "@/data/crosswalk";
 import { useScenario } from "@/features/simulator/ScenarioContext";
 import { useOnboarding } from "@/features/onboarding/OnboardingContext";
 import { useTabParam } from "@/hooks/useTabParam";
@@ -26,9 +27,17 @@ import { AiRmfHeatmapView } from "@/features/heatmap/AiRmfHeatmapView";
 import { ExplorerView } from "@/features/explorer/ExplorerView";
 import ScenarioSimulator from "@/features/simulator/ScenarioSimulator";
 
+type SeverityFilter = "all" | "Critical" | "High" | "Medium-High";
+const VALID_ASI = new Set(OWASP_ASI.map((a) => a.id));
+const readRiskParam = (): string | null => {
+  const r = new URLSearchParams(window.location.search).get("risk");
+  return r && VALID_ASI.has(r) ? r : null;
+};
+
 export default function Home() {
   const [view, setView] = useTabParam();
-  const [selectedASI, setSelectedASI] = useState<string | null>(null);
+  const [selectedASI, setSelectedASI] = useState<string | null>(() => readRiskParam());
+  const [overviewSeverity, setOverviewSeverity] = useState<SeverityFilter>("all");
   const { pendingEvidenceFilter, clearPendingFilter } = useScenario();
   const { registerTabSwitcher } = useOnboarding();
 
@@ -38,6 +47,28 @@ export default function Home() {
       setView(tab as ViewType);
     });
   }, [registerTabSwitcher]);
+
+  // A bare ?risk=ASI0X link lands directly on the Evidence Explorer.
+  useEffect(() => {
+    if (readRiskParam()) setView("detail");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep ?risk= in sync with the selected ASI (only meaningful in the detail view).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (view === "detail" && selectedASI) params.set("risk", selectedASI);
+    else params.delete("risk");
+    const qs = params.toString();
+    window.history.replaceState({}, "", qs ? `?${qs}` : window.location.pathname);
+  }, [selectedASI, view]);
+
+  // Follow back/forward for the ?risk= param.
+  useEffect(() => {
+    const onPop = () => setSelectedASI(readRiskParam());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   // Deep-link: when simulator requests navigation to Evidence Explorer
   useEffect(() => {
@@ -53,6 +84,12 @@ export default function Home() {
     setSelectedASI(null);
   };
 
+  const showCritical = (): void => {
+    setOverviewSeverity("Critical");
+    setSelectedASI(null);
+    setView("overview");
+  };
+
   const openDetail = (asiId: string): void => {
     setSelectedASI(asiId);
     setView("detail");
@@ -63,7 +100,7 @@ export default function Home() {
       {/* ─── Onboarding Overlay ─── */}
       <OnboardingController />
       {/* ─── Hero Header ─── */}
-      <HomeHero />
+      <HomeHero onOpenView={handleViewChange} onShowCritical={showCritical} />
       {/* ─── Navigation Tabs ─── */}
       <ViewTabs view={view} onViewChange={handleViewChange} />
 
@@ -79,7 +116,11 @@ export default function Home() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <OverviewRoster onExplore={openDetail} />
+              <OverviewRoster
+                onExplore={openDetail}
+                severityFilter={overviewSeverity}
+                onSeverityChange={setOverviewSeverity}
+              />
             </motion.div>
           )}
 

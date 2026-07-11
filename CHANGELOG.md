@@ -30,6 +30,12 @@ A series of data-accuracy corrections closing the gap-analysis remediation backl
 
 **Why it matters.** A new orphan-detection check (T16) asserts the set of unmapped description keys equals exactly the known-orphan allowlist — a newly-introduced unmapped entry now fails CI, and removing an allowlist entry requires wiring the category into a mapping with rationale. This keeps the "complete coverage" question honest: the crosswalk references **17 of the 19** defined AI-RMF subcategories.
 
+### Decision Point: AI-RMF description titles aligned to the taxonomy display names
+
+**What changed.** The description database's GOVERN and MANAGE entry *titles* had drifted from the category names the app actually displays: GV-2 was titled "Risk Management Framework" (canonical: Accountability), GV-4 "Oversight & Accountability" (Organizational Practices), GV-6 "Resource Allocation" (Supply Chain & Third-Party), and all four MANAGE entries were mislabeled (MG-1 "Incident Response" → Risk Prioritization, MG-2 "Corrective Actions" → Risk Treatment, MG-3 "Continuous Monitoring" → Response & Recovery, MG-4 "Lessons Learned" → Residual Risk). All seven titles — and their description/implementation text — are corrected to match. (MAP and MEASURE were already consistent.)
+
+**Why it matters.** The tooltip renders the description title while the visible label is the taxonomy display name, so a hover on "GV-6 Supply Chain & Third-Party" showed "Resource Allocation" — the wrong category. A new check (T-title) asserts every description title matches its taxonomy display name, so this mismatch class is now impossible.
+
 ### Decision Point: Coverage statistics corrected (authoritative current figures)
 
 **What changed.** Several earlier entries reported coverage figures that no longer hold after the data corrections above. The authoritative current figures — now **derived from the mappings** at build time and pinned by the test suite, rather than hand-maintained — are:

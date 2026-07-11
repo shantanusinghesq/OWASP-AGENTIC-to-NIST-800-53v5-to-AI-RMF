@@ -114,6 +114,34 @@ describe("@haremantra/crosswalk integrity", () => {
     expect(malformed).toEqual([]);
   });
 
+  it("T11 every ASI evidence string meets the structural floor (+ verifiability report)", () => {
+    const noVerifiableRef: string[] = [];
+    for (const [asiId, entry] of Object.entries(CROSSWALK)) {
+      const ev = entry.evidence;
+      expect(ev.trim().length, `${asiId}: evidence too short`).toBeGreaterThanOrEqual(50);
+      expect(ev.split(";").filter((s) => s.trim()).length, `${asiId}: <2 evidence references`).toBeGreaterThanOrEqual(2);
+      if (!/CVE-\d{4}-\d+|https?:\/\//i.test(ev)) noVerifiableRef.push(asiId);
+    }
+    // Report-only: surfaces the verifiability gap without failing (WS7 backfills
+    // structured evidence with URLs/CVEs). Today only ASI03 carries a CVE.
+    console.log(
+      `[T11] evidence lacking a machine-resolvable reference (URL/CVE): ${noVerifiableRef.length}/10 — ${noVerifiableRef.join(", ")}`,
+    );
+  });
+
+  it("T-scope defined-but-unmapped families are exactly {MP, PE}; no excluded family is mapped", () => {
+    const mappedFamilies = new Set<string>();
+    for (const entry of Object.values(CROSSWALK)) {
+      for (const m of entry.nist53) mappedFamilies.add(m.family);
+    }
+    const definedUnmapped = NIST_800_53.map((f) => f.id).filter((id) => !mappedFamilies.has(id)).sort();
+    expect(definedUnmapped).toEqual(["MP", "PE"]);
+    // The four out-of-scope families must never appear in a mapping.
+    for (const excluded of ["AT", "MA", "PS", "PT"]) {
+      expect(mappedFamilies.has(excluded), `excluded family ${excluded} is mapped`).toBe(false);
+    }
+  });
+
   it("T16 unreferenced AI-RMF description keys equal the known-orphan allowlist", () => {
     // Ratchet: description keys not cited by any CROSSWALK aiRmf mapping must
     // equal exactly this allowlist. Shrinking it requires wiring the category

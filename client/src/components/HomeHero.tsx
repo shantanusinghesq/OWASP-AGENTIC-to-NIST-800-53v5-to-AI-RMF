@@ -6,10 +6,9 @@ import { StatCard } from "@/components/StatCard";
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
 
 // Stats — derived from the mappings by the package (pinned by its test
-// suite), replacing inline counts that drifted from the data: unique
-// controls counted display strings (56, inflated by the SI-7 dual naming;
-// true distinct IDs: 55) and unique categories counted the taxonomy
-// definition (19) rather than what the mappings reference (17).
+// suite), replacing inline counts that drifted from the data. Current
+// derived truth: 54 distinct controls / 89 mappings; 17 of 19 AI-RMF
+// subcategories referenced / 62 mappings.
 const totalControls = CROSSWALK_STATS.totalNistControlMappings;
 const totalCategories = CROSSWALK_STATS.totalAiRmfCategoryMappings;
 const uniqueControls = CROSSWALK_STATS.uniqueNistControls;

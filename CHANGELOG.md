@@ -30,6 +30,20 @@ A series of data-accuracy corrections closing the gap-analysis remediation backl
 
 **Why it matters.** A new orphan-detection check (T16) asserts the set of unmapped description keys equals exactly the known-orphan allowlist — a newly-introduced unmapped entry now fails CI, and removing an allowlist entry requires wiring the category into a mapping with rationale. This keeps the "complete coverage" question honest: the crosswalk references **17 of the 19** defined AI-RMF subcategories.
 
+### Decision Point: Coverage statistics corrected (authoritative current figures)
+
+**What changed.** Several earlier entries reported coverage figures that no longer hold after the data corrections above. The authoritative current figures — now **derived from the mappings** at build time and pinned by the test suite, rather than hand-maintained — are:
+
+| Statistic | Old claim | Corrected |
+|---|---|---|
+| Distinct 800-53 controls | 56 | **54** |
+| Total 800-53 control mappings | 90 | **89** |
+| 800-53 families | "16 of 20 represented" | **16 in scope, 14 with mapped controls** (MP, PE defined but unmapped) |
+| AI-RMF subcategory coverage | "complete coverage of all 19" | **17 of 19 referenced** (GV-3, MS-4 unmapped) |
+| Total AI-RMF category mappings | 62 | 62 (unchanged) |
+
+**Why it matters.** The prior figures overstated coverage: they counted a withdrawn control (SA-12), double-counted SI-7, treated all 16 in-scope families as "represented" when two carry no mappings, and claimed complete AI-RMF coverage when two subcategories are unmapped. The corrected figures are the honest, test-enforced counts. Earlier entries below are annotated *(superseded 2026-07-11)* where they state the old numbers.
+
 ---
 
 ## [0.5.2] — 2026-03-26
@@ -198,11 +212,11 @@ This release represents the most significant conceptual revision since the initi
 
 **What changed.** The stat card previously labeled "AI-RMF CATEGORIES" showing the value **62** was revised to display **"UNIQUE AI-RMF CATEGORIES"** with the value **19**, accompanied by a subtitle: *"62 total category mappings across 10 ASI risks."*
 
-**Why it matters.** The reasoning mirrors Decision Point 2 but carries additional weight because the AI-RMF category space is inherently smaller. The NIST AI Risk Management Framework (AI 100-1) defines exactly 19 subcategories across four functions: GOVERN (GV-1 through GV-6), MAP (MP-1 through MP-5), MEASURE (MS-1 through MS-4), and MANAGE (MG-1 through MG-4). The original display of "62" — the sum of all category references across all ASI mappings — could mislead a reader into thinking the AI-RMF contains 62 subcategories, or that this crosswalk references 62 distinct categories from a larger taxonomy. Neither is true. The crosswalk achieves **complete coverage** of all 19 AI-RMF subcategories, and the 62 figure represents the total number of times those 19 categories are referenced across 10 ASI risks. Surfacing "19" as the primary number immediately communicates full-framework coverage — a significant finding for organizations attempting to satisfy AI-RMF requirements through their agentic AI security program.
+**Why it matters.** The reasoning mirrors Decision Point 2 but carries additional weight because the AI-RMF category space is inherently smaller. The NIST AI Risk Management Framework (AI 100-1) defines exactly 19 subcategories across four functions: GOVERN (GV-1 through GV-6), MAP (MP-1 through MP-5), MEASURE (MS-1 through MS-4), and MANAGE (MG-1 through MG-4). The original display of "62" — the sum of all category references across all ASI mappings — could mislead a reader into thinking the AI-RMF contains 62 subcategories, or that this crosswalk references 62 distinct categories from a larger taxonomy. Neither is true. The crosswalk achieves **complete coverage** of all 19 AI-RMF subcategories, and the 62 figure represents the total number of times those 19 categories are referenced across 10 ASI risks. *(Superseded 2026-07-11: the crosswalk references 17 of the 19 subcategories — GV-3 and MS-4 are defined but unmapped.)* Surfacing "19" as the primary number immediately communicates full-framework coverage — a significant finding for organizations attempting to satisfy AI-RMF requirements through their agentic AI security program.
 
 #### Decision Point 4 — Heatmap Scope Disclosure
 
-**What changed.** An italic annotation was added below the 800-53 heatmap subtitle: *"Scope: 16 of 20 NIST 800-53 Rev 5 control families are represented. Families AT (Awareness & Training), MA (Maintenance), PS (Personnel Security), and PT (PII Transparency) were excluded as lower relevance to agentic AI threat vectors."*
+**What changed.** An italic annotation was added below the 800-53 heatmap subtitle: *"Scope: 16 of 20 NIST 800-53 Rev 5 control families are represented. Families AT (Awareness & Training), MA (Maintenance), PS (Personnel Security), and PT (PII Transparency) were excluded as lower relevance to agentic AI threat vectors."* *(superseded 2026-07-11: 16 in scope, 14 with mapped controls — MP and PE are defined but unmapped.)*
 
 **Why it matters.** The 800-53 heatmap displays 16 column headers representing NIST control families. Without disclosure, a reader might assume these are the only families in SP 800-53, or that the four missing families were accidentally omitted. In fact, their exclusion was a deliberate editorial decision. AT (Awareness & Training) was excluded because its controls focus on human training programs rather than technical agent controls — though this decision is itself nuanced, as noted in Decision Point 5 below. MA (Maintenance) addresses physical system maintenance schedules with limited applicability to software-defined agent architectures. PS (Personnel Security) governs human personnel screening, which does not directly map to non-human agent identity management (though the conceptual parallel is acknowledged in the ASI03 mapping via IA-family controls). PT (PII Processing and Transparency) was excluded because the crosswalk focuses on security controls rather than privacy-specific requirements, though organizations with privacy obligations should evaluate PT controls independently. Disclosing these exclusions and their rationale transforms the heatmap from a potentially misleading "complete picture" into an honest scoped analysis.
 
@@ -256,7 +270,7 @@ The GitHub Pages deployment was replaced with a notice redirecting users to the 
 
 ### Initial Release — The Crosswalk Data Model
 
-The initial commit established the core intellectual contribution of this project: a structured mapping between 10 OWASP ASI 2026 risks, 16 NIST 800-53 Rev 5 control families (90 total control references), 4 NIST AI-RMF functions (19 subcategories, 62 total category references), and real-world evidence citations for each risk.
+The initial commit established the core intellectual contribution of this project: a structured mapping between 10 OWASP ASI 2026 risks, 16 NIST 800-53 Rev 5 control families (90 total control references), 4 NIST AI-RMF functions (19 subcategories, 62 total category references), and real-world evidence citations for each risk. *(Superseded 2026-07-11: 89 control references after the withdrawn-control purge; 17 of 19 subcategories referenced.)*
 
 The crosswalk was implemented as a single-page React application with three views: an 800-53 heatmap showing control density per ASI risk per family, an AI-RMF heatmap showing category coverage per ASI risk per function, and an evidence explorer providing full rationale text and incident citations for each mapping.
 
@@ -270,7 +284,7 @@ The following principles have guided every change documented above and will cont
 
 **Transparent provenance.** Every editorial judgment is disclosed. Severity ratings are labeled as editorial. Scope exclusions are documented with rationale. The reader should never have to guess whether a data point is authoritative or interpretive.
 
-**Dual-number reporting.** Aggregate statistics are always accompanied by their decomposition. "56 unique controls (90 total mappings)" is more honest than either number alone. Compliance dashboards that show only aggregates invite misinterpretation.
+**Dual-number reporting.** Aggregate statistics are always accompanied by their decomposition. "56 unique controls (90 total mappings)" *(superseded 2026-07-11: 54 unique controls, 89 total mappings)* is more honest than either number alone. Compliance dashboards that show only aggregates invite misinterpretation.
 
 **Acknowledged omissions.** What the crosswalk *excludes* is as important as what it includes. The AT-family scope note in ASI09 and the heatmap scoping disclosure are examples of this principle in practice.
 

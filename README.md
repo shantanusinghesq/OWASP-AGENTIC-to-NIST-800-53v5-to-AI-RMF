@@ -25,8 +25,8 @@ This crosswalk operates as a **compliance middleware** layer connecting three au
 | Layer | Framework | Purpose | Scope |
 |-------|-----------|---------|-------|
 | **Threat Layer** | OWASP ASI 2026 | Identifies *what can go wrong* with agentic AI | 10 risk categories (ASI01–ASI10) |
-| **Control Layer** | NIST SP 800-53 Rev 5 | Specifies *what to implement* to mitigate threats | 16 control families, 90+ mapped controls |
-| **Governance Layer** | NIST AI-RMF (AI 100-1) | Defines *how to govern* AI risk at the organizational level | 4 functions, 62+ mapped categories |
+| **Control Layer** | NIST SP 800-53 Rev 5 | Specifies *what to implement* to mitigate threats | 16 families in scope (14 carry mappings), 54 distinct controls, 89 mappings |
+| **Governance Layer** | NIST AI-RMF (AI 100-1) | Defines *how to govern* AI risk at the organizational level | 4 functions, 17 of 19 subcategories referenced, 62 mappings |
 
 Each ASI risk is mapped to multiple 800-53 control families with specific control identifiers, accompanied by a rationale explaining why that control addresses the agentic-specific threat vector. Simultaneously, each risk is mapped to AI-RMF functions and subcategories, creating a bidirectional bridge between technical controls and governance processes.
 

@@ -20,8 +20,24 @@ export {
   type CrosswalkStats,
 } from "./derive.js";
 
-export { OSCAL_SOURCE, type OscalControl } from "./oscal-index.js";
+export { OSCAL_800_53_REV5, OSCAL_SOURCE, type OscalControl } from "./oscal-index.js";
 export { UPSTREAM_VERSIONS, type UpstreamLayer } from "./provenance.js";
+
+export {
+  CSV_HEADER,
+  buildCsv,
+  buildJson,
+  serializeJson,
+  type CrosswalkArtifact,
+} from "./artifacts.js";
+
+export {
+  buildOscalMapping,
+  type OscalMapping,
+  type OscalMappingAiRmf,
+  type OscalMappingControl,
+  type OscalMappingEntry,
+} from "./oscal-mapping.js";
 
 export { NIST_CONTROL_DESCRIPTIONS } from "./nist-control-descriptions.js";
 export {

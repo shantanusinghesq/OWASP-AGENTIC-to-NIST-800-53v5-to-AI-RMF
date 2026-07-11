@@ -37,7 +37,7 @@ You agree not to engage in any of the following activities:
 
 **4.1 Service Replication.** You may not copy, mirror, frame, scrape, crawl, or otherwise reproduce the Service or any substantial portion of its content, design, or functionality for the purpose of creating a competing or substantially similar hosted service, whether for commercial or non-commercial purposes.
 
-**4.2 Automated Access.** You may not use bots, scrapers, spiders, crawlers, or any other automated means to access, download, or extract data from the Service, except as expressly permitted by a robots.txt file or with the Developer's prior written consent.
+**4.2 Automated Access.** You may not use bots, scrapers, spiders, crawlers, or any other automated means to access, download, or extract data from the Service, except as expressly permitted by a robots.txt file or with the Developer's prior written consent. The JSON and CSV export features provided within the Service, and the machine-readable artifacts published with the @haremantra/crosswalk package, are expressly permitted for automated consumption.
 
 **4.3 Reverse Engineering of Service Infrastructure.** While the source code is available under the AGPL-3.0, you may not reverse engineer, decompile, or disassemble the Service's deployment infrastructure, hosting configuration, or operational environment.
 

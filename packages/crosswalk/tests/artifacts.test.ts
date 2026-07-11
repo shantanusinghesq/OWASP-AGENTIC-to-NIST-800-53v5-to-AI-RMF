@@ -7,14 +7,16 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { CROSSWALK, CROSSWALK_DATA_VERSION, OWASP_ASI } from "../src";
 import {
+  CROSSWALK,
+  CROSSWALK_DATA_VERSION,
   CSV_HEADER,
+  OWASP_ASI,
   buildCsv,
   buildJson,
   serializeJson,
-  writeArtifacts,
-} from "../build/emit-artifacts";
+} from "../src";
+import { writeArtifacts } from "../build/emit-artifacts";
 
 /** Quote-aware single-line CSV parser (fields never contain newlines here). */
 function parseCsvRow(line: string): string[] {

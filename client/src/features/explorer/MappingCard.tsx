@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { getControlDescription, type Framework, type ValidationStatus } from "@/data/crosswalk";
 import {
   Tooltip,
@@ -20,6 +22,16 @@ export function MappingCard({
   framework: Framework;
   validationStatus: ValidationStatus;
 }) {
+  // Click-to-expand set (by item index) — accessible alternative to the
+  // hover-only tooltip (works on touch, projectors, and keyboards).
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const toggle = (i: number): void =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+
   // Extract control ID from text (e.g., "AC-3 Access Enforcement" -> "AC-3" or "GV-1 Policies & Processes" -> "GV-1")
   const extractControlId = (text: string): string | null => {
     const match = text.match(/^([A-Z]{2,8}-\d{1,2})\s/);
@@ -53,6 +65,7 @@ export function MappingCard({
           const controlDesc = controlId ? getControlDescription(framework, controlId) : null;
           const isRationale = item.id === "\u21b3";
 
+          const isOpen = expanded.has(i);
           return (
             <div key={i} className="text-[11px] leading-relaxed text-slate-300 mb-1">
               {item.id && (
@@ -61,25 +74,49 @@ export function MappingCard({
                 </span>
               )}
               {controlDesc && !isRationale ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help border-b border-dashed" style={{ borderColor: color }}>
-                      {item.text}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="max-w-xs" style={{ backgroundColor: "#2563EB", color: "white" }}>
-                    <div className="text-xs">
-                      <div className="font-bold mb-1">{controlDesc.title}</div>
-                      <div className="text-[11px] mb-2 text-blue-100">{controlDesc.description}</div>
-                      <div className="text-[10px] text-blue-200 italic mb-2">{controlDesc.implementation}</div>
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => toggle(i)}
+                        aria-expanded={isOpen}
+                        className="cursor-pointer border-b border-dashed text-left inline-flex items-center gap-1 hover:text-white"
+                        style={{ borderColor: color }}
+                      >
+                        {item.text}
+                        <ChevronDown
+                          className="w-3 h-3 opacity-60 transition-transform"
+                          style={{ transform: isOpen ? "rotate(180deg)" : "none" }}
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs" style={{ backgroundColor: "#2563EB", color: "white" }}>
+                      <div className="text-xs">
+                        <div className="font-bold mb-1">{controlDesc.title}</div>
+                        <div className="text-[11px] mb-2 text-blue-100">{controlDesc.description}</div>
+                        <div className="text-[10px] text-blue-200 italic mb-2">{controlDesc.implementation}</div>
+                        {controlDesc.relatedASI && controlDesc.relatedASI.length > 0 && (
+                          <div className="text-[10px] text-blue-100">
+                            <span className="font-semibold">Related ASI:</span> {controlDesc.relatedASI.join(", ")}
+                          </div>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                  {isOpen && (
+                    <div className="mt-1 mb-2 ml-1 pl-2 border-l text-[10px] text-slate-400 space-y-1" style={{ borderColor: `${color}40` }}>
+                      <div className="text-slate-300">{controlDesc.description}</div>
+                      <div className="italic">{controlDesc.implementation}</div>
                       {controlDesc.relatedASI && controlDesc.relatedASI.length > 0 && (
-                        <div className="text-[10px] text-blue-100">
-                          <span className="font-semibold">Related ASI:</span> {controlDesc.relatedASI.join(", ")}
+                        <div>
+                          <span className="font-semibold text-slate-300">Related ASI:</span>{" "}
+                          {controlDesc.relatedASI.join(", ")}
                         </div>
                       )}
                     </div>
-                  </TooltipContent>
-                </Tooltip>
+                  )}
+                </>
               ) : (
                 <span>{item.text}</span>
               )}

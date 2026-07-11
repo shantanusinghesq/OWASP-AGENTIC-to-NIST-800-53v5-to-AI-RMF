@@ -19,6 +19,17 @@ import {
 const VALIDATION_DOC_URL =
   "https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/blob/main/VALIDATION.md";
 
+// Governance framing — translates OWASP/NIST severity into the second-line
+// risk manager's native frame (three-lines-of-defense / SR 11-7 posture).
+// Editorial guidance, not a control requirement.
+const GOVERNANCE_FRAMING: Record<string, string> = {
+  Critical:
+    "Governance: treat as a Tier-1 model risk — board/CRO reporting, independent validation, and continuous monitoring under SR 11-7; escalate before deployment.",
+  High: "Governance: second-line review with documented control ownership and periodic monitoring; log in the AI/model risk register.",
+  "Medium-High":
+    "Governance: register the risk with a named owner and reassess as agent autonomy or tool access expands.",
+};
+
 const STATUS_BLURB: Record<ValidationStatus, string> = {
   editorial: "Authored from public evidence + authoritative guidance; not yet externally reviewed.",
   "practitioner-reviewed": "An external practitioner has signed off on the mapping.",
@@ -80,6 +91,11 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
             <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
               {selectedMeta.desc}
             </p>
+            {GOVERNANCE_FRAMING[selectedMeta.severity] && (
+              <p className="mt-2 text-[11px] text-amber-300/90 max-w-xl leading-relaxed border-l-2 border-amber-500/40 pl-2">
+                {GOVERNANCE_FRAMING[selectedMeta.severity]}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <SeverityBadge level={selectedMeta.severity} />

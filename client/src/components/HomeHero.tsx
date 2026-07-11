@@ -1,10 +1,18 @@
 import type { ReactElement } from "react";
-import { AlertTriangle, Search, Shield } from "lucide-react";
-import { CROSSWALK_STATS, OWASP_ASI } from "@/data/crosswalk";
+import { AlertTriangle, ArrowRight, Radar, Search, Shield } from "lucide-react";
+import { CROSSWALK, CROSSWALK_STATS, OWASP_ASI } from "@/data/crosswalk";
 import { StatCard } from "@/components/StatCard";
+import { TrustBar } from "@/components/TrustBar";
 import type { ViewType } from "@/components/ViewTabs";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
+
+// Featured incident — the worked-example front door. A real, cited breach
+// (EchoLeak/ASI01) that maps to concrete controls; the CTA jumps straight
+// into its full crosswalk so the "aha" is one click, not three.
+const SPOTLIGHT_ASI = "ASI01";
+const SPOTLIGHT = CROSSWALK[SPOTLIGHT_ASI]?.evidence?.[0];
+const SPOTLIGHT_META = OWASP_ASI.find((a) => a.id === SPOTLIGHT_ASI);
 
 // Stats — derived from the mappings by the package (pinned by its test
 // suite), replacing inline counts that drifted from the data. Current
@@ -19,9 +27,11 @@ const criticalCount = OWASP_ASI.filter((a) => a.severity === "Critical").length;
 export function HomeHero({
   onOpenView,
   onShowCritical,
+  onOpenRisk,
 }: {
   onOpenView: (v: ViewType) => void;
   onShowCritical: () => void;
+  onOpenRisk: (asiId: string) => void;
 }): ReactElement {
   return (
     <header
@@ -71,6 +81,28 @@ export function HomeHero({
           </button>
         </div>
 
+        {/* Featured incident — a real breach, mapped to controls in one click */}
+        {SPOTLIGHT && SPOTLIGHT_META && (
+          <button
+            onClick={() => onOpenRisk(SPOTLIGHT_ASI)}
+            className="group mt-5 w-full text-left rounded-lg border border-red-500/30 bg-red-950/30 hover:bg-red-950/50 transition p-3 flex items-start gap-3"
+            aria-label={`See how ${SPOTLIGHT_META.name} maps to controls`}
+          >
+            <Radar className="w-4 h-4 text-red-300 mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-widest text-red-300/80 font-semibold mb-0.5">
+                Featured incident · {SPOTLIGHT_ASI} {SPOTLIGHT_META.name}
+                {SPOTLIGHT.cveId ? ` · ${SPOTLIGHT.cveId}` : ""}
+              </div>
+              <div className="text-sm text-slate-100 leading-snug">{SPOTLIGHT.title}</div>
+              <div className="mt-1 text-[12px] text-red-200 font-medium inline-flex items-center gap-1">
+                See how it maps to NIST controls
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </div>
+          </button>
+        )}
+
         {/* Stats row — each card is a doorway into the matching view */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
           <StatCard label="ASI Risks" value={OWASP_ASI.length} color="#3B82F6" subtitle={`across ${OWASP_ASI.length} threat categories`} onClick={() => onOpenView("overview")} />
@@ -78,6 +110,9 @@ export function HomeHero({
           <StatCard label="Unique AI-RMF Categories" value={uniqueCategories} color="#10B981" subtitle={`${totalCategories} total category mappings across ${OWASP_ASI.length} ASI risks`} onClick={() => onOpenView("aiRmf")} />
           <StatCard label="Critical Risks" value={criticalCount} color="#EF4444" subtitle="ASI01, ASI03, ASI08, ASI10 rated Critical severity" onClick={onShowCritical} />
         </div>
+
+        {/* Aggregate validation posture */}
+        <TrustBar />
       </div>
     </header>
   );

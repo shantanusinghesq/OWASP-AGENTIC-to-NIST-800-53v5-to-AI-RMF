@@ -179,6 +179,7 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
                 color={fam.color}
                 framework="nist"
                 validationStatus={mapping.validationStatus}
+                mappingRef={{ asiId, framework: "nist", familyOrFunc: mapping.family }}
                 items={[
                   ...mapping.controls.map((c) => ({ id: "", text: c })),
                   { id: "↳", text: mapping.rationale },
@@ -204,6 +205,7 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
                 color={func.color}
                 framework="aiRmf"
                 validationStatus={mapping.validationStatus}
+                mappingRef={{ asiId, framework: "aiRmf", familyOrFunc: mapping.func }}
                 items={[
                   ...mapping.cats.map((c) => ({ id: "", text: c })),
                   { id: "↳", text: mapping.rationale },

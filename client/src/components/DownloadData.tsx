@@ -1,31 +1,14 @@
 import type { ReactElement } from "react";
 import { Download } from "lucide-react";
 import { CROSSWALK_DATA_VERSION, buildCsv, buildJson } from "@/data/crosswalk";
+import { triggerDownload } from "@/lib/download";
 
 // ─── Client-side Data Export ────────────────────────────────────────
-// Generates the JSON / CSV artifacts entirely in the browser (Blob +
-// object URL + a synthesized <a download>), then revokes the URL. There is
-// NO server and NO network request — this satisfies NFR-1/2 (static SPA on
-// GitHub Pages). The export format is the package's single source of truth:
-// buildJson / buildCsv come from @haremantra/crosswalk via the data adapter,
-// so the in-app download is byte-identical to the published dist/ artifacts.
-
-function triggerDownload(filename: string, contents: string, mimeType: string): void {
-  const blob = new Blob([contents], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  try {
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.rel = "noopener";
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-  } finally {
-    // Free the object URL regardless of whether the click path threw.
-    URL.revokeObjectURL(url);
-  }
-}
+// Downloads are generated entirely in the browser via @/lib/download —
+// NO server and NO network request (NFR-1/2: static SPA on GitHub Pages).
+// The export format is the package's single source of truth: buildJson /
+// buildCsv come from @haremantra/crosswalk via the data adapter, so the
+// in-app download is byte-identical to the published dist/ artifacts.
 
 function downloadJson(): void {
   triggerDownload(

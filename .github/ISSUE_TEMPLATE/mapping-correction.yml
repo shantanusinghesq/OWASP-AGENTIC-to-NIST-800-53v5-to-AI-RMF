@@ -1,0 +1,76 @@
+name: Mapping correction
+description: Report an inaccurate existing mapping, rationale, or coverage claim.
+title: "[mapping-correction] "
+labels: ["mapping-correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report an **existing** mapping that is wrong, imprecise, or unsupported. If this is
+        a genuine dispute over a recorded editorial decision, label it `mapping-dispute` and
+        reference the relevant CHANGELOG **Decision Point** number (see
+        [GOVERNANCE.md](../../GOVERNANCE.md), "Mapping Dispute Resolution"). Corrections meet
+        the same [Mapping Provenance Standard](../../GOVERNANCE.md) as new mappings.
+  - type: input
+    id: asi-id
+    attributes:
+      label: Affected ASI risk ID(s)
+      description: OWASP Agentic AI risk identifier(s), e.g. ASI04.
+      placeholder: ASI04
+    validations:
+      required: true
+  - type: input
+    id: control-id
+    attributes:
+      label: Affected 800-53 control ID(s)
+      description: NIST SP 800-53 Rev 5 control ID(s) involved, e.g. SA-12. Use "n/a" if AI-RMF-only.
+      placeholder: SA-12
+    validations:
+      required: true
+  - type: input
+    id: airmf-id
+    attributes:
+      label: Affected AI-RMF subcategory ID(s)
+      description: NIST AI 100-1 subcategory ID(s) involved, e.g. GV-3. Use "n/a" if 800-53-only.
+      placeholder: GV-3
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Proposed change
+      description: What is currently recorded, and what it should be changed to (or removed).
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Why is the current mapping/rationale/claim inaccurate? Explain the error.
+    validations:
+      required: true
+  - type: textarea
+    id: citations
+    attributes:
+      label: Authoritative citation(s)
+      description: At least one URL, CVE (CVE-YYYY-NNNN+), or named publication/section supporting the correction.
+    validations:
+      required: true
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Confidence estimate
+      description: Your confidence that the current mapping is in error.
+      options:
+        - High (0.8–1.0)
+        - Medium (0.5–0.8)
+        - Low (below 0.5)
+    validations:
+      required: true
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Stated assumptions
+      description: Any assumptions the correction depends on (scope, interpretation, threat model).
+    validations:
+      required: true

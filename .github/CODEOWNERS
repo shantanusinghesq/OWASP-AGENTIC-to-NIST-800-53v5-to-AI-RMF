@@ -1,0 +1,10 @@
+# Code owners for the OWASP Agentic AI ↔ NIST crosswalk.
+#
+# In Solo Mode these entries document ownership and auto-request review; they do
+# NOT enforce a required approval (no branch protection requiring Code Owner
+# review is enabled — see GOVERNANCE.md, "Board Mode activation runbook").
+#
+# The canonical crosswalk data and all docs are owned by the maintainer.
+
+/packages/crosswalk/**   @haremantra
+/docs/**                 @haremantra

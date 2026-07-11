@@ -866,18 +866,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     implementation: "Organizations obtain and maintain system documentation including design, configuration, and security documentation. For agentic AI systems, this includes documentation of agent architecture and security controls.",
     relatedASI: [],
   },
-  "SA-6": {
-    title: "Software Usage Restrictions",
-    description: "Restricts software use to authorized purposes and implements license compliance.",
-    implementation: "Organizations implement software license compliance and usage restrictions. For agentic AI systems, this includes restricting agent tool usage to authorized purposes.",
-    relatedASI: ["ASI02"],
-  },
-  "SA-7": {
-    title: "User-Installed Software",
-    description: "Restricts user installation of software and implements controls to prevent unauthorized installation.",
-    implementation: "Organizations implement controls to prevent unauthorized software installation. For agentic AI systems, this includes preventing agents from installing unauthorized tools.",
-    relatedASI: ["ASI02", "ASI05"],
-  },
   "SA-8": {
     title: "Security & Privacy in System Life Cycle",
     description: "Integrates security and privacy throughout the system life cycle.",
@@ -902,24 +890,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     implementation: "Organizations require developers to conduct security testing including static analysis, dynamic testing, and penetration testing. For agentic AI systems, this includes security testing of agent components.",
     relatedASI: [],
   },
-  "SA-12": {
-    title: "Supply Chain Protection",
-    description: "Implements controls to protect the supply chain from tampering and unauthorized modification.",
-    implementation: "Organizations implement supply chain protection measures including verification of authenticity and integrity. For agentic AI systems, this includes verifying authenticity of agent tools and components.",
-    relatedASI: ["ASI04"],
-  },
-  "SA-13": {
-    title: "Trustworthiness",
-    description: "Establishes requirements for system trustworthiness and implements controls to achieve trustworthiness.",
-    implementation: "Organizations establish trustworthiness requirements and implement controls to achieve them. For agentic AI systems, this includes establishing agent trustworthiness requirements.",
-    relatedASI: [],
-  },
-  "SA-14": {
-    title: "Criticality Analysis",
-    description: "Conducts criticality analysis during system development to identify critical functions.",
-    implementation: "Organizations conduct criticality analysis to identify critical system functions. For agentic AI systems, this includes identifying critical agent functions.",
-    relatedASI: [],
-  },
   "SA-15": {
     title: "Development Process, Standards & Tools",
     description: "Requires developers to use approved development processes, standards, and tools.",
@@ -937,18 +907,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Requires developers to implement security architecture and design practices.",
     implementation: "Organizations require developers to implement security architecture and design practices. For agentic AI systems, this includes security architecture for agent systems.",
     relatedASI: [],
-  },
-  "SA-18": {
-    title: "Tamper Protection",
-    description: "Implements tamper protection mechanisms to detect and prevent unauthorized modification.",
-    implementation: "Organizations implement tamper protection mechanisms including physical seals and cryptographic hashing. For agentic AI systems, this includes tamper protection for agent configurations.",
-    relatedASI: ["ASI04"],
-  },
-  "SA-19": {
-    title: "Component Authenticity",
-    description: "Verifies the authenticity of system components to prevent counterfeit components.",
-    implementation: "Organizations implement procedures to verify component authenticity. For agentic AI systems, this includes verifying authenticity of agent tools and components.",
-    relatedASI: ["ASI04"],
   },
   "SA-20": {
     title: "Customized Development of Critical Components",
@@ -1018,12 +976,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     implementation: "Organizations implement encryption and integrity protection for transmitted data. For agentic AI systems, this includes encrypting agent communications and protecting against tampering.",
     relatedASI: ["ASI07"],
   },
-  "SC-9": {
-    title: "Transmission with Organization-Controlled Endpoints",
-    description: "Restricts transmission of sensitive information to organization-controlled endpoints.",
-    implementation: "Organizations restrict transmission of sensitive information to trusted endpoints. For agentic AI systems, this includes restricting agent communication to authorized systems.",
-    relatedASI: ["ASI07"],
-  },
   "SC-10": {
     title: "Network Disconnect",
     description: "Terminates network connections after a period of inactivity.",
@@ -1077,12 +1029,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Restricts and controls mobile code (applets, scripts) to prevent unauthorized execution.",
     implementation: "Organizations restrict mobile code execution and implement controls to prevent malicious code. For agentic AI systems, this includes restricting agent-generated code execution.",
     relatedASI: ["ASI05"],
-  },
-  "SC-19": {
-    title: "Voice Over Internet Protocol",
-    description: "Implements security controls for voice over IP communications.",
-    implementation: "Organizations implement security controls for VoIP systems. For agentic AI systems, this includes securing agent voice communications if applicable.",
-    relatedASI: [],
   },
   "SC-20": {
     title: "Secure Name/Address Resolution Service (DNS & DNSSEC)",
@@ -1161,12 +1107,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Monitors information systems for security events and anomalies.",
     implementation: "Organizations implement monitoring systems to detect security events. For agentic AI systems, this includes monitoring agent behavior for anomalies.",
     relatedASI: ["ASI01", "ASI08"],
-  },
-  "SC-33": {
-    title: "Transmission Preparation Integrity",
-    description: "Protects the integrity of information during preparation for transmission.",
-    implementation: "Organizations implement integrity protection for data preparation. For agentic AI systems, this includes protecting agent data integrity during preparation.",
-    relatedASI: [],
   },
   "SC-34": {
     title: "Non-Modifiability of Information",
@@ -1307,12 +1247,6 @@ export const NIST_CONTROL_DESCRIPTIONS: Record<string, {
     description: "Implements spam and phishing detection and prevention.",
     implementation: "Organizations implement email filtering and anti-phishing tools. For agentic AI systems, this includes protecting agents from phishing attacks.",
     relatedASI: ["ASI01"],
-  },
-  "SI-9": {
-    title: "Information System Monitoring Tools & Techniques",
-    description: "Implements monitoring tools and techniques to detect security events.",
-    implementation: "Organizations implement monitoring tools including SIEM and IDS/IPS. For agentic AI systems, this includes tools for monitoring agent behavior.",
-    relatedASI: ["ASI01", "ASI08"],
   },
   "SI-10": {
     title: "Information Input Validation",

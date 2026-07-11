@@ -25,7 +25,7 @@ describe("computeCoverage", () => {
       ASI01: { nistFamilies: 4, nistControls: 11, aiRmfFunctions: 4, aiRmfCategories: 8 },
       ASI02: { nistFamilies: 4, nistControls: 10, aiRmfFunctions: 4, aiRmfCategories: 8 },
       ASI03: { nistFamilies: 4, nistControls: 10, aiRmfFunctions: 4, aiRmfCategories: 8 },
-      ASI04: { nistFamilies: 4, nistControls: 10, aiRmfFunctions: 4, aiRmfCategories: 5 },
+      ASI04: { nistFamilies: 4, nistControls: 9, aiRmfFunctions: 4, aiRmfCategories: 5 },
       ASI05: { nistFamilies: 4, nistControls: 10, aiRmfFunctions: 4, aiRmfCategories: 5 },
       ASI06: { nistFamilies: 4, nistControls: 8, aiRmfFunctions: 4, aiRmfCategories: 6 },
       ASI07: { nistFamilies: 4, nistControls: 8, aiRmfFunctions: 4, aiRmfCategories: 4 },
@@ -39,9 +39,9 @@ describe("computeCoverage", () => {
 describe("computeStats", () => {
   it("derives the reviewed aggregate statistics", () => {
     expect(computeStats(CROSSWALK, AI_RMF)).toEqual({
-      totalNistControlMappings: 90,
+      totalNistControlMappings: 89,
       totalAiRmfCategoryMappings: 62,
-      uniqueNistControls: 55,
+      uniqueNistControls: 54,
       uniqueAiRmfCategories: 17,
     });
   });

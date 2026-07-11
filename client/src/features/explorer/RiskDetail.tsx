@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ExternalLink } from "lucide-react";
 import { AI_RMF, CROSSWALK, NIST_800_53, OWASP_ASI } from "@/data/crosswalk";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { MappingCard } from "./MappingCard";
@@ -86,9 +86,35 @@ export function RiskDetail({ asiId }: { asiId: string }): ReactElement | null {
             Real-World Evidence
           </span>
         </div>
-        <div className="text-[11px] text-red-300/80 leading-relaxed">
-          {selected.evidence}
-        </div>
+        <ul className="space-y-2">
+          {selected.evidence.map((item, i) => (
+            <li key={i} className="text-[11px] text-red-300/80 leading-relaxed">
+              <div className="flex items-start gap-2 flex-wrap">
+                <span className="shrink-0 mt-px px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-red-500/15 text-red-300/90 border border-red-500/20">
+                  {item.type}
+                </span>
+                {item.sourceUrl ? (
+                  <a
+                    href={item.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-red-200/90 hover:text-red-100 underline decoration-red-400/40 hover:decoration-red-300 inline-flex items-center gap-1"
+                  >
+                    {item.title}
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
+                ) : (
+                  <span>{item.title}</span>
+                )}
+                {item.cveId && (
+                  <span className="shrink-0 font-mono text-[10px] text-red-400/90">
+                    {item.cveId}
+                  </span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );

@@ -24,6 +24,7 @@ export {
   UPSTREAM_VERSIONS,
   buildCsv,
   buildJson,
+  evidenceText,
   parseControlRef,
   severityColor,
   type AIRMFControlDesc,
@@ -33,6 +34,7 @@ export {
   type Coverage,
   type CrosswalkEntry,
   type CrosswalkStats,
+  type EvidenceItem,
   type NISTFamily,
   type NISTMapping,
 } from "@haremantra/crosswalk";

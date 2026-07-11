@@ -9,6 +9,7 @@ import {
   NIST_AI_RMF_DESCRIPTIONS,
   NIST_CONTROL_DESCRIPTIONS,
   OWASP_ASI,
+  evidenceText,
 } from "@/data/crosswalk";
 
 export interface SearchEntry {
@@ -51,7 +52,7 @@ function buildSearchIndex(): SearchEntry[] {
           description: desc ? desc.description : "",
           implementation: desc ? desc.implementation : "",
           rationale: mapping.rationale,
-          evidence: cw.evidence,
+          evidence: evidenceText(cw.evidence),
         });
       });
     });
@@ -75,7 +76,7 @@ function buildSearchIndex(): SearchEntry[] {
           description: desc ? desc.description : "",
           implementation: desc ? desc.implementation : "",
           rationale: mapping.rationale,
-          evidence: cw.evidence,
+          evidence: evidenceText(cw.evidence),
         });
       });
     });

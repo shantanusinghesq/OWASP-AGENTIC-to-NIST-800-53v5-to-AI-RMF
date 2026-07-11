@@ -31,10 +31,20 @@ export interface AIRMFMapping {
   rationale: string;
 }
 
+export interface EvidenceItem {
+  title: string;
+  type: "incident" | "research" | "guidance";
+  sourceUrl?: string;
+  cveId?: string;
+  datePublished?: string;
+  dateVerified: string;
+  relatedControls?: string[];
+}
+
 export interface CrosswalkEntry {
   nist53: NISTMapping[];
   aiRmf: AIRMFMapping[];
-  evidence: string;
+  evidence: EvidenceItem[];
 }
 
 export const OWASP_ASI: ASIRisk[] = [
@@ -104,7 +114,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics", "MS-3 Risk Tracking"], rationale: "KRIs around goal drift — anomalous tool sequences, unexpected data access — feed continuous risk measurement (MS-1/3)." },
       { func: "MANAGE", cats: ["MG-1 Risk Prioritization", "MG-3 Response & Recovery"], rationale: "Goal override rollback procedures and kill-switch SLAs map to MG-3. Prioritization of goal-hijack as top-tier risk is MG-1." },
     ],
-    evidence: "EchoLeak zero-click exfiltration via M365 Copilot; Calendar invite goal-lock drift; AgentFlayer inception attack on ChatGPT users."
+    evidence: [
+      { title: "EchoLeak (CVE-2025-32711): zero-click prompt-injection data exfiltration in Microsoft 365 Copilot", type: "incident", sourceUrl: "https://thehackernews.com/2025/06/zero-click-ai-vulnerability-exposes.html", cveId: "CVE-2025-32711", datePublished: "2025-06", dateVerified: "2026-07-11" },
+      { title: "Invitation Is All You Need: Gemini calendar-invite prompt injection (SafeBreach)", type: "incident", sourceUrl: "https://www.safebreach.com/blog/invitation-is-all-you-need-hacking-gemini/", datePublished: "2025-08", dateVerified: "2026-07-11" },
+      { title: "AgentFlayer: ChatGPT Connectors 0-click attack (Zenity Labs)", type: "incident", sourceUrl: "https://labs.zenity.io/p/agentflayer-chatgpt-connectors-0click-attack-5b41", datePublished: "2025-08-06", dateVerified: "2026-07-11" },
+    ]
   },
   ASI02: {
     nist53: [
@@ -119,7 +133,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics", "MS-2 Trustworthiness Evaluation"], rationale: "Tool budgeting metrics (cost ceilings, rate limits) and drift detection form the measurement baseline." },
       { func: "MANAGE", cats: ["MG-2 Risk Treatment", "MG-3 Response & Recovery"], rationale: "Adaptive tool budgeting with automatic revocation (MG-2). Dry-run previews before destructive actions (MG-3)." },
     ],
-    evidence: "Amazon Q secrets via DNS exfiltration; EDR bypass via tool chaining under trusted credentials; MCP tool descriptor poisoning."
+    evidence: [
+      { title: "Amazon Q Developer Vulnerability: Secrets Leaked via DNS and Prompt Injection", type: "incident", sourceUrl: "https://embracethered.com/blog/posts/2025/amazon-q-developer-data-exfil-via-dns/", datePublished: "2025-08-18", dateVerified: "2026-07-11" },
+      { title: "MCP Tool Poisoning (OWASP community attack reference)", type: "guidance", sourceUrl: "https://owasp.org/www-community/attacks/MCP_Tool_Poisoning", dateVerified: "2026-07-11" },
+      { title: "MITRE ATT&CK T1218 — System/Signed Binary Proxy Execution (LOLBins)", type: "guidance", sourceUrl: "https://attack.mitre.org/techniques/T1218/", dateVerified: "2026-07-11" },
+    ]
   },
   ASI03: {
     nist53: [
@@ -134,7 +152,12 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics", "MS-3 Risk Tracking"], rationale: "Credential-lifetime sampling, delegation-depth metrics, and access certification pass rates." },
       { func: "MANAGE", cats: ["MG-2 Risk Treatment", "MG-4 Residual Risk"], rationale: "Automated revocation on session termination (MG-2). Residual risk from implicit trust inheritance (MG-4)." },
     ],
-    evidence: "CVE-2025-31491; Confused deputy via cross-agent trust; Memory-based SSH credential escalation; Forged Agent Persona registration."
+    evidence: [
+      { title: "AutoGPT cross-origin credential & cookie leakage on redirect (CVE-2025-31491)", type: "incident", sourceUrl: "https://nvd.nist.gov/vuln/detail/CVE-2025-31491", cveId: "CVE-2025-31491", datePublished: "2025-04-14", dateVerified: "2026-07-11" },
+      { title: "CSA Research Note: Confused Deputy Attacks on Autonomous AI Agents", type: "research", sourceUrl: "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-confused-deputy-prompt-injection/", datePublished: "2026-03-23", dateVerified: "2026-07-11" },
+      { title: "OWASP AI Agent Security Cheat Sheet — memory poisoning & credential/privilege escalation", type: "guidance", sourceUrl: "https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html", dateVerified: "2026-07-11" },
+      { title: "Security Analysis of Agentic AI Communication Protocols — agent registration/discovery spoofing (CWE-290)", type: "research", sourceUrl: "https://arxiv.org/abs/2511.03841", datePublished: "2025-11", dateVerified: "2026-07-11" },
+    ]
   },
   ASI04: {
     nist53: [
@@ -149,7 +172,12 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-2 Trustworthiness Evaluation"], rationale: "Evaluating provenance, signature validity, and typosquat scanning results." },
       { func: "MANAGE", cats: ["MG-1 Risk Prioritization", "MG-3 Response & Recovery"], rationale: "Supply-chain kill switches for emergency revocation. Blast-radius estimates for compromised components." },
     ],
-    evidence: "Amazon Q supply chain compromise; MCP Tool Descriptor Poisoning; Malicious Postmark MCP server; AgentSmith Prompt-Hub proxy attack."
+    evidence: [
+      { title: "Malicious data-wiping prompt injected into Amazon Q Developer VS Code extension v1.84.0", type: "incident", sourceUrl: "https://www.reversinglabs.com/blog/aws-amazonq-ai-incident", datePublished: "2025-07", dateVerified: "2026-07-11" },
+      { title: "MCP Tool Poisoning Attacks — malicious instructions hidden in tool description/metadata", type: "research", sourceUrl: "https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks", datePublished: "2025-04", dateVerified: "2026-07-11" },
+      { title: "Rogue postmark-mcp npm package BCC-exfiltrated emails (first malicious MCP server in the wild)", type: "incident", sourceUrl: "https://www.koi.ai/blog/postmark-mcp-npm-malicious-backdoor-email-theft", datePublished: "2025-09", dateVerified: "2026-07-11" },
+      { title: "AgentSmith: LangSmith Prompt Hub malicious Proxy Provider agent leaks API keys and data", type: "incident", sourceUrl: "https://noma.security/blog/how-an-ai-agent-vulnerability-in-langsmith-could-lead-to-stolen-api-keys-and-hijacked-llm-responses/", datePublished: "2025-06", dateVerified: "2026-07-11" },
+    ]
   },
   ASI05: {
     nist53: [
@@ -164,7 +192,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics"], rationale: "Tracking code-generation security scan pass rates, sandbox escape attempts, and dependency integrity scores." },
       { func: "MANAGE", cats: ["MG-2 Risk Treatment", "MG-3 Response & Recovery"], rationale: "Kill switch and sandbox isolation as containment procedures. Rollback capabilities for corrupted environments." },
     ],
-    evidence: "Replit vibe-coding agents executing unreviewed install commands; Direct shell injection via embedded prompts; Dependency lockfile poisoning."
+    evidence: [
+      { title: "Replit AI agent deleted a production database during a code freeze (SaaStr / Jason Lemkin incident)", type: "incident", sourceUrl: "https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/", datePublished: "2025-07-21", dateVerified: "2026-07-11" },
+      { title: "\"Your AI, My Shell\": Demystifying Prompt Injection Attacks on Agentic AI Coding Editors", type: "research", sourceUrl: "https://arxiv.org/abs/2509.22040", datePublished: "2025-09", dateVerified: "2026-07-11" },
+      { title: "Lockfile Poisoning: An Attack Vector to Introduce Malware in the Software Supply Chain", type: "research", sourceUrl: "https://safedep.substack.com/p/lockfile-poisoning-an-attack-vector", datePublished: "2023-12-27", dateVerified: "2026-07-11" },
+    ]
   },
   ASI06: {
     nist53: [
@@ -179,7 +211,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics", "MS-3 Risk Tracking"], rationale: "KRIs around anomalous memory-write patterns, cross-tenant access attempts, and self-referential loops." },
       { func: "MANAGE", cats: ["MG-3 Response & Recovery"], rationale: "Memory rollback capabilities, snapshot/versioning, and tested recovery procedures." },
     ],
-    evidence: "Gemini long-term memory corruption via prompt injection; ChatGPT persistent false memory planting; Cross-tenant vector namespace bleed."
+    evidence: [
+      { title: "Hacking Gemini's Memory with Prompt Injection and Delayed Tool Invocation (Johann Rehberger / Embrace The Red)", type: "incident", sourceUrl: "https://embracethered.com/blog/posts/2025/gemini-memory-persistence-prompt-injection/", datePublished: "2025-02-10", dateVerified: "2026-07-11" },
+      { title: "SpAIware: Spyware/false-memory injection into ChatGPT's long-term memory (Johann Rehberger / Embrace The Red)", type: "incident", sourceUrl: "https://embracethered.com/blog/posts/2024/chatgpt-macos-app-persistent-data-exfiltration/", datePublished: "2024-09-20", dateVerified: "2026-07-11" },
+      { title: "OWASP LLM08:2025 Vector and Embedding Weaknesses (cross-context / multi-tenant leakage)", type: "guidance", sourceUrl: "https://genai.owasp.org/llmrisk/llm08-excessive-agency/", datePublished: "2025", dateVerified: "2026-07-11" },
+    ]
   },
   ASI07: {
     nist53: [
@@ -194,7 +230,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-2 Trustworthiness Evaluation"], rationale: "Testing anti-replay protections and protocol version pinning during pre-production security reviews." },
       { func: "MANAGE", cats: ["MG-2 Risk Treatment"], rationale: "Protocol pinning, version enforcement, and discovery message authentication." },
     ],
-    evidence: "Semantic injection over unencrypted HTTP channels; Trust poisoning via altered reputation messages; MCP descriptor spoofing."
+    evidence: [
+      { title: "OWASP ASI07 Insecure Inter-Agent Communication: MITM semantic injection over HTTP/unauthenticated channels", type: "guidance", sourceUrl: "https://github.com/microsoft/hve-core/blob/main/.github/skills/security/owasp-agentic/references/07-insecure-inter-agent-communication.md", datePublished: "2025-12", dateVerified: "2026-07-11" },
+      { title: "OWASP ASI07: altered reputation messages skew agent trust (agentic trading network scenario)", type: "guidance", sourceUrl: "https://github.com/microsoft/hve-core/blob/main/.github/skills/security/owasp-agentic/references/07-insecure-inter-agent-communication.md", datePublished: "2025-12", dateVerified: "2026-07-11" },
+      { title: "Invariant Labs - MCP Tool Poisoning / Shadowing Attacks (spoofed & overridden tool descriptors)", type: "research", sourceUrl: "https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks", datePublished: "2025-04-01", dateVerified: "2026-07-11" },
+    ]
   },
   ASI08: {
     nist53: [
@@ -209,7 +249,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-3 Risk Tracking"], rationale: "Digital twin replay testing — re-running recorded actions in isolated environments to detect cascade potential." },
       { func: "MANAGE", cats: ["MG-3 Response & Recovery", "MG-4 Residual Risk"], rationale: "Emergency isolation procedures, governance drift monitoring, and residual systemic risk tracking." },
     ],
-    evidence: "Financial trading cascade via prompt-injected risk limits; Healthcare protocol propagation from supply-chain tampering; Auto-remediation feedback loops."
+    evidence: [
+      { title: "TradeTrap: Are LLM-based Trading Agents Truly Reliable and Faithful?", type: "research", sourceUrl: "https://arxiv.org/abs/2512.02261", datePublished: "2025-12", dateVerified: "2026-07-11" },
+      { title: "Data Poisoning Vulnerabilities Across Healthcare AI Architectures: A Security Threat Analysis", type: "research", sourceUrl: "https://arxiv.org/abs/2511.11020", datePublished: "2025-11", dateVerified: "2026-07-11" },
+      { title: "Addressing Cascading Failures (Google SRE Book, Ch. 22)", type: "guidance", sourceUrl: "https://sre.google/sre-book/addressing-cascading-failures/", datePublished: "2016", dateVerified: "2026-07-11" },
+    ]
   },
   ASI09: {
     nist53: [
@@ -224,7 +268,12 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics"], rationale: "KRI: tracking override rates (human reviewers overriding vs rubber-stamping agent recommendations)." },
       { func: "MANAGE", cats: ["MG-2 Risk Treatment"], rationale: "Confidence-weighted cues, risk badges, and separate preview-from-effect mechanisms." },
     ],
-    evidence: "Helpful Assistant Trojan exfiltrating code; Credential harvesting via contextual deception; Invoice Copilot Fraud; Weaponized Explainability."
+    evidence: [
+      { title: "CamoLeak: GitHub Copilot Chat prompt-injection flaw silently exfiltrating private source code and secrets", type: "incident", sourceUrl: "https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code", datePublished: "2025-10", dateVerified: "2026-07-11" },
+      { title: "Human-Agent Trust Exploitation (OWASP ASI09) — SecureFlag Security Knowledge Base", type: "guidance", sourceUrl: "https://knowledge-base.secureflag.com/vulnerabilities/sensitive_information_exposure/human_agent_trust_exploitation_in_ai_llm_vulnerability.html", dateVerified: "2026-07-11" },
+      { title: "Zscaler ThreatLabz — indirect prompt injection manipulating autonomous AI agents into executing fraudulent payments", type: "research", sourceUrl: "https://www.zscaler.com/blogs/security-research/indirect-prompt-injection-web-content-targets-ai-agents", datePublished: "2026-07", dateVerified: "2026-07-11" },
+      { title: "Fooling LIME and SHAP: Adversarial Attacks on Post hoc Explanation Methods (Slack, Hilgard, Jia, Singh, Lakkaraju — AIES 2020)", type: "research", sourceUrl: "https://arxiv.org/abs/1911.02508", datePublished: "2019-11", dateVerified: "2026-07-11" },
+    ]
   },
   ASI10: {
     nist53: [
@@ -239,7 +288,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { func: "MEASURE", cats: ["MS-1 Risk Metrics", "MS-3 Risk Tracking"], rationale: "Behavioral drift detection metrics. Tool-use pattern monitoring against baseline manifests." },
       { func: "MANAGE", cats: ["MG-1 Risk Prioritization", "MG-3 Response & Recovery"], rationale: "Kill-switch SLA testing (quarterly). Automatic quarantine pending forensic review with risk committee reporting." },
     ],
-    evidence: "Impersonated observer agent approving fraudulent transactions; Compromised automation agent spawning unauthorized replicas; Reward-hacking DR deletion."
+    evidence: [
+      { title: "AI agent fraud: agent impersonation / identity spoofing in multi-agent systems (Stytch)", type: "guidance", sourceUrl: "https://stytch.com/blog/ai-agent-fraud/", dateVerified: "2026-07-11" },
+      { title: "Morris II / ComPromptMized: self-replicating zero-click GenAI worm (Cohen, Bitton, Nassi)", type: "research", sourceUrl: "https://arxiv.org/abs/2403.02817", datePublished: "2024-03", dateVerified: "2026-07-11" },
+      { title: "Natural emergent misalignment from reward hacking (Anthropic)", type: "research", sourceUrl: "https://www.anthropic.com/research/emergent-misalignment-reward-hacking", datePublished: "2025-11", dateVerified: "2026-07-11" },
+    ]
   },
 };
 

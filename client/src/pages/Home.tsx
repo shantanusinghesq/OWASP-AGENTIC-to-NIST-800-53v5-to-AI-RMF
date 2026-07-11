@@ -14,9 +14,6 @@ import {
   AI_RMF,
   CROSSWALK,
   CROSSWALK_STATS,
-  severityColor,
-  getControlDescription,
-  type Framework,
 } from "@/data/crosswalk";
 import type { ASIRisk } from "@/data/crosswalk";
 import { Link } from "wouter";
@@ -39,236 +36,22 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import ScenarioSimulator from "@/pages/ScenarioSimulator";
+import ScenarioSimulator from "@/features/simulator/ScenarioSimulator";
 import { NIST_CONTROL_DESCRIPTIONS, NIST_AI_RMF_DESCRIPTIONS } from "@/data/crosswalk";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import OnboardingController from "@/components/onboarding/OnboardingController";
 import OverviewRoster from "@/components/OverviewRoster";
 import HeatmapExplainer from "@/components/HeatmapExplainer";
+import { SeverityBadge } from "@/components/SeverityBadge";
+import { StatCard } from "@/components/StatCard";
+import { MappingCard } from "@/features/explorer/MappingCard";
+import { HeatCell } from "@/features/heatmap/HeatCell";
+import { AIRmfHeatCell } from "@/features/heatmap/AiRmfHeatCell";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
 
 const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663361461713/Bxv8kAWRJNLYA27hMDxSrg/hero-banner-WgxSTgdd9RwHSwF7ESq4Lf.webp";
-
-// ─── Sub-components ──────────────────────────────────────────────
-
-function SeverityBadge({ level }: { level: string }) {
-  const isCritical = level === "Critical";
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase ${isCritical ? "pulse-critical" : ""}`}
-      style={{
-        backgroundColor: `${severityColor[level]}20`,
-        color: severityColor[level],
-        border: `1px solid ${severityColor[level]}40`,
-      }}
-    >
-      {isCritical && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-      {level}
-    </span>
-  );
-}
-
-function MappingCard({
-  title,
-  items,
-  color,
-  framework,
-}: {
-  title: string;
-  items: { id: string; text: string }[];
-  color: string;
-  framework: Framework;
-}) {
-  // Extract control ID from text (e.g., "AC-3 Access Enforcement" -> "AC-3" or "GV-1 Policies & Processes" -> "GV-1")
-  const extractControlId = (text: string): string | null => {
-    const match = text.match(/^([A-Z]{2,8}-\d{1,2})\s/);
-    return match ? match[1] : null;
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15 }}
-      className="rounded-md mb-2 overflow-hidden"
-      style={{
-        border: `1px solid ${color}25`,
-        borderLeft: `3px solid ${color}`,
-        backgroundColor: `${color}08`,
-      }}
-    >
-      <div className="px-3 py-2">
-        <div className="font-bold text-xs mb-1.5" style={{ color, fontFamily: "var(--font-mono)" }}>
-          {title}
-        </div>
-        {items.map((item, i) => {
-          // Framework-scoped lookup — never fall back across frameworks: 800-53
-          // owns MP-1..MP-8 (Media Protection) while AI-RMF MAP categories use
-          // the same MP-* IDs, so a fallback chain shows wrong-framework text.
-          const controlId = extractControlId(item.text);
-          const controlDesc = controlId ? getControlDescription(framework, controlId) : null;
-          const isRationale = item.id === "\u21b3";
-          
-          return (
-            <div key={i} className="text-[11px] leading-relaxed text-slate-300 mb-1">
-              {item.id && (
-                <span className="font-semibold mr-1" style={{ color, fontFamily: "var(--font-mono)" }}>
-                  {item.id}
-                </span>
-              )}
-              {controlDesc && !isRationale ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help border-b border-dashed" style={{ borderColor: color }}>
-                      {item.text}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="max-w-xs" style={{ backgroundColor: "#2563EB", color: "white" }}>
-                    <div className="text-xs">
-                      <div className="font-bold mb-1">{controlDesc.title}</div>
-                      <div className="text-[11px] mb-2 text-blue-100">{controlDesc.description}</div>
-                      <div className="text-[10px] text-blue-200 italic mb-2">{controlDesc.implementation}</div>
-                      {controlDesc.relatedASI && controlDesc.relatedASI.length > 0 && (
-                        <div className="text-[10px] text-blue-100">
-                          <span className="font-semibold">Related ASI:</span> {controlDesc.relatedASI.join(", ")}
-                        </div>
-                      )}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <span>{item.text}</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </motion.div>
-  );
-}
-
-function HeatCell({ count, max, riskId, riskName, familyCode }: { count: number; max: number; riskId: string; riskName: string; familyCode: string }) {
-  const intensity = max > 0 ? count / max : 0;
-  const bg =
-    count === 0
-      ? "rgba(15,23,42,0.5)"
-      : intensity > 0.7
-        ? "#1E40AF"
-        : intensity > 0.4
-          ? "#3B82F6"
-          : "#3B82F640";
-  const textColor = count === 0 ? "#334155" : intensity > 0.4 ? "white" : "#93C5FD";
-  
-  // Control family descriptions
-  const familyDescriptions: Record<string, string> = {
-    AC: "Access Control: Manages user access, permissions, and authentication to protect systems and data from unauthorized use.",
-    AU: "Audit & Accountability: Tracks and logs system activities to enable detection of unauthorized actions and accountability.",
-    CA: "Assessment & Authorization: Evaluates security controls and authorizes systems for operation based on risk assessment.",
-    CM: "Configuration Management: Controls system configuration changes to maintain baseline integrity and prevent unauthorized modifications.",
-    CP: "Contingency Planning: Prepares for disruptions through backup, recovery, and continuity procedures.",
-    IA: "Identification & Authentication: Verifies user and system identities through credentials and multi-factor authentication.",
-    IR: "Incident Response: Detects, responds to, and recovers from security incidents and breaches.",
-    MP: "Media Protection: Protects physical and digital media containing sensitive information from unauthorized access.",
-    PE: "Physical & Environmental: Secures physical facilities, equipment, and environmental controls against threats.",
-    PL: "Planning: Develops security strategies, policies, and plans aligned with organizational objectives.",
-    PM: "Program Management: Oversees security program governance, resource allocation, and compliance.",
-    RA: "Risk Assessment: Identifies, analyzes, and evaluates security risks to inform mitigation strategies.",
-    SA: "System & Services Acquisition: Ensures security requirements are met in procurement and development of systems and services.",
-    SC: "System & Comms Protection: Protects system boundaries and communications channels from unauthorized access and interference.",
-    SI: "System & Info Integrity: Maintains system and information integrity through monitoring, validation, and protection mechanisms.",
-    SR: "Supply Chain Risk Mgmt: Manages risks from suppliers, vendors, and third-party dependencies.",
-  };
-  
-  const cell = (
-    <td
-      className="text-center border border-slate-700/50 transition-all duration-150 hover:brightness-125 cursor-help"
-      style={{
-        backgroundColor: bg,
-        color: textColor,
-        padding: "6px 4px",
-        fontSize: 11,
-        fontWeight: count > 0 ? 700 : 400,
-        fontFamily: count > 0 ? "var(--font-mono)" : "inherit",
-        minWidth: 36,
-      }}
-      aria-label={count > 0 ? `${riskId} ${riskName} × ${familyCode}: ${count} controls mapped` : `${riskId} ${riskName} × ${familyCode}: no controls mapped`}
-    >
-      {count || ""}
-    </td>
-  );
-  
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        {cell}
-      </TooltipTrigger>
-      <TooltipContent side="top" className="text-xs font-normal w-80 bg-slate-900 border border-slate-700 text-slate-100">
-        <div className="space-y-2 p-2">
-          <div className="font-mono font-semibold">{riskId} × {familyCode}</div>
-          <div className="text-slate-300 leading-relaxed whitespace-normal">{riskName}</div>
-          <div className="text-slate-400 text-[10px]">{familyDescriptions[familyCode]}</div>
-          {count > 0 && <div className="text-slate-300 font-semibold pt-1">{count} controls mapped</div>}
-        </div>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-function AIRmfHeatCell({ count, max, riskId, riskName, functionName }: { count: number; max: number; riskId: string; riskName: string; functionName: string }) {
-  const intensity = max > 0 ? count / max : 0;
-  const bg =
-    count === 0
-      ? "rgba(15,23,42,0.5)"
-      : intensity > 0.7
-        ? "#047857"
-        : intensity > 0.4
-          ? "#10B981"
-          : "#10B98140";
-  const textColor = count === 0 ? "#334155" : intensity > 0.4 ? "white" : "#6EE7B7";
-  return (
-    <td
-      className="text-center border border-slate-700/50 transition-all duration-150 hover:brightness-125"
-      style={{
-        backgroundColor: bg,
-        color: textColor,
-        padding: "8px 6px",
-        fontSize: 12,
-        fontWeight: count > 0 ? 700 : 400,
-        fontFamily: count > 0 ? "var(--font-mono)" : "inherit",
-        minWidth: 100,
-      }}
-      aria-label={count > 0 ? `${riskId} ${riskName} × ${functionName}: ${count} subcategories` : `${riskId} ${riskName} × ${functionName}: no subcategories`}
-    >
-      {count || ""}
-    </td>
-  );
-}
-
-function StatCard({ label, value, color, subtitle }: { label: string; value: string | number; color: string; subtitle?: string }) {
-  return (
-    <div
-      className="rounded-md p-3 border"
-      style={{
-        backgroundColor: `${color}08`,
-        borderColor: `${color}30`,
-      }}
-    >
-      <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: `${color}` }}>
-        {label}
-      </div>
-      <div className="text-xl font-bold" style={{ color, fontFamily: "var(--font-mono)" }}>
-        {value}
-      </div>
-      {subtitle && (
-        <div className="mt-1" style={{ fontSize: 11, color: "#94A3B8" }}>
-          {subtitle}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─── Main Page ──────────────────────────────────────────────────
 

@@ -1,0 +1,86 @@
+import { motion } from "framer-motion";
+import { getControlDescription, type Framework } from "@/data/crosswalk";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+
+export function MappingCard({
+  title,
+  items,
+  color,
+  framework,
+}: {
+  title: string;
+  items: { id: string; text: string }[];
+  color: string;
+  framework: Framework;
+}) {
+  // Extract control ID from text (e.g., "AC-3 Access Enforcement" -> "AC-3" or "GV-1 Policies & Processes" -> "GV-1")
+  const extractControlId = (text: string): string | null => {
+    const match = text.match(/^([A-Z]{2,8}-\d{1,2})\s/);
+    return match ? match[1] : null;
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.15 }}
+      className="rounded-md mb-2 overflow-hidden"
+      style={{
+        border: `1px solid ${color}25`,
+        borderLeft: `3px solid ${color}`,
+        backgroundColor: `${color}08`,
+      }}
+    >
+      <div className="px-3 py-2">
+        <div className="font-bold text-xs mb-1.5" style={{ color, fontFamily: "var(--font-mono)" }}>
+          {title}
+        </div>
+        {items.map((item, i) => {
+          // Framework-scoped lookup — never fall back across frameworks: 800-53
+          // owns MP-1..MP-8 (Media Protection) while AI-RMF MAP categories use
+          // the same MP-* IDs, so a fallback chain shows wrong-framework text.
+          const controlId = extractControlId(item.text);
+          const controlDesc = controlId ? getControlDescription(framework, controlId) : null;
+          const isRationale = item.id === "\u21b3";
+
+          return (
+            <div key={i} className="text-[11px] leading-relaxed text-slate-300 mb-1">
+              {item.id && (
+                <span className="font-semibold mr-1" style={{ color, fontFamily: "var(--font-mono)" }}>
+                  {item.id}
+                </span>
+              )}
+              {controlDesc && !isRationale ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help border-b border-dashed" style={{ borderColor: color }}>
+                      {item.text}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs" style={{ backgroundColor: "#2563EB", color: "white" }}>
+                    <div className="text-xs">
+                      <div className="font-bold mb-1">{controlDesc.title}</div>
+                      <div className="text-[11px] mb-2 text-blue-100">{controlDesc.description}</div>
+                      <div className="text-[10px] text-blue-200 italic mb-2">{controlDesc.implementation}</div>
+                      {controlDesc.relatedASI && controlDesc.relatedASI.length > 0 && (
+                        <div className="text-[10px] text-blue-100">
+                          <span className="font-semibold">Related ASI:</span> {controlDesc.relatedASI.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <span>{item.text}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}

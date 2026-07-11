@@ -3,7 +3,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
 import { ScenarioProvider } from "./contexts/ScenarioContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 import Home from "./pages/Home";
@@ -26,16 +25,14 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
-        <ScenarioProvider>
-          <OnboardingProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </OnboardingProvider>
-        </ScenarioProvider>
-      </ThemeProvider>
+      <ScenarioProvider>
+        <OnboardingProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </OnboardingProvider>
+      </ScenarioProvider>
     </ErrorBoundary>
   );
 }

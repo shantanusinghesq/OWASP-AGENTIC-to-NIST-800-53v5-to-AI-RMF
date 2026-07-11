@@ -20,10 +20,10 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
     relatedASI: ["ASI01", "ASI03", "ASI08"],
   },
   "GV-2": {
-    title: "GV-2 — Risk Management Framework",
-    description: "Implements a comprehensive risk management framework that identifies, assesses, and mitigates AI-specific risks throughout the system lifecycle.",
-    implementation: "Agentic AI risk management must include threat modeling for agent goal hijacking, tool misuse, cascading failures, and supply chain vulnerabilities specific to AI models and agents.",
-    relatedASI: ["ASI01", "ASI02", "ASI04", "ASI05", "ASI08"],
+    title: "GV-2 — Accountability",
+    description: "Establishes accountability structures so the roles, responsibilities, and lines of authority for AI risk management are clearly defined and enforced.",
+    implementation: "For agentic AI, assign explicit owners and decision authority for each autonomous system, define escalation chains for ambiguous or high-impact agent actions, and hold named roles accountable for goal alignment and incident response.",
+    relatedASI: ["ASI01", "ASI03", "ASI08", "ASI10"],
   },
   "GV-3": {
     title: "GV-3 — Workforce Diversity",
@@ -32,10 +32,10 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
     relatedASI: ["ASI01", "ASI03", "ASI10"],
   },
   "GV-4": {
-    title: "GV-4 — Oversight & Accountability",
-    description: "Establishes oversight mechanisms and accountability structures to ensure AI systems operate within approved parameters and organizational policies.",
-    implementation: "For agentic AI, implement continuous monitoring of agent behavior, goal alignment verification, audit trails for all autonomous decisions, and human-in-the-loop controls for critical actions.",
-    relatedASI: ["ASI01", "ASI03", "ASI08", "ASI10"],
+    title: "GV-4 — Organizational Practices",
+    description: "Fosters organizational practices and a culture that prioritize the safe, responsible design, development, and deployment of AI systems.",
+    implementation: "For agentic AI, embed agent-risk review into the development lifecycle, maintain documented practices for provisioning and decommissioning agents, and cultivate a safety-first culture around autonomy levels and tool access.",
+    relatedASI: ["ASI01", "ASI08", "ASI10"],
   },
   "GV-5": {
     title: "GV-5 — Stakeholder Engagement",
@@ -44,10 +44,10 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
     relatedASI: ["ASI09"],
   },
   "GV-6": {
-    title: "GV-6 — Resource Allocation",
-    description: "Allocates appropriate resources (budget, personnel, tools) to support AI governance and risk management activities.",
-    implementation: "Allocate sufficient resources for continuous monitoring, testing, and red-teaming of agentic AI systems; invest in tools for detecting agent goal drift and anomalous behavior.",
-    relatedASI: ["ASI01", "ASI02", "ASI08"],
+    title: "GV-6 — Supply Chain & Third-Party",
+    description: "Establishes policies and processes to identify and manage risks arising from third-party software, tools, models, and data used by AI systems.",
+    implementation: "For agentic AI, require an AIBOM for all third-party tools, MCP servers, and agent personas; vet and monitor external components for provenance and authenticity; and secure contractual assurances for supplied models and services.",
+    relatedASI: ["ASI02", "ASI04", "ASI08"],
   },
 
   // MAP Function Controls (MP-1 through MP-5)
@@ -111,27 +111,27 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
 
   // MANAGE Function Controls (MG-1 through MG-4)
   "MG-1": {
-    title: "MG-1 — Incident Response",
-    description: "Establishes and executes incident response procedures for AI-related security and safety incidents.",
-    implementation: "For agentic AI incidents (goal hijacking, tool misuse, cascading failures), activate emergency shutdown, isolate affected agents, and initiate forensic analysis.",
+    title: "MG-1 — Risk Prioritization",
+    description: "Prioritizes identified AI risks and allocates response based on assessed impact, likelihood, and organizational risk tolerance.",
+    implementation: "For agentic AI, rank risks such as goal hijacking, tool misuse, and cascading failure by blast radius and autonomy level, and direct mitigation effort to the highest-impact agent behaviors first.",
     relatedASI: ["ASI01", "ASI02", "ASI08", "ASI10"],
   },
   "MG-2": {
-    title: "MG-2 — Corrective Actions",
-    description: "Implements corrective actions to address identified risks and incidents, including system updates and policy changes.",
-    implementation: "Apply patches to agentic AI systems, update tool access policies, refine goal definitions, and retrain models based on incident analysis.",
+    title: "MG-2 — Risk Treatment",
+    description: "Selects and applies strategies to treat prioritized risks — mitigating, transferring, avoiding, or accepting them — to maximize benefits and minimize negative impacts.",
+    implementation: "Apply treatments to agentic AI risks: tighten tool-access policies, refine goal definitions, add human-in-the-loop gates for high-impact actions, or constrain autonomy where residual risk is unacceptable.",
     relatedASI: ["ASI01", "ASI02", "ASI05"],
   },
   "MG-3": {
-    title: "MG-3 — Continuous Monitoring",
-    description: "Maintains continuous monitoring of AI system performance and risk indicators to detect emerging issues.",
-    implementation: "Continuously monitor agentic AI for goal drift, tool misuse patterns, performance degradation, and emerging vulnerabilities in dependencies.",
+    title: "MG-3 — Response & Recovery",
+    description: "Establishes and executes response and recovery procedures so AI incidents are contained and normal operation is restored.",
+    implementation: "For agentic AI incidents, activate kill switches and rollback procedures, isolate affected agents, restore from known-good state or digital-twin replay, and meet documented recovery SLAs.",
     relatedASI: ["ASI01", "ASI02", "ASI04", "ASI08"],
   },
   "MG-4": {
-    title: "MG-4 — Lessons Learned",
-    description: "Captures and applies lessons learned from incidents and monitoring activities to improve AI governance and controls.",
-    implementation: "Document agentic AI incidents, near-misses, and red-team findings; share lessons across the organization to prevent similar issues in other AI systems.",
+    title: "MG-4 — Residual Risk",
+    description: "Documents, monitors, and communicates residual risk that remains after treatment, and tracks it over the AI system lifecycle.",
+    implementation: "For agentic AI, record residual risk after controls are applied (e.g. accepted autonomy exposure), monitor it continuously for drift, and re-evaluate as agent capabilities and dependencies change.",
     relatedASI: ["ASI01", "ASI02", "ASI08"],
   },
 };

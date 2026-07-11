@@ -142,6 +142,29 @@ describe("@haremantra/crosswalk integrity", () => {
     }
   });
 
+  it("T-title every AI-RMF description title matches its taxonomy display name", () => {
+    // The tooltip shows NIST_AI_RMF_DESCRIPTIONS[id].title while the visible
+    // label is the AI_RMF.cats display string; a mismatch renders the wrong
+    // category name (e.g. GV-6 "Supply Chain" labelled "Resource Allocation").
+    // Description titles use "ID — Name"; taxonomy strings use "ID Name".
+    const mismatches: string[] = [];
+    for (const func of AI_RMF) {
+      for (const cat of func.cats) {
+        const m = cat.match(/^(\S+)\s+(.*)$/);
+        if (!m) continue;
+        const [, id, name] = m;
+        const desc = NIST_AI_RMF_DESCRIPTIONS[id];
+        if (!desc) {
+          mismatches.push(`${id}: no description`);
+          continue;
+        }
+        const descName = desc.title.replace(/^\S+\s*—\s*/, "").trim();
+        if (descName !== name) mismatches.push(`${id}: "${descName}" != "${name}"`);
+      }
+    }
+    expect(mismatches, `title/display-name mismatches: ${mismatches.join("; ")}`).toEqual([]);
+  });
+
   it("T16 unreferenced AI-RMF description keys equal the known-orphan allowlist", () => {
     // Ratchet: description keys not cited by any CROSSWALK aiRmf mapping must
     // equal exactly this allowlist. Shrinking it requires wiring the category

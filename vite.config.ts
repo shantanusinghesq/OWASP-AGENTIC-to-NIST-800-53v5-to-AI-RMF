@@ -153,6 +153,9 @@ function vitePluginManusDebugCollector(): Plugin {
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
+  // GitHub Pages project site — served under the repo subpath.
+  // Absolute (not './') so the 404.html SPA fallback resolves assets from any deep link.
+  base: "/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/",
   plugins,
   resolve: {
     alias: {

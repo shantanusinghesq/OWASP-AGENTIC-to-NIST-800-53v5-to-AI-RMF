@@ -26,9 +26,9 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
     relatedASI: ["ASI01", "ASI02", "ASI04", "ASI05", "ASI08"],
   },
   "GV-3": {
-    title: "GV-3 — Organizational Practices",
-    description: "Defines organizational practices and structures for AI governance, including roles, responsibilities, and accountability mechanisms.",
-    implementation: "Establish clear ownership and accountability for agentic AI systems, including incident response teams, model governance boards, and escalation chains for autonomous agent decisions.",
+    title: "GV-3 — Workforce Diversity",
+    description: "Promotes workforce diversity, equity, inclusion, and accessibility in the teams that design, deploy, and oversee AI systems, so a broad range of perspectives informs risk identification.",
+    implementation: "For agentic AI systems, assemble cross-functional review teams spanning security, domain, and affected-user perspectives to surface goal-alignment and misuse risks a homogeneous team would miss.",
     relatedASI: ["ASI01", "ASI03", "ASI10"],
   },
   "GV-4": {
@@ -47,12 +47,6 @@ export const NIST_AI_RMF_DESCRIPTIONS: Record<string, AIRMFControlDesc> = {
     title: "GV-6 — Resource Allocation",
     description: "Allocates appropriate resources (budget, personnel, tools) to support AI governance and risk management activities.",
     implementation: "Allocate sufficient resources for continuous monitoring, testing, and red-teaming of agentic AI systems; invest in tools for detecting agent goal drift and anomalous behavior.",
-    relatedASI: ["ASI01", "ASI02", "ASI08"],
-  },
-  "GV-7": {
-    title: "GV-7 — Continuous Improvement",
-    description: "Establishes processes for continuous monitoring, evaluation, and improvement of AI governance practices based on lessons learned and emerging risks.",
-    implementation: "Implement feedback loops from agent incidents, near-misses, and user reports to continuously refine governance policies and technical controls for agentic AI systems.",
     relatedASI: ["ASI01", "ASI02", "ASI08"],
   },
 

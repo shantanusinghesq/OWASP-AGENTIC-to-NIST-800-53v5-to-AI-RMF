@@ -24,6 +24,12 @@ A series of data-accuracy corrections closing the gap-analysis remediation backl
 
 **Why it matters.** The duplicate name inflated the "unique controls" statistic: the app counted display strings, so one control appeared as two. A new integrity check (T13b) now asserts every control ID renders exactly one display string, making this class of drift impossible.
 
+### Decision Point: AI-RMF orphans resolved; GV-7 removed, GV-3 title corrected
+
+**What changed.** Three AI-RMF description entries were referenced by no crosswalk mapping. **GV-7 (Continuous Improvement)** was a stray — absent from the AI-RMF category taxonomy entirely — and has been deleted. **GV-3** carried a title/description mismatch: it was labelled "Organizational Practices" (the name of GV-4) while the taxonomy correctly lists it as **Workforce Diversity**; its title and description are corrected. **GV-3** and **MS-4 (Measurement Effectiveness)** remain valid taxonomy categories that no ASI risk currently maps to; they are retained and tracked on an explicit allowlist.
+
+**Why it matters.** A new orphan-detection check (T16) asserts the set of unmapped description keys equals exactly the known-orphan allowlist — a newly-introduced unmapped entry now fails CI, and removing an allowlist entry requires wiring the category into a mapping with rationale. This keeps the "complete coverage" question honest: the crosswalk references **17 of the 19** defined AI-RMF subcategories.
+
 ---
 
 ## [0.5.2] — 2026-03-26

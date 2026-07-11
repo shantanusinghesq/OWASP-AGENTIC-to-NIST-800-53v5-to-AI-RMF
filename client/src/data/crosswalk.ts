@@ -63,3 +63,30 @@ export const COVERAGE = computeCoverage(CROSSWALK);
 
 /** Aggregate crosswalk statistics, derived from the mappings (frozen at module load). */
 export const CROSSWALK_STATS = computeStats(CROSSWALK, AI_RMF);
+
+export interface ValidationMix {
+  total: number;
+  editorial: number;
+  "practitioner-reviewed": number;
+  "empirically-validated": number;
+}
+
+/** Aggregate validation-status breakdown across every mapping (nist53 + aiRmf). */
+export function computeValidationMix(cw: typeof CROSSWALK): ValidationMix {
+  const mix: ValidationMix = {
+    total: 0,
+    editorial: 0,
+    "practitioner-reviewed": 0,
+    "empirically-validated": 0,
+  };
+  for (const entry of Object.values(cw)) {
+    for (const m of [...entry.nist53, ...entry.aiRmf]) {
+      mix.total += 1;
+      mix[m.validationStatus] += 1;
+    }
+  }
+  return mix;
+}
+
+/** Firm-wide validation posture (frozen at module load) — currently 100% editorial. */
+export const VALIDATION_MIX = computeValidationMix(CROSSWALK);

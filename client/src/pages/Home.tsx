@@ -100,7 +100,7 @@ export default function Home() {
       {/* ─── Onboarding Overlay ─── */}
       <OnboardingController />
       {/* ─── Hero Header ─── */}
-      <HomeHero onOpenView={handleViewChange} onShowCritical={showCritical} />
+      <HomeHero onOpenView={handleViewChange} onShowCritical={showCritical} onOpenRisk={openDetail} />
       {/* ─── Navigation Tabs ─── */}
       <ViewTabs view={view} onViewChange={handleViewChange} />
 

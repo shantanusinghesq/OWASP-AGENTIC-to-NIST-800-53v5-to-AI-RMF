@@ -153,7 +153,7 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
   },
   ASI05: {
     nist53: [
-      { family: "SI", controls: ["SI-3 Malicious Code Protection", "SI-7 Software Integrity", "SI-10 Information Input Validation", "SI-16 Memory Protection"], rationale: "Static scanning before execution, taint-tracking on generated code, and memory protection against RCE exploits." },
+      { family: "SI", controls: ["SI-3 Malicious Code Protection", "SI-7 Software & Information Integrity", "SI-10 Information Input Validation", "SI-16 Memory Protection"], rationale: "Static scanning before execution, taint-tracking on generated code, and memory protection against RCE exploits." },
       { family: "SC", controls: ["SC-39 Process Isolation", "SC-44 Detonation Chambers"], rationale: "Sandboxed containers with no root access, network egress restrictions, and detonation chambers for untrusted code." },
       { family: "CM", controls: ["CM-7 Least Functionality", "CM-14 Signed Components"], rationale: "Banning eval in production agents, requiring safe interpreters, and signed code validation." },
       { family: "AC", controls: ["AC-3 Access Enforcement", "AC-6 Least Privilege"], rationale: "Separating code generation from execution with validation gates and role-based execution controls." },
@@ -169,7 +169,7 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
   ASI06: {
     nist53: [
       { family: "SC", controls: ["SC-8 Transmission Confidentiality", "SC-28 Protection of Information at Rest"], rationale: "Encryption of memory stores in transit and at rest. Protecting RAG indexes and vector databases." },
-      { family: "SI", controls: ["SI-4 System Monitoring", "SI-7 Software Integrity"], rationale: "Content scanning of memory writes, anomalous update frequency detection, and provenance verification." },
+      { family: "SI", controls: ["SI-4 System Monitoring", "SI-7 Software & Information Integrity"], rationale: "Content scanning of memory writes, anomalous update frequency detection, and provenance verification." },
       { family: "AC", controls: ["AC-3 Access Enforcement", "AC-4 Information Flow"], rationale: "Memory segmentation by tenant/user/domain. Preventing cross-tenant vector bleed through access controls." },
       { family: "AU", controls: ["AU-2 Event Logging", "AU-10 Non-repudiation"], rationale: "Provenance tracking (who wrote what, when) for all memory entries with tamper-evident logging." },
     ],

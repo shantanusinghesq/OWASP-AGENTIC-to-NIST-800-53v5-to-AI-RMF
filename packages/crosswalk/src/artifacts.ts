@@ -9,7 +9,7 @@
 // buildCsv are deterministic over the constants and safe to bundle into the
 // browser build.
 
-import { AI_RMF, CROSSWALK, NIST_800_53, OWASP_ASI } from "./data.js";
+import { AI_RMF, CROSSWALK, NIST_800_53, OWASP_ASI, type EvidenceItem } from "./data.js";
 import { parseControlRef } from "./derive.js";
 import { NIST_AI_RMF_DESCRIPTIONS } from "./nist-ai-rmf-descriptions.js";
 import { NIST_CONTROL_DESCRIPTIONS } from "./nist-control-descriptions.js";
@@ -54,6 +54,18 @@ export function buildJson(): CrosswalkArtifact {
   };
 }
 
+/**
+ * Plain-text rendering of a structured evidence list: item titles joined by
+ * "; " with the CVE id appended in parens when present. Used for the CSV
+ * `evidence` column, the client search index, and the T11 structural floor —
+ * the single place prose is derived from the EvidenceItem[] source of truth.
+ */
+export function evidenceText(items: EvidenceItem[]): string {
+  return items
+    .map((item) => (item.cveId ? `${item.title} (${item.cveId})` : item.title))
+    .join("; ");
+}
+
 /** RFC-4180 field quoting: quote if the value contains comma, quote, or newline. */
 function csvField(value: string): string {
   return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
@@ -87,7 +99,7 @@ export function buildCsv(): string {
             controlId,
             controlTitle,
             mapping.rationale,
-            entry.evidence,
+            evidenceText(entry.evidence),
           ]
             .map(csvField)
             .join(","),

@@ -8,6 +8,7 @@ export {
   type AIRMFMapping,
   type ASIRisk,
   type CrosswalkEntry,
+  type EvidenceItem,
   type NISTFamily,
   type NISTMapping,
 } from "./data.js";
@@ -27,6 +28,7 @@ export {
   CSV_HEADER,
   buildCsv,
   buildJson,
+  evidenceText,
   serializeJson,
   type CrosswalkArtifact,
 } from "./artifacts.js";

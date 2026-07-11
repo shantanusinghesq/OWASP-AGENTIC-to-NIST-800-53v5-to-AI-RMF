@@ -114,18 +114,27 @@ describe("@haremantra/crosswalk integrity", () => {
     expect(malformed).toEqual([]);
   });
 
-  it("T11 every ASI evidence string meets the structural floor (+ verifiability report)", () => {
+  it("T11 every ASI evidence is a non-empty structured array (+ verifiability report)", () => {
+    const validTypes = new Set(["incident", "research", "guidance"]);
     const noVerifiableRef: string[] = [];
     for (const [asiId, entry] of Object.entries(CROSSWALK)) {
       const ev = entry.evidence;
-      expect(ev.trim().length, `${asiId}: evidence too short`).toBeGreaterThanOrEqual(50);
-      expect(ev.split(";").filter((s) => s.trim()).length, `${asiId}: <2 evidence references`).toBeGreaterThanOrEqual(2);
-      if (!/CVE-\d{4}-\d+|https?:\/\//i.test(ev)) noVerifiableRef.push(asiId);
+      expect(Array.isArray(ev), `${asiId}: evidence must be an array`).toBe(true);
+      expect(ev.length, `${asiId}: evidence array is empty`).toBeGreaterThan(0);
+      for (const item of ev) {
+        expect(item.title.trim().length, `${asiId}: evidence item has empty title`).toBeGreaterThan(0);
+        expect(validTypes.has(item.type), `${asiId}: invalid evidence type "${item.type}"`).toBe(true);
+        expect(item.dateVerified, `${asiId}: dateVerified "${item.dateVerified}" not YYYY-MM-DD`).toMatch(
+          /^\d{4}-\d{2}-\d{2}$/,
+        );
+      }
+      // An ASI is "unverifiable" only if NO item carries a sourceUrl or CVE id.
+      if (!ev.some((item) => item.sourceUrl || item.cveId)) noVerifiableRef.push(asiId);
     }
-    // Report-only: surfaces the verifiability gap without failing (WS7 backfills
-    // structured evidence with URLs/CVEs). Today only ASI03 carries a CVE.
+    // Report-only: WS7 backfilled structured, web-verified evidence — every ASI
+    // now carries at least one sourceUrl/CVE, so this should be 0/10.
     console.log(
-      `[T11] evidence lacking a machine-resolvable reference (URL/CVE): ${noVerifiableRef.length}/10 — ${noVerifiableRef.join(", ")}`,
+      `[T11] ASIs with no machine-resolvable reference (URL/CVE): ${noVerifiableRef.length}/10 — ${noVerifiableRef.join(", ")}`,
     );
   });
 

@@ -20,6 +20,7 @@ export {
   NIST_AI_RMF_DESCRIPTIONS,
   NIST_CONTROL_DESCRIPTIONS,
   OWASP_ASI,
+  UPSTREAM_VERSIONS,
   parseControlRef,
   severityColor,
   type AIRMFControlDesc,

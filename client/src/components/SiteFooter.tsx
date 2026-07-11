@@ -1,8 +1,12 @@
 import type { ReactElement } from "react";
 import { Link } from "wouter";
 import { ExternalLink, FileText, Scale } from "lucide-react";
+import { UPSTREAM_VERSIONS } from "@/data/crosswalk";
 
 export function SiteFooter(): ReactElement {
+  const sources = Object.values(UPSTREAM_VERSIONS)
+    .map((l) => `${l.framework} ${l.edition}`)
+    .join(" | ");
   return (
     <footer className="container pb-8">
       <div className="rounded-lg bg-slate-900/50 border border-slate-700/30 px-5 py-4">
@@ -43,7 +47,7 @@ export function SiteFooter(): ReactElement {
         </div>
         {/* Sources */}
         <p className="text-[11px] text-slate-400 leading-relaxed text-center">
-          Sources: OWASP Top 10 for Agentic Applications v2026 (CC BY-SA 4.0) | NIST SP 800-53 Rev 5 | NIST AI 100-1 (AI RMF 1.0) | NIST AI 600-1 GenAI Profile
+          Sources: {sources}
         </p>
         <p className="text-[11px] text-slate-400 mt-1 text-center">
           Copyright &copy; {new Date().getFullYear()} haremantra. All rights reserved for the hosted service. Source code available under AGPL-3.0.

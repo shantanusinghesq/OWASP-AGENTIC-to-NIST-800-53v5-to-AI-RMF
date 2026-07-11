@@ -12,9 +12,14 @@
   },
   "files": [
     "src",
+    "dist",
     "LICENSE",
     "README.md"
   ],
+  "scripts": {
+    "build": "tsup && tsx build/emit-artifacts.ts",
+    "prepublishOnly": "pnpm build"
+  },
   "keywords": [
     "owasp",
     "agentic-ai",
@@ -31,6 +36,17 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "restricted",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./data.json": "./dist/crosswalk.json"
+    }
   }
 }

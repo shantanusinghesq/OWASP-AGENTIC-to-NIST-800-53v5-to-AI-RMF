@@ -14,7 +14,7 @@ This package contains the curated crosswalk that powers the [OWASP Agentic AI â†
 | `CROSSWALK` | `Record<ASIId, CrosswalkEntry>` â€” per-ASI control + AI-RMF mappings with rationale and evidence | Editorial |
 | `severityColor` | `Record<Severity, hexstring>` | Editorial |
 | `NIST_CONTROL_DESCRIPTIONS` | `Record<ControlId, {title, description, implementation, relatedASI}>` | NIST + editorial |
-| `NIST_AI_RMF_DESCRIPTIONS` | `Record<CatId, AIRMFControlDesc>` | NIST + editorial *(currently GOVERN-only; MAP/MEASURE/MANAGE pending)* |
+| `NIST_AI_RMF_DESCRIPTIONS` | `Record<CatId, AIRMFControlDesc>` | NIST + editorial (all four functions: GOVERN, MAP, MEASURE, MANAGE) |
 
 Plus the corresponding TypeScript interfaces.
 
@@ -34,7 +34,7 @@ console.log(ac3.title, ac3.description);
 
 ### Data integrity
 
-A Vitest suite at `tests/data.integrity.test.ts` guards against drift: every referenced family / control / AI-RMF cat resolves; every ASI has at least one mapping per framework. Two checks (`T4`, `T6b`) are `.skip`'d pending editorial backfill of missing description entries.
+A Vitest suite at `tests/data.integrity.test.ts` guards against drift: every referenced family / control / AI-RMF cat resolves; every ASI has at least one mapping per framework. Companion suites `tests/data.contract.test.ts` and `tests/derive.test.ts` pin distinct-count invariants and the derived coverage table. All checks are active (none skipped).
 
 ### License
 
@@ -44,7 +44,7 @@ The parent repository (the React/Vite SPA that consumes this package) is license
 
 ### Consuming from GitHub Packages
 
-This package is published to the GitHub Packages npm registry under the `@obviate` scope. Consumers need a `GITHUB_TOKEN` env var with at least the `read:packages` scope.
+This package is published to the GitHub Packages npm registry under the `@haremantra` scope. Consumers need a `GITHUB_TOKEN` env var with at least the `read:packages` scope.
 
 Add a `.npmrc` at the root of your consuming project:
 

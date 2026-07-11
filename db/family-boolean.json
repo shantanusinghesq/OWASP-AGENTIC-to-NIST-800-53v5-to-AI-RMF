@@ -1,0 +1,18 @@
+{
+  "AC": "has_agent_limits",
+  "AU": "has_monitoring",
+  "CA": "has_testing",
+  "CM": "has_dev_controls",
+  "CP": "has_phased_deployment",
+  "IA": "has_identity_management",
+  "IR": "has_monitoring",
+  "MP": "has_dev_controls",
+  "PE": "has_dev_controls",
+  "PL": "has_oversight_design",
+  "PM": "has_oversight_design",
+  "RA": "has_testing",
+  "SA": "has_dev_controls",
+  "SC": "has_agent_limits",
+  "SI": "has_monitoring",
+  "SR": "has_dev_controls"
+}

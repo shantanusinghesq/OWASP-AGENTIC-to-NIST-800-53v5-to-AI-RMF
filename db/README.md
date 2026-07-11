@@ -6,13 +6,19 @@ querying the 12 patterns and their OWASP ASI risk mappings outside the web app
 (scripts, notebooks, CI checks, downstream tools).
 
 This directory is intentionally **not** part of the pnpm workspace — it is a
-self-contained Node package so the web app's dependency tree stays untouched.
+self-contained npm package with its own lockfile, so its native `better-sqlite3`
+dependency never enters the web app's install or CI pipeline. Its checked-in JSON
+artifacts (`patterns.json`, `family-boolean.json`) are generated from the
+TypeScript source; a drift test in the main suite
+(`client/src/features/diagram/engine/db-sync.test.ts`) fails CI if they fall out
+of sync, so the npm island stays honest without joining the workspace.
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `patterns.json` | JSON mirror of `client/src/features/diagram/engine/agentic-patterns.ts` (12 patterns + taxonomy version). Checked in. |
+| `patterns.json` | JSON mirror of `client/src/features/diagram/engine/agentic-patterns.ts` (12 patterns + taxonomy version). Checked in, generated. |
+| `family-boolean.json` | JSON mirror of `FAMILY_TO_PRIMARY_BOOLEAN` in `client/src/features/simulator/engine/mappings.ts`. Checked in, generated. |
 | `seed.mjs` | Generates `patterns.db` from `patterns.json`. |
 | `query.mjs` | CLI for querying the database. |
 | `patterns.db` | Generated SQLite file. Gitignored (the repo root `.gitignore` excludes `*.db`) — run the seed to produce it. |
@@ -58,5 +64,9 @@ After editing it, regenerate the JSON from the repo root and reseed:
 
 ```bash
 npx tsx -e "import { AGENTIC_PATTERNS, PATTERN_TAXONOMY_VERSION } from './client/src/features/diagram/engine/agentic-patterns'; import { writeFileSync } from 'fs'; writeFileSync('db/patterns.json', JSON.stringify({ taxonomyVersion: PATTERN_TAXONOMY_VERSION, patterns: AGENTIC_PATTERNS }, null, 2) + '\n');"
+npx tsx -e "import { FAMILY_TO_PRIMARY_BOOLEAN } from './client/src/features/simulator/engine/mappings'; import { writeFileSync } from 'fs'; writeFileSync('db/family-boolean.json', JSON.stringify(FAMILY_TO_PRIMARY_BOOLEAN, null, 2) + '\n');"
 node db/seed.mjs
 ```
+
+The drift test `client/src/features/diagram/engine/db-sync.test.ts` (part of `pnpm test`)
+fails if either JSON falls out of sync with its TypeScript source.

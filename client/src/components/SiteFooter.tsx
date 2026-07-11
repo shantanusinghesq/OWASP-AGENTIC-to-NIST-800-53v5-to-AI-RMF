@@ -2,6 +2,8 @@ import type { ReactElement } from "react";
 import { Link } from "wouter";
 import { ExternalLink, FileText, Scale } from "lucide-react";
 import { UPSTREAM_VERSIONS } from "@/data/crosswalk";
+import { DownloadData } from "@/components/DownloadData";
+import { ProvenancePanel } from "@/components/ProvenancePanel";
 
 export function SiteFooter(): ReactElement {
   const sources = Object.values(UPSTREAM_VERSIONS)
@@ -44,6 +46,14 @@ export function SiteFooter(): ReactElement {
               Source Code
             </a>
           </div>
+        </div>
+        {/* Client-side data export (no server / no network) */}
+        <div className="mb-3 pb-3 border-b border-slate-700/30">
+          <DownloadData />
+        </div>
+        {/* Provenance & known limitations */}
+        <div className="mb-3">
+          <ProvenancePanel />
         </div>
         {/* Sources */}
         <p className="text-[11px] text-slate-400 leading-relaxed text-center">

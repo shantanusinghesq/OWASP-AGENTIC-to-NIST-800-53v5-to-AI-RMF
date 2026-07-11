@@ -114,6 +114,23 @@ describe("@haremantra/crosswalk integrity", () => {
     expect(malformed).toEqual([]);
   });
 
+  it("T16 unreferenced AI-RMF description keys equal the known-orphan allowlist", () => {
+    // Ratchet: description keys not cited by any CROSSWALK aiRmf mapping must
+    // equal exactly this allowlist. Shrinking it requires wiring the category
+    // into a mapping (with rationale); a NEW orphan fails immediately.
+    // GV-3 (Workforce Diversity) and MS-4 (Measurement Effectiveness) are valid
+    // taxonomy categories not yet mapped — tracked for future editorial wiring.
+    const KNOWN_ORPHANS = new Set(["GV-3", "MS-4"]);
+    const referenced = new Set<string>();
+    for (const entry of Object.values(CROSSWALK)) {
+      for (const m of entry.aiRmf) {
+        for (const cat of m.cats) referenced.add(firstToken(cat));
+      }
+    }
+    const orphans = Object.keys(NIST_AI_RMF_DESCRIPTIONS).filter((k) => !referenced.has(k)).sort();
+    expect(orphans, `orphan set changed; update wiring or allowlist`).toEqual([...KNOWN_ORPHANS].sort());
+  });
+
   it("T13b every control ID renders exactly one display string across all CROSSWALK mappings", () => {
     // Guards the SI-7 class of defect: the same control ID cited under two
     // display names ("SI-7 Software Integrity" vs "...Software & Information

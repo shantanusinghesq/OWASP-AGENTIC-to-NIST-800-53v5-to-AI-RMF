@@ -18,6 +18,12 @@ A series of data-accuracy corrections closing the gap-analysis remediation backl
 
 **Effect on statistics.** Removing the withdrawn SA-12 citation lowers the distinct-control count from 55 to **54** (89 total mappings). This is the honest count of *valid Rev 5 controls* referenced; the previous 55 counted a withdrawn control.
 
+### Decision Point: SI-7 normalized to one canonical display name
+
+**What changed.** SI-7 was cited under two different display strings — "SI-7 Software Integrity" (ASI05, ASI06) and "SI-7 Software & Information Integrity" (ASI04). Both are the same control. All references are now normalized to the canonical Rev 5 title, **SI-7 Software & Information Integrity**.
+
+**Why it matters.** The duplicate name inflated the "unique controls" statistic: the app counted display strings, so one control appeared as two. A new integrity check (T13b) now asserts every control ID renders exactly one display string, making this class of drift impossible.
+
 ---
 
 ## [0.5.2] — 2026-03-26

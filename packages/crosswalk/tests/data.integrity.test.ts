@@ -113,4 +113,24 @@ describe("@haremantra/crosswalk integrity", () => {
     const malformed = Object.keys(NIST_AI_RMF_DESCRIPTIONS).filter((k) => !validShape.test(k));
     expect(malformed).toEqual([]);
   });
+
+  it("T13b every control ID renders exactly one display string across all CROSSWALK mappings", () => {
+    // Guards the SI-7 class of defect: the same control ID cited under two
+    // display names ("SI-7 Software Integrity" vs "...Software & Information
+    // Integrity") inflated the distinct-control statistic.
+    const byId = new Map<string, Set<string>>();
+    for (const entry of Object.values(CROSSWALK)) {
+      for (const m of entry.nist53) {
+        for (const c of m.controls) {
+          const id = firstToken(c);
+          if (!byId.has(id)) byId.set(id, new Set());
+          byId.get(id)!.add(c);
+        }
+      }
+    }
+    const inconsistent = [...byId.entries()]
+      .filter(([, strings]) => strings.size > 1)
+      .map(([id, strings]) => `${id}: ${[...strings].join(" | ")}`);
+    expect(inconsistent, `controls with inconsistent display strings: ${inconsistent.join("; ")}`).toEqual([]);
+  });
 });

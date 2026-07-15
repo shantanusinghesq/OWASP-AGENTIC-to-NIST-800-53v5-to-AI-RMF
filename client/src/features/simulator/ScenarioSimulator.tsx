@@ -407,7 +407,9 @@ export default function ScenarioSimulator() {
 
     showToast(`Scenario #${newCount} generated — ${fp.risk_category} × ${fp.agent_archetype}`);
 
-    // Advance onboarding if in guided-action phase
+    // Unreachable: "guided-action" is no longer reachable from the hook
+    // modal (comprehension-audit fix, see OnboardingController.tsx header).
+    // Kept in place, not deleted.
     if (phase === "guided-action") {
       setTimeout(() => advance(), 800);
     }

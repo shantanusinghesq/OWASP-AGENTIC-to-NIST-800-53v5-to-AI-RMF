@@ -1,7 +1,9 @@
 // ─── Assessment Tray ────────────────────────────────────────────────
-// Fixed bottom bar summarizing the working assessment. Renders NOTHING when
-// the assessment is untouched (no selections + default name) so the app's
-// default DOM is unchanged — App.smoke.test.tsx must stay byte-identical.
+// Fixed bottom bar summarizing the working assessment. Always rendered,
+// including a zero-state invitation when the assessment is untouched — this
+// is the entrance to the deliverable workflow (tick a mapping → tray →
+// annotate → Committee brief / scoped OSCAL) and must not be discoverable
+// only by accident (comprehension-audit F1).
 // Collapsed: count + coverage chips + editable name + committee exports
 // (print brief / scoped OSCAL). Expanded: selection list, gap summary, and
 // save/load/import/export actions (JSON roundtrip).
@@ -18,7 +20,6 @@ import { exportScopedOscal } from "./export-oscal";
 import { pruneStale } from "./storage";
 import { GapSummary } from "./GapSummary";
 import { TraySelectionList } from "./TraySelectionList";
-import { DEFAULT_ASSESSMENT_NAME } from "./types";
 
 const actionClass =
   "inline-flex items-center gap-1 rounded-md border border-slate-600/60 bg-slate-800/60 px-2 py-1 text-[11px] font-medium text-slate-300 hover:text-blue-300 hover:border-blue-500/40 transition-colors disabled:opacity-40 disabled:pointer-events-none";
@@ -39,7 +40,7 @@ export function AssessmentTray({
   onNavigate,
 }: {
   onNavigate: (asiId: string) => void;
-}): ReactElement | null {
+}): ReactElement {
   const {
     assessment,
     rename,
@@ -53,11 +54,6 @@ export function AssessmentTray({
   } = useAssessment();
   const [expanded, setExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Untouched assessment → no tray. Keeps the default App DOM unchanged.
-  const untouchedName =
-    assessment.name.trim() === "" || assessment.name === DEFAULT_ASSESSMENT_NAME;
-  if (assessment.selections.length === 0 && untouchedName) return null;
 
   const coverage = selectionCoverage(assessment);
   const count = assessment.selections.length;
@@ -192,6 +188,11 @@ export function AssessmentTray({
             </span>{" "}
             selected
           </span>
+          {count === 0 && (
+            <span data-testid="assessment-tray-zero-state" className="text-[11px] text-slate-400">
+              · tick a mapping to build an assessment
+            </span>
+          )}
           <div className="hidden sm:flex items-center gap-1">
             {chip("controls", coverage.controls)}
             {chip("families", coverage.families)}

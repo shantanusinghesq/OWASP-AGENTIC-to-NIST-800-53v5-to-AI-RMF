@@ -8,12 +8,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import {
+  AI_RMF,
   CROSSWALK,
   CROSSWALK_DATA_VERSION,
   CSV_HEADER,
   OWASP_ASI,
   buildCsv,
   buildJson,
+  computeStats,
   serializeJson,
 } from "../src";
 import { writeArtifacts } from "../build/emit-artifacts";
@@ -49,10 +51,8 @@ function parseCsvRow(line: string): string[] {
   return fields;
 }
 
-const EXPECTED_ROWS = Object.values(CROSSWALK).reduce(
-  (sum, entry) => sum + entry.nist53.reduce((s, m) => s + m.controls.length, 0),
-  0,
-);
+const stats = computeStats(CROSSWALK, AI_RMF);
+const EXPECTED_ROWS = stats.totalNistControlMappings + stats.totalAiRmfCategoryMappings;
 
 describe("crosswalk.json", () => {
   it("round-trips losslessly against the TS constants", () => {
@@ -72,20 +72,28 @@ describe("crosswalk.csv", () => {
 
   it("has the spec header in the documented column order", () => {
     expect(lines[0]).toBe(
-      "asiId,asiName,severity,family,familyName,controlId,controlTitle,rationale,evidence",
+      "asiId,asiName,severity,framework,family,familyName,controlId,controlTitle,rationale,validationStatus,evidence",
     );
     expect(lines[0]).toBe(CSV_HEADER.join(","));
   });
 
-  it("has exactly 89 data rows — one per (ASI, family, control) mapping (no aggregation)", () => {
-    expect(EXPECTED_ROWS).toBe(89);
-    expect(lines.length - 1).toBe(89);
+  it("has exactly 151 data rows — one per (ASI, framework, family, control) mapping, both frameworks (no aggregation)", () => {
+    expect(EXPECTED_ROWS).toBe(151);
+    expect(lines.length - 1).toBe(151);
     expect(lines.length - 1).toBe(EXPECTED_ROWS);
   });
 
-  it("every data row parses to exactly 9 fields (quoting is correct throughout)", () => {
+  it("every data row parses to exactly 11 fields (quoting is correct throughout)", () => {
     for (let i = 1; i < lines.length; i++) {
-      expect(parseCsvRow(lines[i]), `row ${i}: ${lines[i]}`).toHaveLength(9);
+      expect(parseCsvRow(lines[i]), `row ${i}: ${lines[i]}`).toHaveLength(11);
+    }
+  });
+
+  it("every row's framework column is either 800-53 or AI-RMF, and every validationStatus is populated", () => {
+    for (let i = 1; i < lines.length; i++) {
+      const fields = parseCsvRow(lines[i]);
+      expect(["800-53", "AI-RMF"], `row ${i}: ${lines[i]}`).toContain(fields[3]);
+      expect(fields[9], `row ${i}: ${lines[i]}`).not.toBe("");
     }
   });
 
@@ -97,19 +105,31 @@ describe("crosswalk.csv", () => {
     // Raw text is wrapped in quotes...
     expect(row).toContain(`"${commaRationale}"`);
     // ...and decodes back to the exact original value.
-    expect(parseCsvRow(row!)[7]).toBe(commaRationale);
+    expect(parseCsvRow(row!)[8]).toBe(commaRationale);
   });
 
   it("first data row maps ASI01 → AC-3 with the expected columns", () => {
-    expect(parseCsvRow(lines[1]).slice(0, 7)).toEqual([
+    expect(parseCsvRow(lines[1]).slice(0, 8)).toEqual([
       "ASI01",
       "Agent Goal Hijack",
       "Critical",
+      "800-53",
       "AC",
       "Access Control",
       "AC-3",
       "Access Enforcement",
     ]);
+  });
+
+  it("emits AI-RMF rows too — ASI01's GOVERN mapping appears with func-as-family and its cats", () => {
+    const govern = lines.filter(
+      (l) => l.startsWith("ASI01,") && l.includes(",AI-RMF,GOVERN,"),
+    );
+    expect(govern.length).toBeGreaterThan(0);
+    const fields = parseCsvRow(govern[0]);
+    expect(fields[3]).toBe("AI-RMF");
+    expect(fields[4]).toBe("GOVERN");
+    expect(fields[5]).toBe("GOVERN");
   });
 });
 

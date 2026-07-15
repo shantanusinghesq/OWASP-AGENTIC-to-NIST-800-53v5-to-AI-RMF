@@ -112,6 +112,7 @@ export function evaluateScenario(fp: FactPattern): ScenarioResult {
 
       for (const control of nistMapping.controls) {
         controls_evaluated.push({
+          asi_id: asiRisk.id,
           control_id: control.split(' ')[0],
           family: nistMapping.family,
           state,

@@ -240,6 +240,7 @@ function evaluateCells(
       const state = getCellStateForPattern(asi.id, family.id, matches, controlState);
       const governingBoolean = FAMILY_TO_PRIMARY_BOOLEAN[family.id] ?? "";
       evaluations.push({
+        asi_id: asi.id,
         control_id: governingBoolean || family.id,
         family: family.id,
         state,

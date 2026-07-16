@@ -172,7 +172,9 @@ export default function AnalysisPanel({ onNavigateToEvidence }: AnalysisPanelPro
                         </span>
                       </div>
                       <p className="text-[10px] leading-relaxed" style={{ color: COLORS.textSecondary }}>
-                        {ctrl.rationale}
+                        {/* One rationale is authored per family, shared by every control in it
+                            — labelled as such (comprehension-audit F9/H7). */}
+                        <span className="font-semibold">Family rationale:</span> {ctrl.rationale}
                       </p>
                     </div>
                   ))}

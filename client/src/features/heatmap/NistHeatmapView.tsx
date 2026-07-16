@@ -42,6 +42,19 @@ export function NistHeatmapView({
         {TOP_EXPOSURE.name} — {ROW_TOTAL[TOP_EXPOSURE.id]} mapped controls.
       </div>
       <HeatmapExplainer type="nist" />
+      {/* Family-code legend — always visible (not hover-only) so the 16 bare
+          two-letter codes are never unexplained, including on mobile, where
+          the hover tooltips on the desktop table below don't reach. */}
+      <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-400">
+        {NIST_800_53.map((f) => (
+          <span key={f.id}>
+            <span className="font-semibold text-slate-300" style={{ fontFamily: "var(--font-mono)" }}>
+              {f.id}
+            </span>{" "}
+            {f.name}
+          </span>
+        ))}
+      </div>
       {/* Mobile fallback: severity-ranked stacked list instead of the wide matrix */}
       <div className="md:hidden space-y-2">
         {RANKED_ROWS.map((asi) => (

@@ -8,7 +8,7 @@
 // (print brief / scoped OSCAL). Expanded: selection list, gap summary, and
 // save/load/import/export actions (JSON roundtrip).
 
-import { useRef, useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { ChevronDown, ChevronUp, ClipboardList, Download, FileJson, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { triggerDownload } from "@/lib/download";
@@ -54,6 +54,26 @@ export function AssessmentTray({
   } = useAssessment();
   const [expanded, setExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const trayRef = useRef<HTMLDivElement | null>(null);
+  // Collapsed-bar height (~56px) as the initial guess, corrected by the
+  // observer below once the tray has actually rendered.
+  const [trayHeight, setTrayHeight] = useState(56);
+
+  // Spacer must track the tray's ACTUAL rendered height, not a fixed guess —
+  // the tray's height varies with `expanded`, selection count, and saved-
+  // assessment count, and a static guess left it under-reserved when
+  // expanded, covering the footer's Provenance & Limitations panel
+  // (comprehension-audit F10).
+  useEffect(() => {
+    const el = trayRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect.height;
+      if (height) setTrayHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const coverage = selectionCoverage(assessment);
   const count = assessment.selections.length;
@@ -90,9 +110,11 @@ export function AssessmentTray({
 
   return (
     <>
-      {/* Spacer keeps the fixed bar from covering the footer. */}
-      <div aria-hidden="true" className="h-14" />
+      {/* Spacer keeps the fixed bar from covering the footer — height is
+          measured from the tray itself (see trayHeight), not guessed. */}
+      <div aria-hidden="true" style={{ height: trayHeight }} />
       <div
+        ref={trayRef}
         data-testid="assessment-tray"
         className="fixed bottom-0 inset-x-0 z-40 border-t border-slate-700/60 bg-slate-950/95 backdrop-blur"
       >

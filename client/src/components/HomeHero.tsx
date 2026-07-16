@@ -60,8 +60,8 @@ export function HomeHero({
           Agentic AI Risks
         </h1>
         <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-          Bridging ASI 2026 → NIST 800-53 Rev 5 → NIST AI-RMF 100-1. Interactive compliance mapping
-          for agentic AI security risks across {OWASP_ASI.length} threat categories.{" "}
+          Bridging ASI (Agentic Security Index) 2026 → NIST 800-53 Rev 5 → NIST AI-RMF 100-1.
+          Interactive compliance mapping for agentic AI security risks across {OWASP_ASI.length} threat categories.{" "}
           Severity ratings (Critical, High, Medium-High) are editorially assigned based on OWASP ordinal risk ranking and are not official OWASP severity classifications.
         </p>
 

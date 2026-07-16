@@ -2,6 +2,9 @@ import type { ReactElement } from "react";
 import { AlertTriangle, ExternalLink, Info } from "lucide-react";
 import { UPSTREAM_VERSIONS } from "@/data/crosswalk";
 
+const VALIDATION_DOC_URL =
+  "https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/blob/main/VALIDATION.md";
+
 // ─── Provenance & Limitations ───────────────────────────────────────
 // Renders (a) the exact upstream framework editions this crosswalk was pinned
 // against (machine-readable, straight from UPSTREAM_VERSIONS) and (b) a short,
@@ -112,6 +115,34 @@ export function ProvenancePanel(): ReactElement {
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Validation model — summary; full document stays linked for the
+            reader who wants every clause (comprehension-audit F7). */}
+        <div>
+          <h3 className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Validation model
+          </h3>
+          <p className="text-[11px] leading-relaxed text-slate-400">
+            A mapping is an <span className="font-medium text-slate-200">editorial judgement</span> about
+            which controls are relevant to a risk — not a measured fact. Every mapping declares one of
+            three tiers: <span className="font-medium text-slate-200">Editorial</span> (authored from public
+            evidence and authoritative guidance; not yet externally reviewed — where every mapping stands
+            today), <span className="font-medium text-slate-200">Reviewed</span> (an external practitioner
+            has signed off), or <span className="font-medium text-slate-200">Validated</span> (corroborated
+            by observed incident or exploitation evidence). Evidence must show the risk is real
+            <em> and</em> the control domain is a recognised countermeasure — it is never required to show
+            that the specific control would have prevented the specific cited incident.
+          </p>
+          <a
+            href={VALIDATION_DOC_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            Read the full validation model
+            <ExternalLink className="w-2.5 h-2.5" aria-hidden="true" />
+          </a>
         </div>
       </div>
     </details>

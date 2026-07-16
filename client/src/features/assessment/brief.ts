@@ -100,7 +100,10 @@ function mappingHtml(
     `<article class="mapping">`,
     `<h4>${esc(title)}</h4>`,
     `<ul class="refs">${items}</ul>`,
-    `<p class="rationale">${esc(rationale)}</p>`,
+    // One rationale is authored per family, covering every control listed
+    // above it — labelled as such, not implied as per-control justification
+    // (comprehension-audit F9/H7).
+    `<p class="rationale"><strong>Family rationale:</strong> ${esc(rationale)}</p>`,
     `<p class="status">Validation status: ${esc(VALIDATION_LABEL[status])}</p>`,
     annotationHtml(annotation),
     `</article>`,

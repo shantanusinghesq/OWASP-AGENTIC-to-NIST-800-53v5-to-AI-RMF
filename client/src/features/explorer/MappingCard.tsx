@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { getControlDescription, type Framework, type ValidationStatus } from "@/data/crosswalk";
@@ -10,6 +10,34 @@ import {
 import { ValidationBadge } from "./ValidationBadge";
 import { SelectToggle } from "@/features/assessment/SelectToggle";
 import type { MappingRef } from "@/features/assessment/types";
+
+const PROMPT_INJECTION_DEF =
+  "An attack where untrusted input (a webpage, email, or document the agent reads) is crafted to look like an instruction. Agents can't reliably tell instructions from the data they process, so they follow it.";
+
+// Wraps the first mention of "prompt injection" in a rationale string with a
+// definition tooltip — the term appears constantly across mappings and is
+// never otherwise defined on screen (comprehension-audit F8/H6).
+function withGlossary(text: string): ReactNode {
+  const idx = text.toLowerCase().indexOf("prompt injection");
+  if (idx === -1) return text;
+  const match = text.slice(idx, idx + "prompt injection".length);
+  return (
+    <>
+      {text.slice(0, idx)}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="border-b border-dotted cursor-help" style={{ borderColor: "currentColor" }}>
+            {match}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs">
+          <div className="text-xs">{PROMPT_INJECTION_DEF}</div>
+        </TooltipContent>
+      </Tooltip>
+      {text.slice(idx + match.length)}
+    </>
+  );
+}
 
 export function MappingCard({
   title,
@@ -78,7 +106,11 @@ export function MappingCard({
             <div key={i} className="text-[11px] leading-relaxed text-slate-300 mb-1">
               {item.id && (
                 <span className="font-semibold mr-1" style={{ color, fontFamily: "var(--font-mono)" }}>
-                  {item.id}
+                  {/* One rationale is authored per family, covering every
+                      control listed above it — label it as such rather than
+                      implying discrete per-control justification
+                      (comprehension-audit F9/H7). */}
+                  {isRationale ? "Family rationale:" : item.id}
                 </span>
               )}
               {controlDesc && !isRationale ? (
@@ -126,7 +158,7 @@ export function MappingCard({
                   )}
                 </>
               ) : (
-                <span>{item.text}</span>
+                <span>{withGlossary(item.text)}</span>
               )}
             </div>
           );

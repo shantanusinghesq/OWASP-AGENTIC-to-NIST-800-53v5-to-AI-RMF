@@ -88,6 +88,9 @@ export type CellState = 'active' | 'broken' | 'irrelevant';
  * Details the evaluation of a single security control within a scenario.
  */
 export interface ControlEvaluation {
+  /** The ID of the OWASP ASI risk this evaluation belongs to (e.g., 'ASI01'). */
+  asi_id: string;
+
   /** The ID of the control being evaluated (e.g., 'has_agent_limits'). */
   control_id: string;
 

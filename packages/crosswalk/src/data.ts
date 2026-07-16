@@ -164,7 +164,7 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
   ASI01: {
     nist53: [
       { family: "AC", controls: ["AC-3 Access Enforcement", "AC-4 Information Flow", "AC-6 Least Privilege"], rationale: "Goal hijack exploits excessive agent permissions. AC-3/6 enforce least privilege for agent tool access and goal-change authority.", validationStatus: "editorial" },
-      { family: "SI", controls: ["SI-3 Malicious Code Protection", "SI-5 Security Alerts", "SI-10 Information Input Validation"], rationale: "Input validation (SI-10) prevents prompt injection payloads from reaching goal-selection logic. SI-3 detects malicious instruction patterns.", validationStatus: "editorial" },
+      { family: "SI", controls: ["SI-3 Malicious Code Protection", "SI-5 Security Alerts", "SI-10 Information Input Validation"], rationale: "Input validation (SI-10) constrains prompt injection payloads from reaching goal-selection logic. SI-3 detects malicious instruction patterns.", validationStatus: "editorial" },
       { family: "AU", controls: ["AU-2 Event Logging", "AU-6 Audit Record Review", "AU-12 Audit Record Generation"], rationale: "Comprehensive logging of goal state, tool sequences, and behavioral baselines enables detection of unauthorized goal drift.", validationStatus: "editorial" },
       { family: "CM", controls: ["CM-3 Configuration Change Control", "CM-5 Access Restrictions for Change"], rationale: "Locking agent system prompts and requiring configuration management for goal changes maps directly to CM-3/5.", validationStatus: "editorial" },
     ],

@@ -49,8 +49,11 @@ export default function AnalysisPanel({ onNavigateToEvidence }: AnalysisPanelPro
 
     if (!crosswalkEntry || !asiMeta) return null;
 
-    // Get broken controls for this cell
+    // Get broken controls for this cell, scoped to the selected ASI risk —
+    // controls_evaluated spans all 10 ASIs, and NIST families are reused
+    // across multiple ASIs, so family alone is not a unique key.
     const relevantControls = result.controls_evaluated.filter(c => {
+      if (c.asi_id !== asiId) return false;
       if (familyId) return c.family === familyId;
       return true;
     });

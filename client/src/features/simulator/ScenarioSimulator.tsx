@@ -407,7 +407,9 @@ export default function ScenarioSimulator() {
 
     showToast(`Scenario #${newCount} generated — ${fp.risk_category} × ${fp.agent_archetype}`);
 
-    // Advance onboarding if in guided-action phase
+    // Unreachable: "guided-action" is no longer reachable from the hook
+    // modal (comprehension-audit fix, see OnboardingController.tsx header).
+    // Kept in place, not deleted.
     if (phase === "guided-action") {
       setTimeout(() => advance(), 800);
     }
@@ -805,10 +807,13 @@ export default function ScenarioSimulator() {
 
           {/* ─── Implicated ASI Risks ─── */}
           <div className="mb-6">
-            <button onClick={() => {}} className="flex items-center gap-2 text-xs font-bold transition-colors mb-3" style={{ color: PALETTE.cobaltLight }}>
+            <button onClick={() => {}} className="flex items-center gap-2 text-xs font-bold transition-colors mb-1" style={{ color: PALETTE.cobaltLight }}>
               <Layers className="w-3.5 h-3.5" />
               Implicated ASI Risks ({implicatedRisks.length})
             </button>
+            <p className="text-[10px] mb-3" style={{ color: PALETTE.textSecondary }}>
+              Weights below are editorial estimates, not empirical frequencies — practitioner validation required.
+            </p>
             <div className="space-y-2">
               {implicatedRisks.map((risk) => {
                 const asiMeta = OWASP_ASI.find((a) => a.id === risk.asiId);

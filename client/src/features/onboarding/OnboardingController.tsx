@@ -1,16 +1,19 @@
 /**
  * OnboardingController — Phase Orchestrator
- * 
- * Manages the 5-phase Scrim & Spotlight sequence:
- * 1. Hook (center modal)
- * 2. Guided Action (spotlight config bar → user clicks Generate)
- * 3. Translation (spotlight first broken heatmap cell) — scrolls DOWN to target
- * 4. Root Cause (spotlight cascade topology) — scrolls UP to target
- * 5. Handoff (dismissible banner)
- * 
- * AUTO-SCROLL: Each phase transition scrolls the viewport to the next spotlight
+ *
+ * Phase 1 (Hook) is the only reachable phase today: the hook modal's primary
+ * CTA now closes onboarding and scrolls to the hero's Featured Incident card
+ * instead of advancing into the guided tour (comprehension-audit F6/H2 — the
+ * tour routed cold visitors away from the product and misdescribed its own
+ * screen). Phases 2–5 (Guided Action / Translation / Root Cause / Handoff)
+ * and their components are UNREACHABLE as a result — advance() has no other
+ * caller that can reach "guided-action" from "hook" — and are intentionally
+ * left in place rather than deleted; see docs/comprehension-audit/07-recommended-actions.md
+ * for the follow-up cleanup this implies.
+ *
+ * AUTO-SCROLL: phase transitions scroll the viewport to the next spotlight
  * target so first-time users never need to discover scroll positions manually.
- * 
+ *
  * Uses MutationObserver to wait for DOM elements before positioning spotlights.
  * Elevates spotlight targets above the scrim via z-index.
  */
@@ -22,35 +25,20 @@ import Scrim from "./Scrim";
 import SpotlightTooltip from "./SpotlightTooltip";
 import HookModal from "./HookModal";
 import HandoffBanner from "./HandoffBanner";
+import { scrollToTarget } from "./scrollToTarget";
 
 // data-onboarding attribute selectors
 const TARGETS = {
+  // Unreachable after the hook-CTA redirect (phases 2–4 no longer fire) — kept for the dead branches below.
   configBar: '[data-onboarding="config-bar"]',
   generateButton: '[data-onboarding="generate-button"]',
   firstBrokenCell: '[data-onboarding="first-broken-cell"]',
   cascadeTopology: '[data-onboarding="cascade-topology"]',
+  // Reachable: the hook modal's primary CTA scrolls to and highlights this.
+  featuredIncident: '[data-onboarding="featured-incident"]',
 };
 
-// Scroll offset to keep the target comfortably visible (not pinned to edge)
-const SCROLL_OFFSET = 120;
-
-/**
- * Smooth-scroll an element into view with a fixed top offset,
- * then invoke a callback once the scroll settles.
- */
-function scrollToTarget(el: HTMLElement, callback?: () => void) {
-  const rect = el.getBoundingClientRect();
-  const absoluteTop = window.scrollY + rect.top - SCROLL_OFFSET;
-
-  window.scrollTo({ top: Math.max(0, absoluteTop), behavior: "smooth" });
-
-  // Wait for scroll to settle before positioning the spotlight
-  const settle = setTimeout(() => {
-    callback?.();
-  }, 500);
-
-  return () => clearTimeout(settle);
-}
+const HIGHLIGHT_DURATION_MS = 700;
 
 export default function OnboardingController() {
   const { phase, isActive, advance, skip, switchToSimulator } = useOnboarding();
@@ -119,6 +107,18 @@ export default function OnboardingController() {
     [cleanupElevation, elevateElement]
   );
 
+  // ─── Hook modal's primary CTA: scroll to and highlight the Featured
+  // Incident card instead of starting the guided simulator tour ────────────
+  const goToFeaturedIncident = useCallback(() => {
+    const el = document.querySelector(TARGETS.featuredIncident) as HTMLElement | null;
+    if (!el) return;
+    scrollCleanupRef.current?.();
+    scrollCleanupRef.current = scrollToTarget(el, () => {
+      el.classList.add("card-pulse");
+      window.setTimeout(() => el.classList.remove("card-pulse"), HIGHLIGHT_DURATION_MS);
+    });
+  }, []);
+
   // ─── Phase transition effects ─────────────────────────────────────────────
   useEffect(() => {
     observerRef.current?.disconnect();
@@ -130,6 +130,9 @@ export default function OnboardingController() {
         cleanupElevation();
         break;
 
+      // Unreachable: the hook modal no longer calls advance(), and no other
+      // caller can transition "hook" → "guided-action" (see file header).
+      // Kept in place, not deleted — comprehension-audit follow-up cleanup.
       case "guided-action":
         // Phase 2: Switch to simulator tab, then spotlight the config bar
         // The config bar is near the top, so we scroll UP to "Start Here"
@@ -197,11 +200,17 @@ export default function OnboardingController() {
       {/* Phase 1: Hook Modal */}
       <AnimatePresence>
         {phase === "hook" && (
-          <HookModal onProceed={advance} onSkip={skip} />
+          <HookModal
+            onGoToFeaturedIncident={() => {
+              skip();
+              goToFeaturedIncident();
+            }}
+            onSkip={skip}
+          />
         )}
       </AnimatePresence>
 
-      {/* Phases 2–4: Scrim + Spotlight Tooltip */}
+      {/* Phases 2–4: Scrim + Spotlight Tooltip — unreachable, see file header */}
       {(phase === "guided-action" || phase === "translation" || phase === "root-cause") && (
         <>
           <Scrim visible={true} spotlightRect={spotlightRect} />
@@ -216,7 +225,7 @@ export default function OnboardingController() {
         </>
       )}
 
-      {/* Phase 5: Handoff Banner */}
+      {/* Phase 5: Handoff Banner — unreachable, see file header */}
       <AnimatePresence>
         {phase === "handoff" && <HandoffBanner onDismiss={advance} />}
       </AnimatePresence>

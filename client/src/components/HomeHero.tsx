@@ -87,6 +87,7 @@ export function HomeHero({
         {SPOTLIGHT && SPOTLIGHT_META && (
           <button
             onClick={() => onOpenRisk(SPOTLIGHT_ASI)}
+            data-onboarding="featured-incident"
             className="group mt-5 w-full text-left rounded-lg border border-red-500/30 bg-red-950/30 hover:bg-red-950/50 transition p-3 flex items-start gap-3"
             aria-label={`See how ${SPOTLIGHT_META.name} maps to controls`}
           >

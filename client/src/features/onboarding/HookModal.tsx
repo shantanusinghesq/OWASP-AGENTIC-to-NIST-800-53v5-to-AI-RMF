@@ -1,18 +1,33 @@
 /**
  * HookModal — Phase 1: The Hook (Establishing Value)
  * Full-screen blurred scrim with center modal showing animated node graphic,
- * value proposition copy, and Run First Simulation / Skip CTAs.
+ * value proposition copy, and CTAs. Primary CTA closes the modal and takes
+ * the visitor straight to a real, cited incident (comprehension-audit F6 —
+ * the previous "Run First Simulation" CTA routed cold visitors away from
+ * the product). Escape and backdrop-click both dismiss (comprehension-audit
+ * F6 / M9 — this was previously a keyboard trap).
  */
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Shield, GitBranch, Zap } from "lucide-react";
 
+const TITLE_ID = "hook-modal-title";
+
 interface HookModalProps {
-  onProceed: () => void;
+  onGoToFeaturedIncident: () => void;
   onSkip: () => void;
 }
 
-export default function HookModal({ onProceed, onSkip }: HookModalProps) {
+export default function HookModal({ onGoToFeaturedIncident, onSkip }: HookModalProps) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") onSkip();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onSkip]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -25,10 +40,15 @@ export default function HookModal({ onProceed, onSkip }: HookModalProps) {
       <div
         className="absolute inset-0"
         style={{ backgroundColor: "rgba(15, 23, 42, 0.92)", backdropFilter: "blur(8px)" }}
+        onClick={onSkip}
+        aria-hidden="true"
       />
 
       {/* Modal card */}
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={TITLE_ID}
         initial={{ opacity: 0, y: 24, scale: 0.94 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 24, scale: 0.94 }}
@@ -111,20 +131,19 @@ export default function HookModal({ onProceed, onSkip }: HookModalProps) {
 
         {/* Copy */}
         <div className="text-center">
-          <h2 className="text-lg font-bold mb-3" style={{ color: "#E2E8F0" }}>
+          <h2 id={TITLE_ID} className="text-lg font-bold mb-3" style={{ color: "#E2E8F0" }}>
             Welcome to the Compliance Middleware.
           </h2>
           <p className="text-[13px] leading-relaxed mb-6" style={{ color: "#94A3B8" }}>
             AI agents don't just generate text—they take action. This platform bridges the gap
             between emerging agentic threats (OWASP) and established enterprise security frameworks
-            (NIST). Let's run a quick simulation to see how a single AI failure impacts your
-            compliance posture.
+            (NIST). See a real, cited breach and exactly which NIST controls catch it.
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col items-center gap-3">
             <button
-              onClick={onProceed}
+              onClick={onGoToFeaturedIncident}
               className="w-full px-5 py-2.5 rounded-md text-[13px] font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 backgroundColor: "rgba(37, 99, 235, 0.2)",
@@ -132,14 +151,14 @@ export default function HookModal({ onProceed, onSkip }: HookModalProps) {
                 border: "1px solid rgba(37, 99, 235, 0.4)",
               }}
             >
-              Run First Simulation
+              See a real incident, mapped →
             </button>
             <button
               onClick={onSkip}
               className="px-4 py-2 text-[11px] font-medium transition-colors hover:text-slate-300"
               style={{ color: "#64748B" }}
             >
-              Skip tutorial (I know my way around)
+              Skip (I know my way around)
             </button>
           </div>
         </div>

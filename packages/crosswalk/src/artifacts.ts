@@ -32,11 +32,13 @@ export const CSV_HEADER = [
   "asiId",
   "asiName",
   "severity",
+  "framework",
   "family",
   "familyName",
   "controlId",
   "controlTitle",
   "rationale",
+  "validationStatus",
   "evidence",
 ] as const;
 
@@ -73,32 +75,60 @@ function csvField(value: string): string {
 
 /**
  * Pure: builds the CSV text (header + one data row per ASI×family×control
- * mapping, no aggregation). Ends with a trailing newline.
+ * mapping across BOTH frameworks — 800-53 and AI-RMF — no aggregation). Ends
+ * with a trailing newline. Each ASI's 800-53 rows are followed immediately by
+ * its AI-RMF rows, so a reader scanning by ASI sees one contiguous block.
  */
 export function buildCsv(): string {
   const asiById = new Map(OWASP_ASI.map((a) => [a.id, a]));
   const familyById = new Map(NIST_800_53.map((f) => [f.id, f]));
+  const funcById = new Map(AI_RMF.map((f) => [f.id, f]));
 
   const lines: string[] = [CSV_HEADER.join(",")];
 
   for (const [asiId, entry] of Object.entries(CROSSWALK)) {
     const asi = asiById.get(asiId);
+
     for (const mapping of entry.nist53) {
       const family = familyById.get(mapping.family);
       for (const control of mapping.controls) {
         const ref = parseControlRef(control);
-        const controlId = ref ? ref.id : control;
-        const controlTitle = ref ? ref.title : "";
         lines.push(
           [
             asiId,
             asi?.name ?? "",
             asi?.severity ?? "",
+            "800-53",
             mapping.family,
             family?.name ?? "",
-            controlId,
-            controlTitle,
+            ref ? ref.id : control,
+            ref ? ref.title : "",
             mapping.rationale,
+            mapping.validationStatus,
+            evidenceText(entry.evidence),
+          ]
+            .map(csvField)
+            .join(","),
+        );
+      }
+    }
+
+    for (const mapping of entry.aiRmf) {
+      const func = funcById.get(mapping.func);
+      for (const cat of mapping.cats) {
+        const ref = parseControlRef(cat);
+        lines.push(
+          [
+            asiId,
+            asi?.name ?? "",
+            asi?.severity ?? "",
+            "AI-RMF",
+            mapping.func,
+            func?.name ?? "",
+            ref ? ref.id : cat,
+            ref ? ref.title : "",
+            mapping.rationale,
+            mapping.validationStatus,
             evidenceText(entry.evidence),
           ]
             .map(csvField)

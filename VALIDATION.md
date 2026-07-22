@@ -180,6 +180,55 @@ in the wild.
 
 ---
 
+## The governance framework index (ISO 42001 / EU AI Act)
+
+`FRAMEWORK_REFS` bridges each ASI risk to ISO/IEC 42001:2023 Annex A and the EU AI
+Act. That bridge separates into two questions that are held to **different**
+standards, and conflating them is what allowed a shipped defect:
+
+1. **Which clause fits this risk** — an editorial judgment, `editorial` tier,
+   subject to the same Tier-3 promotion path as every other mapping.
+2. **What that clause is called** — *not* editorial. A clause id either exists or
+   it does not; it either renders under its official title or it is wrong.
+
+Question 2 is now enforced. `packages/crosswalk/src/framework-index.ts` holds
+`ISO_42001_ANNEX_A` (all 38 Annex A controls under their 9 objectives) and
+`EU_AI_ACT_ARTICLES`, and `tests/framework-refs.test.ts` resolves every reference
+string against them — id must exist, title must match exactly, and each id must
+render exactly one display string across the whole dataset (the ISO/EU analogue of
+the T13b rule for NIST control ids).
+
+**Why this index is hand-curated, unlike `oscal-index.ts`.** The NIST index is
+generated from NIST's openly-published OSCAL catalog by `scripts/refresh-oscal.mjs`.
+ISO/IEC 42001:2023 is copyrighted and paywalled: there is no lawful machine-readable
+catalog to pin against, and there must be no refresh script. The index therefore
+carries **clause ids and official titles only** — never control text. Adding ISO
+control prose to that file would be a licensing violation.
+
+**Provenance and its limit.** The index was verified on 2026-07-22 by two-source
+corroboration (ISMS.online, Mindset Cyber), which agreed with each other and were
+internally consistent to sub-control level. EU AI Act article numbers and titles
+were verified against the EU AI Act Explorer. **The primary ISO standard text has
+not been purchased.** The guard test proves the *data matches the index*; it cannot
+prove the *index matches ISO*. Before this crosswalk backs a paid deliverable, buy
+ISO/IEC 42001:2023 and reconcile — the index makes that a single-file diff rather
+than a hunt through mapping data.
+
+**Sources that must not be cited.** Two compliance-vendor pages consulted during
+verification publish **fabricated** Annex A schemas, confidently formatted and
+mutually contradictory:
+
+| Source | What it invents |
+|---|---|
+| CertPro | "A.7 Human Oversight of AI", "A.8 AI Supplier Management", "A.9 AI System Documentation"; stops at A.9; claims 21 controls |
+| Hicomply | "A.2 AI risk management", "A.4 Accountability and human oversight", "A.10 AI incident management" |
+
+Neither matches ISO/IEC 42001:2023. They are recorded here so no future contributor
+re-introduces them as a reference — and as a live reminder that vendor marketing
+pages are not a substitute for the standard.
+
+---
+
 ## How this renders in the app
 
 The Evidence Explorer shows each mapping's `validationStatus` as a **labelled

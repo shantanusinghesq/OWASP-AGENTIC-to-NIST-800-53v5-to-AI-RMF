@@ -282,6 +282,36 @@ only MP).
 
 ---
 
+## ISO 42001 coverage gaps (second scope axis)
+
+Everything above tracks **NIST 800-53 family** scope. This section tracks the
+separate question of **ISO/IEC 42001 Annex A coverage** in `FRAMEWORK_REFS`, opened
+2026-07-22 when the bridge's clause citations were corrected (see CHANGELOG,
+*The Governance Bridge Cites the Wrong Clauses*). These are **editorial-coverage**
+items — deliberately excluded from that correction, which was scoped to citation
+accuracy only. They do not carry the family status enum above.
+
+| # | Gap | Proposed action | Trigger |
+|---|---|---|---|
+| 1 | **A.6.2.8 (AI system recording of event logs) is cited by no ASI.** It is the single most on-point Annex A clause for agent audit-trail risk, and the bridge currently routes those risks through the generic A.6.2.6. | Add A.6.2.8 to ASI10 (Rogue Agents) and ASI03 (Identity & Privilege Abuse). | Next editorial pass, or any Tier-3 practitioner review touching ASI03/ASI10. |
+| 2 | **ASI04 (Supply Chain) cites A.10.2 Allocating responsibilities but not A.10.3 Suppliers.** A.10.3 is the more direct anchor for the risk the ASI actually names. | Add A.10.3 alongside A.10.2 on ASI04. | Same as above. |
+| 3 | **Four agentic control areas have no Annex A anchor at all**: agent identity issuance, credential scoping/TTL, network egress control, and inter-agent authn/authz. | None — do not stretch a clause to cover them. Document the gap instead. | See note below; this is a property of the standard, not a backlog item. |
+
+**On gap 3 — this is a finding, not a defect.** ISO/IEC 42001 is a *management-system*
+standard: policy, roles, impact assessment, lifecycle process, data governance,
+supplier relationships. It contains no network, identity, or credential controls
+because that was never its remit. NIST 800-53r5 carries exactly those (AC, IA, SC,
+SR), and CSA independently names AC, IA, AU and SR as the families with systematic
+agentic gaps in current guidance.
+
+That asymmetry is the crosswalk's strongest and currently *unstated* positioning
+claim: **ISO 42001 and 800-53r5 are complements, not alternatives, and a firm
+asserting "we are ISO 42001 certified" has said nothing about its agent identity or
+egress posture.** Surfacing it in the UI — rather than leaving a reader to infer it
+from an empty column — is a product decision, tracked separately from this roadmap.
+
+---
+
 ## Review process
 
 This roadmap is reviewed in **dual mode**, and every review is executable by a single
@@ -312,3 +342,4 @@ activation checklist is executed.
 | Date | Change |
 |---|---|
 | 2026-07-11 | Initial roadmap: six families (AT partially triggered; MA/PS/PT not triggered/excluded; MP/PE not triggered/defined-but-unmapped). Established dual-mode review process and canonical activation checklist. |
+| 2026-07-22 | Added the ISO 42001 coverage-gap section as a second scope axis (three items), opened alongside the governance-bridge citation corrections. NIST family statuses unchanged; `lastReviewed` deliberately not bumped, since no family review occurred. |

@@ -138,9 +138,11 @@ The original plan's discipline was right and should be reinstated rather than re
 
 ## Assumptions to validate
 
+> **Update 2026-07-22 (post-publication):** PM-01 **resolved = confirmed** — the maintainer states no design-partner outreach occurred in the window. Finding 0 therefore moves from inferred (0.5) to confirmed: the commercial plan was never executed, only lapsed. Direction chosen: **full reactivate** (buy the standard, reconcile the registry, run the 5 conversations). PM-02–PM-05 remain open and are the object of that reactivation. Execution kit: `~/linuxshanti/scratchpad/2026-07-22-reactivation-kit.md`.
+
 | ID | Assumption | How to test | Cost |
 |---|---|---|---|
-| PM-01 | No design-partner outreach occurred 2026-05-21 → 2026-07-22 | Ask the maintainer | Free — **do this first** |
+| ~~PM-01~~ | ~~No design-partner outreach occurred 2026-05-21 → 2026-07-22~~ **CONFIRMED 2026-07-22** | ~~Ask the maintainer~~ Done | Free |
 | PM-02 | ISO 42001 A.9 requires per-decision records (inherits `/acc` A-02) | Big-4 advisor consult, post-purchase of the standard | ~$500–1500 + CHF 200 |
 | PM-03 | The ISO agentic gap reads as *news* to a second-line risk manager | 5 practitioner conversations | Time only |
 | PM-04 | The crosswalk's blanket `editorial` status does not disqualify it as a door-opener | Same 5 conversations | Time only |

@@ -29,6 +29,18 @@ export { OSCAL_800_53_REV5, OSCAL_SOURCE, type OscalControl } from "./oscal-inde
 export { UPSTREAM_VERSIONS, type UpstreamLayer } from "./provenance.js";
 
 export {
+  EU_AI_ACT_ARTICLES,
+  EU_AI_ACT_SOURCE,
+  ISO_42001_ANNEX_A,
+  ISO_42001_OBJECTIVES,
+  ISO_42001_SOURCE,
+  euAiActRef,
+  isoRef,
+  type EuAiActArticle,
+  type Iso42001Control,
+} from "./framework-index.js";
+
+export {
   CSV_HEADER,
   buildCsv,
   buildJson,

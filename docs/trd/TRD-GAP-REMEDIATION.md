@@ -250,6 +250,23 @@ The adversarial pass found 14 cross-recommendation conflicts (4 blocking). Resol
 
 ---
 
+### WS11 — Governance-bridge integrity (ISO 42001 / EU AI Act) (effort: S–M; opened 2026-07-22 post-P4; depends: nothing blocking)
+
+Opened after the 2026-07-22 correction of `FRAMEWORK_REFS` (CHANGELOG, *The Governance Bridge Cites the Wrong Clauses*). That change landed the clause registry `packages/crosswalk/src/framework-index.ts` and the resolve-and-match guard in `tests/framework-refs.test.ts`, closing the **citation-accuracy** defect. Everything below is what that change deliberately did **not** close. The suite is green; these remain open.
+
+**Root cause worth carrying forward:** the NIST axis had a pinned upstream catalog (WS5) and the ISO/EU axis had nothing, so wrong ids were unrepresentable on one axis and invisible on the other. WS11-04 and WS11-06 are the ISO-side analogues of WS5's anchoring and drift watch — until they land, the asymmetry is reduced but not gone.
+
+| ID | Requirement | Acceptance | Effort | Source |
+|---|---|---|---|---|
+| R-WS11-01 | Cite **A.6.2.8 (AI system recording of event logs)** on ASI10 (Rogue Agents) and ASI03 (Identity & Privilege Abuse). It is the most on-point Annex A clause for agent audit-trail risk and is currently referenced by **no** ASI; those risks route through the generic A.6.2.6 instead. | `A.6.2.8` appears in ≥ 1 `FRAMEWORK_REFS` entry; guard suite green. | S | Bridge correction follow-up 1 |
+| R-WS11-02 | Add **A.10.3 (Suppliers)** to ASI04 alongside A.10.2. A.10.2 (*Allocating responsibilities*) is a weaker anchor than A.10.3 for a risk whose entire subject is supply chain. | ASI04 cites both A.10.2 and A.10.3. | S | Bridge correction follow-up 2 |
+| R-WS11-03 | **`FRAMEWORK_REFS` is absent from `dist/crosswalk.json` and `dist/crosswalk.csv`.** `artifacts.ts` never emitted it, so the WS9 data product does not carry the governance bridge at all — non-TS consumers (GRC integrations, spreadsheets) cannot see it. Rule: emit it, or state in the package README that the bridge is a TS/ESM-only export. The 2026-07-11 CHANGELOG line "the field is exported with the data" is true only for TS importers and should be corrected either way. | `frameworkRefs` present in the JSON payload with a `dataVersion` bump, **or** README documents the omission and the CHANGELOG line is corrected. | S | Discovered during 2026-07-22 verification |
+| R-WS11-04 | **Reconcile the registry against the purchased primary text.** `framework-index.ts` was built from two corroborating secondary sources (ISMS.online, Mindset Cyber); ISO/IEC 42001:2023 has not been bought. The guard proves *data matches registry* and cannot prove *registry matches ISO*. Buy the standard and diff all 38 controls before the bridge backs any paid deliverable. | Registry header records reconciliation against the primary text with a date; any deltas landed as a DP. | S (cost, not labor — the registry makes this a single-file diff) | VALIDATION.md residual risk |
+| R-WS11-05 | Surface the **ISO-anchor gap** in the UI rather than leaving a reader to infer it from a short chip list. Four agentic control areas — agent identity issuance, credential scoping/TTL, network egress control, inter-agent authn/authz — have **no** Annex A anchor, because ISO 42001 is a management-system standard with no network/identity/credential controls. NIST 800-53r5 (AC, IA, SC, SR) carries exactly those, and CSA independently names AC/IA/AU/SR as the systematically-gapped families. Product decision, not a data fix. | Bridge panel (or adjacent copy) states where ISO is structurally silent and which 800-53 families cover it. | M | EXPANSION_ROADMAP §ISO gaps, item 3 |
+| R-WS11-06 | **Drift watch for the ISO/EU axis** — the WS5 analogue. An ISO 42001 amendment or an EU AI Act consolidation would silently invalidate the registry with no signal, exactly as pre-WS5 NIST drift did. A cron cannot fetch a paywalled standard, so this is a dated review anchor (`lastReviewed` / `nextReviewDue` in the registry header, mirroring EXPANSION_ROADMAP) plus a test asserting the review is not overdue. | Registry carries ISO-8601 review anchors; a test fails when `nextReviewDue` has passed. | S | Structural parity with WS5 |
+
+---
+
 ## 5. Sequenced Roadmap (supersedes gap-analysis §6)
 
 Corrections applied, stated expressly: item 1 re-scoped (blocker refuted, GT-1); data unification inserted as the missing prerequisite; tests before migration (AD-7); data-accuracy fixes gate the confidence UI (no confidence layer over known-false statistics); WS5 placed after the ghost purge so its validation activates green; A.2/A.3 remainders converted from calendar timelines to **unlock gates**.
@@ -262,6 +279,8 @@ Corrections applied, stated expressly: item 1 re-scoped (blocker refuted, GT-1);
 | **P3 — Upstream anchoring & data product** | WS5 (OSCAL index + validation + drift cron), WS9 (dist/JSON/CSV/OSCAL/provenance), WS8 (expansion roadmap annex) | 2–3 weeks | WS5 validation green; artifacts published on a tagged release; annex live with 6 families |
 | **P4 — Structured evidence & transparency** | WS7 (evidence schema + backfill audit, validationStatus, Tier-2 report-only, VALIDATION.md, register); WS6 (YAML migration — **optional/severable**; execute only if contributor accessibility is still wanted after P0–P3) | 3–5 weeks (WS7); +2–3 weeks (WS6 if taken) | Tier-2 checks promoted to hard-fail as violation counts hit 0; every ASI ≥ 1 verifiable evidence item |
 | **P5 — Gated governance** | WS10-01..05 artifacts ship with P2–P3 (cheap); **Board Mode, Tier-3 status promotion, and A.3's practitioner-review remainder unlock only on:** first external contributor PR **or** 2 confirmed onboarded reviewers | Artifacts: days. Unlock: external | Trigger condition in GOVERNANCE.md fires |
+
+**WS11 (added 2026-07-22) sits outside P0–P5.** It was opened after the phase plan was written and has no blocking dependency on it. Suggested order: R-WS11-01/02 (S, editorial, do with the next data pass) → R-WS11-03 (S, closes a WS9 hole) → R-WS11-06 (S, structural parity with WS5) → R-WS11-05 (M, product decision) → R-WS11-04 (gated on purchasing the standard, and a hard prerequisite before the bridge backs anything sold).
 
 **Prohibitions on sequencing, named:** Do not start WS6 before WS4 is green (AD-7). Do not ship R-WS7-04's confidence UI before WS3 completes (no transparency layer over false statistics). Do not publish contribution templates before R-WS10-02's canonical designation. Do not implement any second exclusion artifact, evidence schema, confidence design, or cutover path (AD-1..AD-4).
 
@@ -286,6 +305,7 @@ Corrections applied, stated expressly: item 1 re-scoped (blocker refuted, GT-1);
 | NEW: unconsumable data product + ToS conflict | — | High (falsifies CF-05 mitigation) | WS9-01..07 |
 | NEW: publish integrity | — | Medium-High | WS1-01..05 |
 | NEW: supply-chain surface | — | Medium | WS10-06/07 |
+| NEW: governance-bridge citation drift (ISO/EU axis unanchored while NIST axis pinned) | — | **High (procurement-visible; 7/10 entries shipped wrong)** | Citation accuracy CLOSED 2026-07-22; anchoring/drift/coverage remainder → WS11-01..06 |
 
 ---
 

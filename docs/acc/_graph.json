@@ -1,0 +1,1090 @@
+{
+  "generated": "2026-07-20",
+  "acc_range": [
+    1,
+    4
+  ],
+  "nodes": [
+    {
+      "id": "acc-001",
+      "type": "ACC",
+      "text": "aegis integration batch",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01",
+      "focus": "full session \u2014 `@haremantra/crosswalk` extraction + /batch execution + AEGIS integration prototype"
+    },
+    {
+      "id": "acc-002",
+      "type": "ACC",
+      "text": "publish bypass",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01",
+      "focus": "publishing `@obviate/crosswalk` \u2192 blockers cascade \u2192 rename + manual bypass"
+    },
+    {
+      "id": "acc-003",
+      "type": "ACC",
+      "text": "trd backlog remediation",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11",
+      "focus": "OWASP crosswalk \u2014 full TRD gap-remediation backlog (Waves 1-6) + preceding refactor"
+    },
+    {
+      "id": "acc-004",
+      "type": "ACC",
+      "text": "ux audit implementation",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11",
+      "focus": "3-persona UX audit + full implementation (PRs #31-35, v0.9.0) + demo evaluation"
+    },
+    {
+      "id": "dec-001-01",
+      "type": "Decision",
+      "text": "Extract crosswalk data into `@haremantra/crosswalk` workspace package (MIT) while SPA stays AGPL-3.0 \u2014 dual-license unblocks AEGIS commercial consumption (scratchpad-aegis-relationship.md D-01/D-03)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-02",
+      "type": "Decision",
+      "text": "Asymmetric workspace \u2014 keep `client/` at root (not `apps/web/`) for now; only `packages/crosswalk/` is a workspace member \u2014 minimum-blast-radius extraction (deviation from approved plan, surfaced)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-03",
+      "type": "Decision",
+      "text": "AEGIS coexists with crosswalk, not replaces \u2014 `ASI_CONTROL_MAPPING` stays for scoring math (3 of 4 consumers); crosswalk powers rendering only (1 of 4 \u2014 `RemediationRoadmap.tsx:161`) (scratchpad-aegis-integration.md D-05)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-04",
+      "type": "Decision",
+      "text": "Publish to GitHub Packages, not npm Pro or local file: deps \u2014 only path that satisfies AEGIS's `frozen-lockfile=true` (scratchpad-aegis-integration.md D-01)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-05",
+      "type": "Decision",
+      "text": "Track B (AEGIS PR1) shipped as local-only prototype branch, not real PR \u2014 AEGIS has no git remote",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-06",
+      "type": "Decision",
+      "text": "Phase-0 history rewritten to exclude `.github/workflows/deploy-pages.yml` from initial commits \u2014 OAuth token lacked `workflow` scope; user later refreshed and held-back commit landed as `f6ee490`",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-07",
+      "type": "Decision",
+      "text": "Squash-merge all 3 batch PRs (not merge-commit) \u2014 clean main history",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-08",
+      "type": "Decision",
+      "text": "T10 (orphan check) refined to **key-shape regex** `^(GV|MP|MS|MG)-\\d+$`, not usage check \u2014 shape was the original bug (`MAP-*` long-form), not unused entries; keeps `MS-4`/`GV-7` (valid-but-unreferenced) passing",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-001-09",
+      "type": "Decision",
+      "text": "`.js` extensions added to `packages/crosswalk/src/index.ts` re-exports \u2014 required for nodenext consumers (AEGIS); zero behavioral change for bundler resolution",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-002-01",
+      "type": "Decision",
+      "text": "Renamed package `@obviate/crosswalk` \u2192 `@haremantra/crosswalk` \u2014 GitHub Packages npm registry requires the scope to match the GitHub user/org owning the repo; no `obviate` org exists under `haremantra`",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-002-02",
+      "type": "Decision",
+      "text": "Bypass GH Actions; publish manually with classic PAT \u2014 Actions blocked at user-account level, can't fix from harness or quickly",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-002-03",
+      "type": "Decision",
+      "text": "Token type for GH Packages npm = **classic PAT** (`write:packages` scope) \u2014 fine-grained PATs do not yet support GitHub Packages npm publishing (documented GitHub limitation)",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-002-04",
+      "type": "Decision",
+      "text": "When/if `obviate` GH org is created, bump version + republish under `@obviate/crosswalk`; AEGIS imports change in one place",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "dec-003-01",
+      "type": "Decision",
+      "text": "Executed entire TRD backlog (`docs/trd/TRD-GAP-REMEDIATION.md`) Waves 1-6, PRs #18-#30 \u2014 after the S1-S7 refactor (PRs #9-#17). Package `@haremantra/crosswalk` v0.2.0\u2192**v0.8.0**; tests 21\u2192**67**.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-02",
+      "type": "Decision",
+      "text": "Honest counts over padded \u2014 removed withdrawn SA-12, dropping distinct controls 55\u2192**54** / mappings 90\u2192**89**, rather than substituting a mismatched successor.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-03",
+      "type": "Decision",
+      "text": "Orphans handled non-destructively (user choice) \u2014 claim \"complete 19\"\u2192\"**17 of 19 referenced**\"; keep GV-3/MS-4 on T16 allowlist; delete stray GV-7.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-04",
+      "type": "Decision",
+      "text": "Fixed systemic GOVERN/MANAGE description-title mismatch (user-approved) \u2014 was rendering wrong Evidence-Explorer tooltips (e.g. GV-6\u2192\"Resource Allocation\").",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-05",
+      "type": "Decision",
+      "text": "WS6 YAML migration OUT of scope (user: TS-native). WS7 evidence sourced by web research (user choice) \u2014 all 33 refs adversarially verified, **0 unverifiable**.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-06",
+      "type": "Decision",
+      "text": "`validationStatus` on all 80 mappings = `editorial`; ordinal `confidence` left unassigned \u2014 no numeric floats, no scrambler-score imports (AD-3).",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-07",
+      "type": "Decision",
+      "text": "db/ kept standalone npm island (NOT folded into workspace) so native better-sqlite3 stays out of app CI; enforced by a JSON drift-guard test instead.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-08",
+      "type": "Decision",
+      "text": "Package publish uses `publishConfig` to point the *published* artifact at `dist/`; workspace client keeps consuming raw `src` (no build-before-build coupling).",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-003-09",
+      "type": "Decision",
+      "text": "OSCAL title validation + Tier-2 rationale-cross-reference are **report-only** (editorial debt surfaced, not blocking).",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-01",
+      "type": "Decision",
+      "text": "Ran a 3-persona UX audit (OpenAI/clarity, Palo Alto/workflow, Wiz/PLG) of the live app \u2192 `docs/UX-AUDIT-2026-07-11.md`. Scores 72/63/61; convergent thesis: \"rotate the product 90\u00b0 \u2014 make a **defensible control set** the atomic object; **lead with the evidence** (real incidents), not the map.\"",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-02",
+      "type": "Decision",
+      "text": "Implemented ALL recs across **5 sequenced PRs #31-#35** (each green through ci.yml, squash-merged, live-verified). Package `@haremantra/crosswalk` v0.8.0\u2192**v0.9.0**; tests **67\u2192107**.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-03",
+      "type": "Decision",
+      "text": "Assessment tray uses **provider-tolerant hooks** \u2014 `useAssessment()` throws / `useAssessmentMaybe()` returns null \u2014 so `SelectToggle` renders nothing without the provider, keeping `App.smoke` + `RiskDetail.validation` tests byte-identical (verified empty diff every PR).",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-04",
+      "type": "Decision",
+      "text": "Committee brief = pure `buildBriefHtml()` \u2192 `window.open`+`document.write` of a **self-contained light-theme** doc (dark app theme can't leak); `esc()` on every interpolated value (XSS guard). Not a route/iframe.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-05",
+      "type": "Decision",
+      "text": "Package publish uses **publishConfig** to point the published artifact at `dist`; workspace client keeps consuming raw `src` (no build coupling). Simulator **React.lazy** code-split (main bundle 879\u2192741 KB + 142 KB lazy chunk). Hero image **self-hosted** (`client/public/hero-banner.webp`, dropped CloudFront) + preload.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-06",
+      "type": "Decision",
+      "text": "Governance bridge (ISO 42001 / EU AI Act / SR 11-7) shipped as explicit **editorial v1** (`FRAMEWORK_REFS`), UI-labelled \"Editorial v1 \u00b7 verify before use\" \u2014 NOT authoritative.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-07",
+      "type": "Decision",
+      "text": "`?risk=ASI0X` permalink additive to frozen `?tab=`; heatmaps severity-ranked (`bySeverity`, `client/src/lib/severity.ts`) with exposure-total columns.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "dec-004-08",
+      "type": "Decision",
+      "text": "Demo evaluated by **generating real deliverables via the app's pure export fns** (not narration/browser/re-audit) \u2192 `docs/scratchpad-demo-evaluate-updated-app.md`. Verdict **PASS**: 5/5 persona jobs now complete end-to-end (were 0/5), 14/14 recs present, 107 tests green.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-001-01",
+      "type": "OpenQuestion",
+      "text": "**[BLOCKER] Repo Actions allowlist excludes `pnpm/action-setup@v4`** \u2014 affects publish-crosswalk.yml execution AND deploy-pages.yml since the npm\u2192pnpm migration. Total workflow runs ever on this repo: 0. Harness blocked the `gh api PUT actions/permissions/selected-actions` write \u2014 user must add via web UI (`/settings/actions` \u2192 Allow specific actions \u2192 add pattern) or CLI in real terminal",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-001-02",
+      "type": "OpenQuestion",
+      "text": "After allowlist fix, re-fire workflow \u2014 `git tag -d crosswalk-v0.2.0 && git push origin :refs/tags/crosswalk-v0.2.0 && git tag crosswalk-v0.2.0 && git push origin crosswalk-v0.2.0` (workflow doesn't auto-replay on settings change)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-001-03",
+      "type": "OpenQuestion",
+      "text": "`Home.tsx:97` fallback ordering \u2014 search for `\"MP-1\"` resolves to NIST 800-53's `\"MP-1 Media Protection Policy\"` before checking AI-RMF map (wrong context); deferred",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-001-04",
+      "type": "OpenQuestion",
+      "text": "Two known-orphan AI-RMF description entries \u2014 `GV-7` (likely leftover from old 7-cat GOVERN list; current `AI_RMF.cats` has GV-1..6) and `MS-4` (Unit 3 added; valid AI_RMF.cat but no CROSSWALK reference). Editorial decision pending",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-001-05",
+      "type": "OpenQuestion",
+      "text": "AEGIS git remote \u2014 strategic decision (private GitHub vs. local-only). If created via `gh repo create haremantra/aegis --private --source=. --push`, prototype branch becomes lift-able into a real PR",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-002-01",
+      "type": "OpenQuestion",
+      "text": "GH Actions disabled at user-account level \u2014 `HTTP 422: Actions has been disabled for this user`; user-level billing endpoint returns 404 (no Actions billing record). Affects publish workflow + Pages deploy. Adding a payment method did not flip it within ~2 min observation window. Path forward: wait longer / check dashboard banner / GH Support",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-002-02",
+      "type": "OpenQuestion",
+      "text": "Future `obviate` GH org strategy \u2014 register the org, transfer repo or republish, deprecate `@haremantra/crosswalk`?",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-002-03",
+      "type": "OpenQuestion",
+      "text": "AEGIS consumption (Phase 4) \u2014 install `@haremantra/crosswalk@0.2.0` in `/Users/shantanusingh/Projects/AEGIS/packages/report`, replace prototype `link:` dep, delete the 26-line ambient shim `packages/report/src/obviate-crosswalk.d.ts`. Blocked only on user decision",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "oq-003-01",
+      "type": "OpenQuestion",
+      "text": "Residual editorial debt (report-only, tracked, non-blocking) \u2014 ~107 OSCAL title divergences (14 referenced = benign Rev-4 renames; rest unreferenced desc keys) + 65 Tier-2 rationale\u2194ID cross-reference gaps. Future editorial pass; promote Tier-2 checks to hard-fail when a count hits 0.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-003-02",
+      "type": "OpenQuestion",
+      "text": "Node-20 action deprecation warning on the pinned SHAs \u2014 cosmetic; bump SHAs when convenient.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-003-03",
+      "type": "OpenQuestion",
+      "text": "npm provenance (WS1-7) moot on GitHub Packages restricted \u2014 a standalone registry-strategy decision if public-npm anonymous consumption is ever wanted.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-004-01",
+      "type": "OpenQuestion",
+      "text": "`FRAMEWORK_REFS` is unverified editorial \u2014 needs practitioner review before any citation use (UI already flags this).",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-004-02",
+      "type": "OpenQuestion",
+      "text": "`demo-artifacts/` disposition \u2014 gitignore or delete (currently untracked, uncommitted).",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-004-03",
+      "type": "OpenQuestion",
+      "text": "Deferred UX items \u2014 per-risk prerendered OG images (needs a prerender/SSR pipeline); fully authoritative multi-framework mapping (only editorial v1 shipped); `?sel=` URL selection-share (designed in the tray-arch plan, NOT built).",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "oq-004-04",
+      "type": "OpenQuestion",
+      "text": "Pre-UX editorial debt from ACC 003 still open \u2014 ~107 OSCAL title divergences + 65 Tier-2 rationale-cross-reference (both report-only, non-blocking).",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-001-01",
+      "type": "RejectedApproach",
+      "text": "`file:` or `link:` deps for AEGIS production consumption \u2014 rejected because path-relative resolution differs per machine and breaks `frozen-lockfile=true` integrity hashes",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-02",
+      "type": "RejectedApproach",
+      "text": "Cross-repo pnpm workspace symlink between this repo and AEGIS \u2014 rejected, pnpm workspaces don't span git repository roots",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-03",
+      "type": "RejectedApproach",
+      "text": "Cell-by-cell reconciliation of `CROSSWALK` \u2194 `ASI_CONTROL_MAPPING` \u2014 rejected after CoVE showed they're complementary not duplicate (`CROSSWALK` is rich rendering data, `ASI_CONTROL_MAPPING` is sparse 7-boolean scoring map)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-04",
+      "type": "RejectedApproach",
+      "text": "Vendor (copy crosswalk source into AEGIS) \u2014 rejected, defeats single-source-of-truth purpose of extraction",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-05",
+      "type": "RejectedApproach",
+      "text": "T10 strict orphan check (every key referenced in CROSSWALK) \u2014 rejected, flagged valid-but-unused entries (`MS-4`, `GV-7`) as bugs",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-06",
+      "type": "RejectedApproach",
+      "text": "Replace `ASI_CONTROL_MAPPING` with crosswalk-derived data \u2014 rejected, scoring math is stable and depends on the boolean abstraction",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-07",
+      "type": "RejectedApproach",
+      "text": "Apps/* layout migration (`client/` \u2192 `apps/web/`) \u2014 deferred not rejected; reversible cosmetic change",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-001-08",
+      "type": "RejectedApproach",
+      "text": "Track A actual publish from worker \u2014 rejected, requires manual user-side repo settings + token review",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-002-01",
+      "type": "RejectedApproach",
+      "text": "Fine-grained PAT for publishing \u2014 rejected, GitHub Packages npm registry doesn't support fine-grained tokens (no `Packages` permission category exposed)",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-002-02",
+      "type": "RejectedApproach",
+      "text": "Add `pnpm/action-setup@v4` to repo Actions allowlist as the fix \u2014 necessary but not sufficient; user-account Actions disable is the deeper blocker",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-002-03",
+      "type": "RejectedApproach",
+      "text": "Add payment method to enable Actions \u2014 tried; did not flip the disable within observation window. May propagate later",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-002-04",
+      "type": "RejectedApproach",
+      "text": "Make repo public to bypass user-account Actions disable (Path B) \u2014 user chose Path A (billing) instead; harness also blocked the visibility flip without explicit named authorization",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-002-05",
+      "type": "RejectedApproach",
+      "text": "`@obviate` scope publish \u2014 rejected by registry with `403 permission_denied: create_package` because no `obviate` GH user/org exists under `haremantra`'s account",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "rej-003-01",
+      "type": "RejectedApproach",
+      "text": "SA-12\u2192SR-9 substitution to keep count=55 \u2014 rejected: repo's SR-9 title \"Supplier Security Incident Response\" semantically mismatches SA-12's tamper/integrity intent; padding is the inaccuracy being fought.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-003-02",
+      "type": "RejectedApproach",
+      "text": "Folding db/ into pnpm workspace \u2014 rejected: pulls native better-sqlite3 into app CI; kept standalone + drift guard.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-003-03",
+      "type": "RejectedApproach",
+      "text": "byte-identical data regression guard (earlier refactor) \u2014 rejected: formatter-brittle; used semantic deep-equality snapshot.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-003-04",
+      "type": "RejectedApproach",
+      "text": "Fixing all 107 OSCAL title divergences now \u2014 deferred: editorial, overwhelmingly on unreferenced description keys.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-004-01",
+      "type": "RejectedApproach",
+      "text": "Browser click-through / Playwright to evaluate the app \u2014 rejected: client-rendered SPA can't be driven from this session; pure-function artifact generation is stronger + reproducible.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-004-02",
+      "type": "RejectedApproach",
+      "text": "Re-run the 3 auditor subagents to re-score \u2014 rejected: they can't see the rendered SPA either (fetch returns the shell); opinion, not measurement.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-004-03",
+      "type": "RejectedApproach",
+      "text": "Nest `frameworkRefs` inline in the 10 CROSSWALK entries \u2014 rejected: fragile multiline edits; used a separate keyed `FRAMEWORK_REFS` const instead.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "rej-004-04",
+      "type": "RejectedApproach",
+      "text": "Repoint package main/types/exports to `dist` directly \u2014 rejected: couples the workspace client's build to a prebuilt package; used `publishConfig` override so only the *published* package points at dist.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-001-01",
+      "type": "NextAction",
+      "text": "**User** \u2014 add `pnpm/action-setup@v4` to repo Actions allowlist (web UI: `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/settings/actions` \u2192 \"Allow specific actions\" patterns)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-001-02",
+      "type": "NextAction",
+      "text": "**User or me** \u2014 re-fire `crosswalk-v0.2.0` tag (delete + re-push, see Open Questions)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-001-03",
+      "type": "NextAction",
+      "text": "**Verify** \u2014 `gh run list` confirms publish workflow ran; package appears at `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/packages`",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-001-04",
+      "type": "NextAction",
+      "text": "**Verify** \u2014 Pages deploy fires on next push (or `workflow_dispatch`)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-001-05",
+      "type": "NextAction",
+      "text": "**User decision** \u2014 AEGIS git remote (yes/no). If yes, lift `prototype/obviate-crosswalk-integration` (`/Users/shantanusingh/Projects/AEGIS`) into real AEGIS PR using `@haremantra/crosswalk@^0.2.0`; delete the type shim `packages/report/src/obviate-crosswalk.d.ts`",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-001-06",
+      "type": "NextAction",
+      "text": "**Editorial** \u2014 resolve `GV-7` and `MS-4` (delete from descriptions, OR add to `AI_RMF.cats` / `CROSSWALK` references)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-001-07",
+      "type": "NextAction",
+      "text": "**Fix** \u2014 `Home.tsx:97` fallback ordering (check AI-RMF descriptions before NIST 800-53 when prefix matches an AI-RMF function, or unify maps with namespaced keys)",
+      "acc_seq": 1,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-002-01",
+      "type": "NextAction",
+      "text": "**Wire AEGIS to consume** \u2014 `cd /Users/shantanusingh/Projects/AEGIS && pnpm add @haremantra/crosswalk@0.2.0 --filter @aegis/report` (after `~/.npmrc` is set up there too); update `packages/report/src/pdf/RemediationRoadmap.tsx` import; delete `packages/report/src/obviate-crosswalk.d.ts` shim; lift prototype branch into a real PR if AEGIS gets a remote",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-002-02",
+      "type": "NextAction",
+      "text": "**Verify Actions enablement state** \u2014 visit https://github.com/dashboard for any banner; if still blocked, open GH Support ticket",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-002-03",
+      "type": "NextAction",
+      "text": "**(After Actions enabled)** Bump to `0.2.1`, tag `crosswalk-v0.2.1`, push tag \u2192 confirm publish workflow runs end-to-end",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-002-04",
+      "type": "NextAction",
+      "text": "**Editorial follow-ups** (unchanged from #001) \u2014 `Home.tsx:97` fallback ordering bug, `GV-7`/`MS-4` orphans",
+      "acc_seq": 2,
+      "acc_date": "2026-05-01"
+    },
+    {
+      "id": "nxt-003-01",
+      "type": "NextAction",
+      "text": "(Optional) Editorial pass \u2014 correct the 14 *referenced* OSCAL title divergences; then promote Tier-2 checks whose violation count is 0. Targets: `packages/crosswalk/src/nist-control-descriptions.ts`, `packages/crosswalk/tests/editorial-quality.test.ts`.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-003-02",
+      "type": "NextAction",
+      "text": "(Optional) Bump the 5 pinned action SHAs to clear the Node-20 deprecation \u2014 the 3 files under `.github/workflows/`.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-003-03",
+      "type": "NextAction",
+      "text": "(Optional) If AT fully triggers per `docs/EXPANSION_ROADMAP.md`, wire AT-2/AT-3 into ASI09 CROSSWALK (follow that family's activation checklist).",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-003-04",
+      "type": "NextAction",
+      "text": "Otherwise: backlog complete \u2014 no required next action. Verify anytime with `pnpm check && pnpm test && pnpm build`.",
+      "acc_seq": 3,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-004-01",
+      "type": "NextAction",
+      "text": "(Optional, human layer) Live click-through per `docs/scratchpad-demo-evaluate-updated-app.md` \u00a7\"human layer\"; open `demo-artifacts/committee-brief.html` in a browser.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-004-02",
+      "type": "NextAction",
+      "text": "(Optional) Decide `demo-artifacts/` disposition \u2014 add to `.gitignore` or delete.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-004-03",
+      "type": "NextAction",
+      "text": "(Optional) Practitioner review of `FRAMEWORK_REFS` before promoting it above editorial.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-004-04",
+      "type": "NextAction",
+      "text": "(Optional, backlog from ACC 003) Editorial pass on the 107 OSCAL title divergences; promote Tier-2 checks whose count is 0 \u2014 `packages/crosswalk/src/nist-control-descriptions.ts`, `packages/crosswalk/tests/editorial-quality.test.ts`.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    },
+    {
+      "id": "nxt-004-05",
+      "type": "NextAction",
+      "text": "Otherwise: UX overhaul complete \u2014 no required action. Verify anytime with `pnpm check && pnpm test && pnpm build`.",
+      "acc_seq": 4,
+      "acc_date": "2026-07-11"
+    }
+  ],
+  "edges": [
+    {
+      "from": "acc-001",
+      "to": "acc-002",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "acc-002",
+      "to": "acc-003",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "acc-003",
+      "to": "acc-004",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "dec-001-01",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-02",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-03",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-04",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-05",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-06",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-07",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-08",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-001-09",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-002-01",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-002-02",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-002-03",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-002-04",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-01",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-02",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-03",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-04",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-05",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-06",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-07",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-08",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-003-09",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-01",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-02",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-03",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-04",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-05",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-06",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-07",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "dec-004-08",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-001-01",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-001-02",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-001-03",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-001-04",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-001-05",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-002-01",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-002-02",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-002-03",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-003-01",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-003-02",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-003-03",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-004-01",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-004-02",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-004-03",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "oq-004-04",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-01",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-02",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-03",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-04",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-05",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-06",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-07",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-001-08",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-002-01",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-002-02",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-002-03",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-002-04",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-002-05",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-003-01",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-003-02",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-003-03",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-003-04",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-004-01",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-004-02",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-004-03",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "rej-004-04",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-01",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-02",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-03",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-04",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-05",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-06",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-001-07",
+      "to": "acc-001",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-002-01",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-002-02",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-002-03",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-002-04",
+      "to": "acc-002",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-003-01",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-003-02",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-003-03",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-003-04",
+      "to": "acc-003",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-004-01",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-004-02",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-004-03",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-004-04",
+      "to": "acc-004",
+      "type": "PART_OF"
+    },
+    {
+      "from": "nxt-004-05",
+      "to": "acc-004",
+      "type": "PART_OF"
+    }
+  ]
+}

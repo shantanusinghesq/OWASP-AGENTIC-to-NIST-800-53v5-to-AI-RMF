@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { ReactElement, ReactNode } from "react";
-import { ChevronDown, Grid3X3, Search, Shield, Zap } from "lucide-react";
+import { ChevronDown, Grid3X3, ScanSearch, Search, Shield, Zap } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export type ViewType = "overview" | "matrix" | "aiRmf" | "detail" | "simulator";
+export type ViewType = "analyze" | "overview" | "matrix" | "aiRmf" | "detail" | "simulator";
 
 interface TabDef {
   key: ViewType | "heatmaps";
@@ -13,6 +13,7 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
+  { key: "analyze", label: "Analyze Architecture", icon: <ScanSearch className="w-3.5 h-3.5" /> },
   { key: "overview", label: "Overview", icon: <Shield className="w-3.5 h-3.5" /> },
   {
     key: "heatmaps",

@@ -29,13 +29,14 @@ import { generateScenarioPreview } from "./engine/preview";
 import { FAMILY_FULL_NAMES } from "./engine/narrative";
 import type { FactPattern, GovernancePosture } from "./engine/types";
 import type { BiasDataPoint } from "./engine/bias-model";
-import { useScenario, type ScenarioSnapshot } from "./ScenarioContext";
+import { useScenario } from "./ScenarioContext";
 import { useOnboarding } from "@/features/onboarding/OnboardingContext";
 import CascadeGraph from "./CascadeGraph";
 import ScenarioComparison from "./ScenarioComparison";
 import AnalysisPanel from "./AnalysisPanel";
 import DiagramAnalyzer from "@/features/diagram/DiagramAnalyzer";
 import type { PatternEvaluationOutput } from "@/features/diagram/engine/pattern-evaluator";
+import { snapshotFromDiagram } from "@/features/diagram/engine/to-snapshot";
 import {
   Zap,
   RefreshCw,
@@ -418,15 +419,7 @@ export default function ScenarioSimulator() {
   // Diagram analysis result handler — mirrors generateScenarioHandler but
   // sources the scenario from the Architecture Diagram Analyzer sidebar
   const handleDiagramResult = useCallback((output: PatternEvaluationOutput) => {
-    const snapshot: ScenarioSnapshot = {
-      id: crypto.randomUUID(),
-      timestamp: Date.now(),
-      factPattern: output.factPattern,
-      result: output.result,
-      biasData: output.biasData,
-      label: output.label,
-      resultSource: "diagram",
-    };
+    const snapshot = snapshotFromDiagram(output);
     setActiveScenario(snapshot);
     setDiagramSidebarOpen(false);
 
@@ -444,6 +437,21 @@ export default function ScenarioSimulator() {
     });
     showToast(`Diagram analysis applied — ${output.label}`);
   }, [setActiveScenario, setReplayStep]);
+
+  // Hydrate from a scenario handed over by the inline front-door analyzer:
+  // it sets activeScenario then navigates here, so on entry with an active
+  // scenario and no local result yet, render it.
+  useEffect(() => {
+    if (activeScenario && !scenarioGenerated) {
+      setScenario(activeScenario.factPattern);
+      setResult(activeScenario.result);
+      setBiasData(activeScenario.biasData);
+      setShowCascade(true);
+      setScenarioGenerated(true);
+      setScenarioCount((c) => c + 1);
+      setReplayStep(0);
+    }
+  }, [activeScenario, scenarioGenerated, setReplayStep]);
 
   // Computed data
   const heatmapData = useMemo(() => {

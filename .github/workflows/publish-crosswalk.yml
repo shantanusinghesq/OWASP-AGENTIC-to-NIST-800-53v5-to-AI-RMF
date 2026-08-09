@@ -1,4 +1,4 @@
-name: Publish @haremantra/crosswalk
+name: Publish @shantanusinghesq/crosswalk
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 22
           registry-url: https://npm.pkg.github.com
-          scope: '@haremantra'
+          scope: '@shantanusinghesq'
           cache: pnpm
       # The pushed tag (crosswalk-vX.Y.Z) must match the package version, or a
       # mis-tagged push would publish stale contents unchallenged (--no-git-checks
@@ -40,6 +40,6 @@ jobs:
       # that fails referential-integrity checks.
       - run: pnpm check
       - run: pnpm test
-      - run: pnpm --filter @haremantra/crosswalk publish --no-git-checks
+      - run: pnpm --filter @shantanusinghesq/crosswalk publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

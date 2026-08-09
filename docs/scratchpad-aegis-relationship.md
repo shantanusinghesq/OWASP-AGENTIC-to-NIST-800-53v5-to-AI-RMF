@@ -65,7 +65,7 @@ AEGIS maps ASI → 7 abstract booleans for scoring. This repo maps ASI → speci
 | Effort to reach | Low (~1 day extraction) | Medium (~3 days monorepo migration) | Low (port + delete) |
 
 **Options considered:**
-- A: Keep this repo standalone. Extract `data.ts` + descriptions into a permissively-licensed `@aegis/crosswalk` (or `@haremantra/crosswalk`) consumed by both. SPA imports its own data via the package; AEGIS imports it for report enrichment.
+- A: Keep this repo standalone. Extract `data.ts` + descriptions into a permissively-licensed `@aegis/crosswalk` (or `@shantanusinghesq/crosswalk`) consumed by both. SPA imports its own data via the package; AEGIS imports it for report enrichment.
 - B: Fold `client/` into AEGIS as `apps/learn`. One product, three surfaces (Learn → Try → Assess). Drop standalone repo.
 - C: Freeze this repo. Port data into AEGIS. Archive.
 
@@ -85,7 +85,7 @@ AEGIS maps ASI → 7 abstract booleans for scoring. This repo maps ASI → speci
 ### D-02 — How is the shared crosswalk data physically distributed? (only if D-01 = A)
 
 **Options considered:**
-- A: Published private npm package (`@haremantra/crosswalk` on a private registry).
+- A: Published private npm package (`@shantanusinghesq/crosswalk` on a private registry).
 - B: Git submodule from this repo into AEGIS.
 - C: pnpm `overrides` / workspace path pointing into a sibling clone of this repo on disk.
 - D: Copy-paste / manual sync (status quo).
@@ -117,7 +117,7 @@ AEGIS maps ASI → 7 abstract booleans for scoring. This repo maps ASI → speci
 
 **Options considered:**
 - A: Keep AGPL-3.0 on the data package as well. AEGIS cannot consume.
-- B: Dual-license — SPA stays AGPL-3.0 (defends public-good repo); the extracted `@haremantra/crosswalk` package is MIT (so AEGIS can consume cleanly).
+- B: Dual-license — SPA stays AGPL-3.0 (defends public-good repo); the extracted `@shantanusinghesq/crosswalk` package is MIT (so AEGIS can consume cleanly).
 - C: Relicense everything as MIT/Apache.
 
 **Accepted:** Option **B** — dual-license. The SPA shell (UI, layout, styling, accessibility work) stays AGPL because that's where the original public-good intent applies. The data package (citations of NIST 800-53 and OWASP ASI, plus Shantanu's editorial rationale) is MIT so AEGIS and any commercial consumer can use it.
@@ -137,7 +137,7 @@ AEGIS maps ASI → 7 abstract booleans for scoring. This repo maps ASI → speci
 
 **FINDING from CoVE-01:** They are not the same shape. There is little to reconcile. The only overlap is the ASI risk identifiers themselves (ASI01–ASI10), and those agree.
 
-**Accepted:** No reconciliation needed. Both stay; they describe different things. ASI identifiers are canonicalized in the shared `@haremantra/crosswalk` package; both this repo and AEGIS import from there. AEGIS's `ASI_CONTROL_MAPPING` (ASI → 7 booleans) stays in `@aegis/shared` because it's tied to AEGIS's scoring logic, not the public crosswalk.
+**Accepted:** No reconciliation needed. Both stay; they describe different things. ASI identifiers are canonicalized in the shared `@shantanusinghesq/crosswalk` package; both this repo and AEGIS import from there. AEGIS's `ASI_CONTROL_MAPPING` (ASI → 7 booleans) stays in `@aegis/shared` because it's tied to AEGIS's scoring logic, not the public crosswalk.
 
 **Rejected:** Cell-by-cell editorial reconciliation
 **Reasoning against:** Was the original recommended path; CoVE-01 invalidated it. There is nothing meaningful to reconcile beyond ASI ID/name/severity/desc, which are already in agreement.
@@ -182,7 +182,7 @@ AEGIS maps ASI → 7 abstract booleans for scoring. This repo maps ASI → speci
 ### D-07 — Should AEGIS reports consume this repo's rich crosswalk data? (NEW from CoVE-01/02/03)
 
 **Options considered:**
-- A: Yes — AEGIS imports `@haremantra/crosswalk` to enrich reports with NIST control rationale, AI-RMF mapping, and published-attack evidence citations per ASI.
+- A: Yes — AEGIS imports `@shantanusinghesq/crosswalk` to enrich reports with NIST control rationale, AI-RMF mapping, and published-attack evidence citations per ASI.
 - B: No — AEGIS reports stay scoped to questionnaire-derived findings; crosswalk is reference-only.
 
 **Accepted:** Option **A** — but as a Phase 2 follow-up after D-01/D-02 ship, not part of the initial extraction.

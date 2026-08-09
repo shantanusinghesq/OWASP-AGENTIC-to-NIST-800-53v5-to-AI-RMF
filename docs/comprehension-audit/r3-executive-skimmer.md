@@ -47,12 +47,12 @@ I read four of them and stopped: **ASI01 Agent Goal Hijack** ("Attackers redirec
 The count line is the tell. It means the answer to "how much of this do our existing 800-53 controls already touch" is a number, and the number is on the card. That is exactly the shape of thing a GRC lead can use.
 
 **Beat 3 — the footer.**
-Straight to the bottom. **"Licensed under AGPL-3.0."** **"Source Code."** **"Export data (v0.9.0): Download JSON / Download CSV."** A collapsed strip: **"PROVENANCE & LIMITATIONS — Show."** And the sources line: **"Sources: OWASP Top 10 for Agentic AI (ASI) 2026 | NIST SP 800-53 Rev 5 (OSCAL v1.5.0) | NIST AI Risk Management Framework AI 100-1, v1.0."** Copyright: **"© 2026 haremantra."**
+Straight to the bottom. **"Licensed under AGPL-3.0."** **"Source Code."** **"Export data (v0.9.0): Download JSON / Download CSV."** A collapsed strip: **"PROVENANCE & LIMITATIONS — Show."** And the sources line: **"Sources: OWASP Top 10 for Agentic AI (ASI) 2026 | NIST SP 800-53 Rev 5 (OSCAL v1.5.0) | NIST AI Risk Management Framework AI 100-1, v1.0."** Copyright: **"© 2026 shantanusinghesq."**
 
 Three things resolve here:
 1. **It's open source, and the data exports.** JSON/CSV means my GRC people can actually take it somewhere. That converts it from "a website" to "an artifact."
 2. **`v0.9.0`.** Pre-1.0. Sets expectations.
-3. **It's a person, not an institution.** "haremantra" is a handle. There is no company, no OWASP endorsement, no named author with a title. Combined with the hero's "100% Editorial / 0% Validated," the credibility picture is complete: *this is one competent individual's mapping, published honestly, with the confidence level disclosed up front.*
+3. **It's a person, not an institution.** "shantanusinghesq" is a handle. There is no company, no OWASP endorsement, no named author with a title. Combined with the hero's "100% Editorial / 0% Validated," the credibility picture is complete: *this is one competent individual's mapping, published honestly, with the confidence level disclosed up front.*
 
 That disclosure is the reason I don't drop it. Most things that cross my desk overclaim. This one under-claims in the hero, in a progress bar, unprompted. **The hero also says the severity ratings "are editorially assigned based on OWASP ordinal risk ranking and are not official OWASP severity classifications"** — that's a disclaimer that most vendors would have buried and this one put in the subhead. I trust a source that tells me where it's weak.
 
@@ -64,7 +64,7 @@ That disclosure is the reason I don't drop it. Most things that cross my desk ov
 
 **Skipping.** T1 settled it.
 
-The one question I still have — *who is haremantra and why should I believe their control mappings* — is **not resolvable by another click on this site**, and I know that, because the site already answered it in the only way it can: it told me the mappings are 100% editorial and 0% validated, and it handed me the source code and the raw data so someone else can check. There is no "About the author" click that would change my decision. Spending clicks would be theater.
+The one question I still have — *who is shantanusinghesq and why should I believe their control mappings* — is **not resolvable by another click on this site**, and I know that, because the site already answered it in the only way it can: it told me the mappings are 100% editorial and 0% validated, and it handed me the source code and the raw data so someone else can check. There is no "About the author" click that would change my decision. Spending clicks would be theater.
 
 I did not open **PROVENANCE & LIMITATIONS**. Honest accounting: it's collapsed behind a "Show" toggle at the very bottom of a long page, and it's the single most decision-relevant control on the page for a credibility-triaging reader like me. **I never found out what's in it.** The one thing I most wanted was one click and one full-page scroll away from where I'd have looked. That is a placement failure, not a content failure — I have no idea whether the content is good, because the page never gave me a reason to click while I still had budget.
 
@@ -106,7 +106,7 @@ This is the site's best feature and it says it out loud, twice, in the hero:
 - **v0.9.0** in the export line. It does not claim to be finished.
 
 **What I never found out:**
-- **Who made it.** "© 2026 haremantra" is a handle. No name, no title, no affiliation, no credential. For a credibility triager this is the biggest hole on the page — and the *only* reason it isn't fatal is that the tool pre-emptively told me not to trust it too much.
+- **Who made it.** "© 2026 shantanusinghesq" is a handle. No name, no title, no affiliation, no credential. For a credibility triager this is the biggest hole on the page — and the *only* reason it isn't fatal is that the tool pre-emptively told me not to trust it too much.
 - **What's under PROVENANCE & LIMITATIONS.** Collapsed, bottom of page, never opened. I never found out.
 - **What the Scenario Simulator actually does.** I saw the tab and I saw the modal offer to "run a quick simulation to see how a single AI failure impacts your compliance posture." I never ran it, and nothing outside the modal told me why I'd want to. It's the loudest thing on the page (it gets a blocking dialog!) and I still can't tell you what it produces.
 
@@ -136,13 +136,13 @@ Every substantive factual claim I made above, tagged.
 | 13 | AGPL-3.0 licensed, source code linked | `[SITE: footer — "Licensed under AGPL-3.0" chip + "Source Code" link]` |
 | 14 | Data exports as JSON and CSV; version v0.9.0 | `[SITE: footer — "Export data (v0.9.0): Download JSON / Download CSV"]` |
 | 15 | Sources are OWASP Top 10 for Agentic AI (ASI) 2026, NIST SP 800-53 Rev 5 (OSCAL v1.5.0), NIST AI-RMF AI 100-1 v1.0 | `[SITE: footer sources line]` |
-| 16 | Authorship is a handle, not an organization | `[SITE: footer — "Copyright © 2026 haremantra. All rights reserved for the hosted service." — and the *absence* of any author/org/affiliation element anywhere I scrolled. Negative finding.]` |
+| 16 | Authorship is a handle, not an organization | `[SITE: footer — "Copyright © 2026 shantanusinghesq. All rights reserved for the hosted service." — and the *absence* of any author/org/affiliation element anywhere I scrolled. Negative finding.]` |
 | 17 | A "PROVENANCE & LIMITATIONS" section exists but is collapsed | `[SITE: footer strip with a "Show" toggle — contents never viewed]` |
 | 18 | There is a "How mappings are validated" link | `[SITE: right side of the EVIDENCE CONFIDENCE bar — never clicked]` |
 | 19 | That my org runs an 800-53 control catalog / that GRC owns it / that "middleware" implies a runtime request path | `[PRIOR KNOWLEDGE — not from the site. This is my own enterprise context and my own reading of the word "middleware." The site says nothing about who runs 800-53 or what it expects of them.]` |
 | 20 | That OWASP's Agentic Top 10 is new/emerging and that a CVE at Microsoft carries weight with my leadership | `[PRIOR KNOWLEDGE — not from the site.]` |
 
-**`[REACHED FOR EXTERNAL HELP]` events: none.** I felt the pull exactly once — at the footer, wanting to know who "haremantra" is. I did not act on it. Worth recording that the pull existed, because it means the page left a credibility question open that a real reader *would* have taken to Google, and once they're on Google they may not come back.
+**`[REACHED FOR EXTERNAL HELP]` events: none.** I felt the pull exactly once — at the footer, wanting to know who "shantanusinghesq" is. I did not act on it. Worth recording that the pull existed, because it means the page left a credibility question open that a real reader *would* have taken to Google, and once they're on Google they may not come back.
 
 ---
 

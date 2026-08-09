@@ -148,7 +148,7 @@ This is the load-bearing decision. The other three are hygiene.
 ## CoVE Answers
 
 ### CoVE-01 — Is the crosswalk publicly deployed today?
-**FINDING: YES.** `gh api repos/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/pages` returns `status: "built"`, `build_type: "workflow"`, live at `https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/`.
+**FINDING: YES.** `gh api repos/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/pages` returns `status: "built"`, `build_type: "workflow"`, live at `https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/`.
 **Impact:** Confirms the Phase 2 claim that the crosswalk "demos in 60 seconds with nothing installed." No change to D-03 — it strengthens it. Note the deployed build predates today's correction, so the live site still shows the wrong ISO clauses until D-01 lands and Pages redeploys. **That is a reason to land D-01 before any conversation, and it re-orders the next actions below.**
 
 ### CoVE-02 — Does the branch commit overlap this work?

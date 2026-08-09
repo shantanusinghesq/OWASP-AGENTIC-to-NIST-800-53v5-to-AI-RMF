@@ -2,7 +2,7 @@
 
 **Format note.** Roles 01–07 answer a fixed question set from the diagram-analyzer engagement (2026-07). This document does not belong to that set. It is a standalone product thesis written 2026-07-22, after the governance-bridge citation defect was found and corrected (CHANGELOG, *The Governance Bridge Cites the Wrong Clauses*; backlog WS11). It keeps the house conventions — inferred answer, evidence, confidence, assumption to validate — because they are the right shape for this too.
 
-**Context consumed:** `packages/crosswalk` data model and 12 test suites; CHANGELOG decision log; `VALIDATION.md`; `docs/EXPANSION_ROADMAP.md`; `docs/trd/TRD-GAP-REMEDIATION.md` (WS0–WS11); the `/acc` commercial plan memory and its Phase-1 artifact set in `~/linuxshanti/scratchpad/`; `haremantra/acc` repo state via GitHub API; the 18-control agentic checklist at `~/linuxshanti/scratchpad/2026-07-22-agentic-ai-risk-controls.md`; `/last30days` research on agentic AI risk management (96 items, 6 sources, 2026-07-22).
+**Context consumed:** `packages/crosswalk` data model and 12 test suites; CHANGELOG decision log; `VALIDATION.md`; `docs/EXPANSION_ROADMAP.md`; `docs/trd/TRD-GAP-REMEDIATION.md` (WS0–WS11); the `/acc` commercial plan memory and its Phase-1 artifact set in `~/linuxshanti/scratchpad/`; `shantanusinghesq/acc` repo state via GitHub API; the 18-control agentic checklist at `~/linuxshanti/scratchpad/2026-07-22-agentic-ai-risk-controls.md`; `/last30days` research on agentic AI risk management (96 items, 6 sources, 2026-07-22).
 
 ---
 
@@ -20,7 +20,7 @@
 | `scratchpad/post-1-iso-42001-a9-decision-trails.md` | Positioning post 1 | 2026-05-21 |
 | `scratchpad/post-2-eu-ai-act-article-14-oversight.md` | Positioning post 2 | 2026-05-21 |
 | `plugins/acc` + `marketplace.json` | The free distribution wedge | 2026-05-21, still `v1.0.0` |
-| `haremantra/acc` (public) | The product itself | 2026-06-12 · **8 stars** |
+| `shantanusinghesq/acc` (public) | The product itself | 2026-06-12 · **8 stars** |
 | **This repo** | *Not named in the commercial plan at all* | **2026-07-22 — today** |
 
 Every GTM artifact was created on 2026-05-21 and none has been modified since. Phase 1 ran 2026-05-21 → 2026-06-20 with explicit kill criteria at the boundary; that gate passed **32 days ago**. The plan's own instruction was: *"Treat this as an active, time-bound experiment — not a side hobby… Kill criteria are explicit at each phase boundary. Honor them."*
@@ -41,7 +41,7 @@ Meanwhile this repository accumulated a decision-log CHANGELOG, a tiered validat
 
 | Asset | Job it does | State | Distribution |
 |---|---|---|---|
-| **Crosswalk SPA + `@haremantra/crosswalk`** | *"Which controls cover agentic risk?"* — assessment | v0.10.0, 117 tests, OSCAL + JSON + CSV export, GitHub Pages | Public, MIT data package, no marketing |
+| **Crosswalk SPA + `@shantanusinghesq/crosswalk`** | *"Which controls cover agentic risk?"* — assessment | v0.10.0, 117 tests, OSCAL + JSON + CSV export, GitHub Pages | Public, MIT data package, no marketing |
 | **`/acc`** | *"Prove the human oversaw the AI."* — evidence generation | Public plugin, 8 stars | Marketplace scaffolded, dormant |
 | **18-control agentic checklist** | *"What should we actually implement?"* — remediation | Verified 2026-07-22, lives in a scratchpad file | None |
 
@@ -153,5 +153,5 @@ PM-03, PM-04 and PM-05 are answered by the **same** five conversations. That is 
 ---
 
 *Prepared by: Claude (Opus 4.8), assuming the role of AI Product Manager with an AI engineering background.*
-*Evidence: repo @ branch `remediation/pr2-comprehension-design`, working tree post-WS11 backlog entry; `/acc` plan artifacts by filesystem mtime; `haremantra/acc` via GitHub API 2026-07-22.*
+*Evidence: repo @ branch `remediation/pr2-comprehension-design`, working tree post-WS11 backlog entry; `/acc` plan artifacts by filesystem mtime; `shantanusinghesq/acc` via GitHub API 2026-07-22.*
 *Companion documents: `docs/trd/TRD-GAP-REMEDIATION.md` §WS11 (the engineering backlog this thesis assumes); `~/linuxshanti/scratchpad/2026-07-22-agentic-ai-risk-controls.md` (the 18-control checklist).*

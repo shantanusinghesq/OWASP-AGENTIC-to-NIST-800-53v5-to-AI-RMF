@@ -112,7 +112,7 @@ I identify **four distinct maturity stages** in your trajectory. You are current
 - Resolve the Actions blocker or migrate CI
 
 **Medium-term (next month):**
-- Extract the scenario evaluation engine into the `@haremantra/crosswalk` package (it's currently tightly coupled to the React component)
+- Extract the scenario evaluation engine into the `@shantanusinghesq/crosswalk` package (it's currently tightly coupled to the React component)
 - Add a "Scenario Library" — pre-built scenarios that demonstrate specific failure modes (useful for training/demos)
 - Implement real PDF export (you've mentioned this twice as a "next step" but never built it)
 

@@ -11,7 +11,7 @@ importers:
 
   .:
     dependencies:
-      '@haremantra/crosswalk':
+      '@shantanusinghesq/crosswalk':
         specifier: workspace:*
         version: link:packages/crosswalk
       '@radix-ui/react-dialog':

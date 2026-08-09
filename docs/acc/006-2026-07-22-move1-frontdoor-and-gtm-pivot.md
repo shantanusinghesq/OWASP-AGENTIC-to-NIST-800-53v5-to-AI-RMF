@@ -6,7 +6,7 @@
 Continues [[005-2026-07-22-governance-bridge-fix-and-product-thesis]] (governance-bridge ISO fix + PM thesis). This checkpoint = everything after that.
 
 ## Decisions
-- D: PR #41 squash-merged (`bd1ed96`) → `@haremantra/crosswalk` v0.10.0 on `main`; Pages redeployed, public site now serves corrected ISO clauses.
+- D: PR #41 squash-merged (`bd1ed96`) → `@shantanusinghesq/crosswalk` v0.10.0 on `main`; Pages redeployed, public site now serves corrected ISO clauses.
 - D: **GTM redirect (user): "lighten up."** Drop the ISO-standard purchase + running real conversations as near-term focus. This is a solo OSS POC; priority = SHIP for adoption before the window passes. Sales playbook was the wrong instrument. Supersedes the "full reactivate" direction.
 - D: PM-01 = **No** (no design-partner outreach 2026-05-21→now) — recorded in `docs/role-outputs/08-product-manager.md`. Direction briefly "full reactivate," then superseded by the product/adoption redirect above.
 - D: Ran 5 adversarial mock interviews (personas 1-5), both-sides, under anti-laundering guardrails (buyer must not fold to fluency; mark where scripted buyer went easier than real). NOT market signal — rehearsal only.

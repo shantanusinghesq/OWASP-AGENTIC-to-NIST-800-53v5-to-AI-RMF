@@ -65,7 +65,7 @@ Before you begin, ensure you have the following installed on your system:
 Open a terminal and clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF.git
+git clone https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF.git
 ```
 
 Navigate into the project directory:
@@ -138,7 +138,7 @@ This will serve the production build at `http://localhost:4173/OWASP-AGENTIC-to-
 │       │   ├── TermsOfService.tsx
 │       │   └── NotFound.tsx
 │       ├── data/
-│       │   └── crosswalk.ts    # Data adapter — the ONLY importer of @haremantra/crosswalk
+│       │   └── crosswalk.ts    # Data adapter — the ONLY importer of @shantanusinghesq/crosswalk
 │       ├── components/         # Shared shell: SeverityBadge, StatCard, HomeHero,
 │       │   │                   #   ViewTabs, SiteFooter, ErrorBoundary
 │       │   └── ui/             # shadcn/ui (pruned to the 8 components in use)
@@ -155,7 +155,7 @@ This will serve the production build at `http://localhost:4173/OWASP-AGENTIC-to-
 │       └── lib/
 │           └── utils.ts        # Tailwind class utilities
 ├── packages/
-│   └── crosswalk/              # @haremantra/crosswalk — the crosswalk data package (MIT)
+│   └── crosswalk/              # @shantanusinghesq/crosswalk — the crosswalk data package (MIT)
 │       ├── src/                # Data, descriptions, derived statistics (single source of truth)
 │       └── tests/              # Referential-integrity, contract, and derivation pins
 ├── db/                         # Offline SQLite analyst tooling for the pattern taxonomy
@@ -174,7 +174,7 @@ This will serve the production build at `http://localhost:4173/OWASP-AGENTIC-to-
 
 ## Data Model
 
-The crosswalk data lives in the `@haremantra/crosswalk` workspace package (`packages/crosswalk/src/data.ts`) as TypeScript objects — the single source of truth consumed by the application through the `client/src/data/crosswalk.ts` adapter, and independently publishable for downstream tools. The application remains fully self-contained with no external API dependencies. The data model consists of four primary structures:
+The crosswalk data lives in the `@shantanusinghesq/crosswalk` workspace package (`packages/crosswalk/src/data.ts`) as TypeScript objects — the single source of truth consumed by the application through the `client/src/data/crosswalk.ts` adapter, and independently publishable for downstream tools. The application remains fully self-contained with no external API dependencies. The data model consists of four primary structures:
 
 **`OWASP_ASI`** — An array of 10 risk objects, each containing an identifier (ASI01–ASI10), a human-readable name, a severity rating (Critical, High, or Medium-High), and a description of the threat.
 
@@ -192,7 +192,7 @@ Contributions are welcome under the terms of the AGPL-3.0 license. Start with **
 
 - **Propose or correct a mapping** using the issue forms: [New mapping proposal](.github/ISSUE_TEMPLATE/new-mapping.yml) or [Mapping correction](.github/ISSUE_TEMPLATE/mapping-correction.yml). Each requires the affected ASI / 800-53 / AI-RMF IDs, a rationale, at least one citation, a confidence estimate, and your stated assumptions.
 - **Meet the [Mapping Provenance Standard](GOVERNANCE.md#mapping-provenance-standard)** — every new or modified mapping must cite at least one authoritative source (a URL, a `CVE-YYYY-NNNN+` identifier, or a named publication/section) beyond editorial judgment, alongside the rationale.
-- **Edit data in the canonical location only** — `packages/crosswalk/src`. The client consumes this data through the `@haremantra/crosswalk` package; a CI guard rejects any duplicate copy under `client/src/lib`.
+- **Edit data in the canonical location only** — `packages/crosswalk/src`. The client consumes this data through the `@shantanusinghesq/crosswalk` package; a CI guard rejects any duplicate copy under `client/src/lib`.
 
 The project runs in **Solo Mode**: the maintainer's review plus a green CI run (`pnpm check && pnpm test && pnpm build` and the repository guards) is the sole merge gate — **no external approval is required yet**. A multi-reviewer Board Mode activates only when the trigger documented in [GOVERNANCE.md](GOVERNANCE.md#board-mode-inactive) is met. Which control families could enter scope, and under what conditions, is tracked in the [Scope Expansion Roadmap](docs/EXPANSION_ROADMAP.md).
 

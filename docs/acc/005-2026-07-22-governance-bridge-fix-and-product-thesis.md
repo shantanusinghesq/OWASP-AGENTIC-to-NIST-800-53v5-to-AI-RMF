@@ -20,13 +20,13 @@
 - Gates green: `pnpm check` clean; `pnpm test` **117 passed / 27 files** (was 112); build emits `dataVersion: 0.10.0`, zero stale strings in `dist/crosswalk.json|csv`; new exports in `dist/index.d.ts`.
 - `framework-refs.test.ts` now 7 tests (was 2): ISO resolve+exact-title, EU resolve+canonical-short, one-display-string-per-id (ISO/EU analogue of T13b), registry well-formedness.
 - UI verified via Playwright at 640px (`sm:grid-cols-3`, tightest): ASI06's longest string renders 178px, no clipping, no horizontal scroll.
-- **GitHub Pages LIVE and `status: built`** at `https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/` — still serving the pre-fix wrong clauses until the correction lands.
+- **GitHub Pages LIVE and `status: built`** at `https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/` — still serving the pre-fix wrong clauses until the correction lands.
 - Cross-repo artifact from this session: `~/linuxshanti/scratchpad/2026-07-22-agentic-ai-risk-controls.md` (18-control agentic checklist; companion to the PM thesis).
 - `HANDOFF.md` STALE — dated 2026-05-01, describes v0.2.0.
 - CPPG active at `~/Documents/CPPG/`; matched `defer-out-of-scope-work-to-a-forcing-function`, `reject-added-process-for-existing-simpler-convention`.
 
 ## Open Questions
-- Q: PM-01 — did any `/acc` design-partner outreach happen 2026-05-21 → 2026-07-22? All GTM artifacts frozen at 2026-05-21; `haremantra/acc` 8 stars, last push 2026-06-12. Mtimes cannot see email/calls. **Free to answer; gates the whole PM thesis.**
+- Q: PM-01 — did any `/acc` design-partner outreach happen 2026-05-21 → 2026-07-22? All GTM artifacts frozen at 2026-05-21; `shantanusinghesq/acc` 8 stars, last push 2026-06-12. Mtimes cannot see email/calls. **Free to answer; gates the whole PM thesis.**
 - Q: A-03 — are 5 second-line risk practitioners reachable in ~4 weeks? Inherited unverified from the `/acc` plan. **Largest risk**; if false, D-03 has no execution path and the honest move is explicit kill, not drift back into building.
 - Q: PM-03/04/05 — is the ISO gap *news*? Does blanket `editorial` status disqualify the artifact? Is assess-then-evidence the real buyer sequence? Same 5 conversations answer all three.
 - Q: WS11-03 — `FRAMEWORK_REFS` absent from `dist/crosswalk.json`/`.csv` (`artifacts.ts` never emitted it). Emit, or document the TS-only limitation?

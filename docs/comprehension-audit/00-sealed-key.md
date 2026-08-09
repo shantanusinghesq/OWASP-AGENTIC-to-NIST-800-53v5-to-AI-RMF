@@ -8,7 +8,7 @@ target: live GitHub Pages build v0.9.0
 
 **Authored by:** the key-holder, from the repository only. The key-holder has **not** visited the live site and takes no further part in the audit.
 **Repo:** `C:\Users\shant\linuxshanti\OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF`
-**Site under audit:** https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/ (crosswalk data v0.9.0)
+**Site under audit:** https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/ (crosswalk data v0.9.0)
 
 This document states what the site is **supposed** to communicate. It is not a claim about how well it does so.
 
@@ -19,7 +19,7 @@ Convention used below: **(a)** = the claim; **(b)** = grounding, with the actual
 ## K1 — Category: what KIND of thing this is (and what it is not)
 
 **(a) The claim.**
-This is a **free, fully client-side, open-source reference-data product with an interactive front end**: a three-way *compliance crosswalk* that translates OWASP's Top 10 for Agentic AI (ASI 2026) into NIST SP 800-53 Rev 5 controls and NIST AI-RMF (AI 100-1) functions. Its self-declared category is **"compliance middleware"** — a translation layer sitting between a threat taxonomy and the two control/governance frameworks an enterprise already reports against. The underlying data package (`@haremantra/crosswalk`) is the actual product; the web app is one view of it.
+This is a **free, fully client-side, open-source reference-data product with an interactive front end**: a three-way *compliance crosswalk* that translates OWASP's Top 10 for Agentic AI (ASI 2026) into NIST SP 800-53 Rev 5 controls and NIST AI-RMF (AI 100-1) functions. Its self-declared category is **"compliance middleware"** — a translation layer sitting between a threat taxonomy and the two control/governance frameworks an enterprise already reports against. The underlying data package (`@shantanusinghesq/crosswalk`) is the actual product; the web app is one view of it.
 
 It is **not**: a scanner, a monitor, an agent-security product, a GRC platform, a certification, an audit, or a source of legal/compliance advice. It has **no backend, no database, no API, no accounts, and no telemetry** — every computation and every export happens in the browser. It is also *not* an authoritative NIST or OWASP publication: the mappings are one author's editorial judgement layered on top of public-domain frameworks.
 
@@ -28,7 +28,7 @@ It is **not**: a scanner, a monitor, an agent-security product, a GRC platform, 
 - Hero H1, `HomeHero.tsx:60` — **"Agentic AI Risks"**. Sub-line, `HomeHero.tsx:63-65`: *"Bridging ASI 2026 → NIST 800-53 Rev 5 → NIST AI-RMF 100-1. Interactive compliance mapping for agentic AI security risks across 10 threat categories."*
 - Onboarding modal H2, `client/src/features/onboarding/HookModal.tsx:114` — **"Welcome to the Compliance Middleware."** Body: *"AI agents don't just generate text—they take action. This platform bridges the gap between emerging agentic threats (OWASP) and established enterprise security frameworks (NIST)."*
 - `README.md:23` — *"This crosswalk operates as a **compliance middleware** layer connecting three authoritative frameworks"*, with the three-layer table: Threat Layer (OWASP ASI) / Control Layer (800-53) / Governance Layer (AI-RMF).
-- `CLAUDE.md` (repo) — *"This is a **fully client-side** interactive crosswalk between three frameworks… All data is embedded in TypeScript — there is no database, no API, no backend logic."* And: *"**Data model is the product** — `@haremantra/crosswalk`."*
+- `CLAUDE.md` (repo) — *"This is a **fully client-side** interactive crosswalk between three frameworks… All data is embedded in TypeScript — there is no database, no API, no backend logic."* And: *"**Data model is the product** — `@shantanusinghesq/crosswalk`."*
 - `client/src/components/DownloadData.tsx:6-11` — *"Downloads are generated entirely in the browser… NO server and NO network request."*
 - `<title>` / `<meta name="description">`, `client/index.html:11-13` — *"Agentic AI Risks from NIST to OWASP"* / *"Interactive compliance mapping of OWASP Agentic AI risks (ASI01–ASI10) to NIST 800-53 Rev 5 controls and NIST AI-RMF categories. Heatmaps, evidence explorer, and exportable mappings for security and compliance teams."*
 - Not-advice boundary: `TERMS_OF_SERVICE.md` §6 — *"**The crosswalk mappings are provided for informational and educational purposes only.** They do not constitute legal advice, compliance certification, audit guidance, or professional recommendations."*

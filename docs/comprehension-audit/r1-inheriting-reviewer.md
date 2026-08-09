@@ -189,7 +189,7 @@ I'm confident it's a crosswalk with a brief-generator bolted on, and I'm confide
 
 **Still unsure of:**
 - Whether "Editorial" is a stage the project intends to leave (`Reviewed (0)`, `Validated (0)` are shown as *empty buckets*, which implies a roadmap the site never states) or a permanent condition. This decides whether we revisit in six months.
-- Who the author is. `Copyright © 2026 haremantra` is the only name on the site, and "single-author editorial process" is a limitation I'd need to put a human being's credentials behind before I cite this to anyone.
+- Who the author is. `Copyright © 2026 shantanusinghesq` is the only name on the site, and "single-author editorial process" is a limitation I'd need to put a human being's credentials behind before I cite this to anyone.
 - Whether the mappings are complete enough to survive a real audit challenge on *any* single control, given the per-family rationale issue.
 - What happens to my saved assessment. It has `Save`, `Export JSON`, `Import JSON` and no sign of a server — I assume browser-local, and I would not trust my only copy of a committee input to a browser cache. The site never says where it lives.
 

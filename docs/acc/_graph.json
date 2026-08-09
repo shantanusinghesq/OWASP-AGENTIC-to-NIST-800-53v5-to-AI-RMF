@@ -11,7 +11,7 @@
       "text": "aegis integration batch",
       "acc_seq": 1,
       "acc_date": "2026-05-01",
-      "focus": "full session \u2014 `@haremantra/crosswalk` extraction + /batch execution + AEGIS integration prototype"
+      "focus": "full session \u2014 `@shantanusinghesq/crosswalk` extraction + /batch execution + AEGIS integration prototype"
     },
     {
       "id": "acc-002",
@@ -40,7 +40,7 @@
     {
       "id": "dec-001-01",
       "type": "Decision",
-      "text": "Extract crosswalk data into `@haremantra/crosswalk` workspace package (MIT) while SPA stays AGPL-3.0 \u2014 dual-license unblocks AEGIS commercial consumption (scratchpad-aegis-relationship.md D-01/D-03)",
+      "text": "Extract crosswalk data into `@shantanusinghesq/crosswalk` workspace package (MIT) while SPA stays AGPL-3.0 \u2014 dual-license unblocks AEGIS commercial consumption (scratchpad-aegis-relationship.md D-01/D-03)",
       "acc_seq": 1,
       "acc_date": "2026-05-01"
     },
@@ -103,7 +103,7 @@
     {
       "id": "dec-002-01",
       "type": "Decision",
-      "text": "Renamed package `@obviate/crosswalk` \u2192 `@haremantra/crosswalk` \u2014 GitHub Packages npm registry requires the scope to match the GitHub user/org owning the repo; no `obviate` org exists under `haremantra`",
+      "text": "Renamed package `@obviate/crosswalk` \u2192 `@shantanusinghesq/crosswalk` \u2014 GitHub Packages npm registry requires the scope to match the GitHub user/org owning the repo; no `obviate` org exists under `shantanusinghesq`",
       "acc_seq": 2,
       "acc_date": "2026-05-01"
     },
@@ -131,7 +131,7 @@
     {
       "id": "dec-003-01",
       "type": "Decision",
-      "text": "Executed entire TRD backlog (`docs/trd/TRD-GAP-REMEDIATION.md`) Waves 1-6, PRs #18-#30 \u2014 after the S1-S7 refactor (PRs #9-#17). Package `@haremantra/crosswalk` v0.2.0\u2192**v0.8.0**; tests 21\u2192**67**.",
+      "text": "Executed entire TRD backlog (`docs/trd/TRD-GAP-REMEDIATION.md`) Waves 1-6, PRs #18-#30 \u2014 after the S1-S7 refactor (PRs #9-#17). Package `@shantanusinghesq/crosswalk` v0.2.0\u2192**v0.8.0**; tests 21\u2192**67**.",
       "acc_seq": 3,
       "acc_date": "2026-07-11"
     },
@@ -201,7 +201,7 @@
     {
       "id": "dec-004-02",
       "type": "Decision",
-      "text": "Implemented ALL recs across **5 sequenced PRs #31-#35** (each green through ci.yml, squash-merged, live-verified). Package `@haremantra/crosswalk` v0.8.0\u2192**v0.9.0**; tests **67\u2192107**.",
+      "text": "Implemented ALL recs across **5 sequenced PRs #31-#35** (each green through ci.yml, squash-merged, live-verified). Package `@shantanusinghesq/crosswalk` v0.8.0\u2192**v0.9.0**; tests **67\u2192107**.",
       "acc_seq": 4,
       "acc_date": "2026-07-11"
     },
@@ -278,7 +278,7 @@
     {
       "id": "oq-001-05",
       "type": "OpenQuestion",
-      "text": "AEGIS git remote \u2014 strategic decision (private GitHub vs. local-only). If created via `gh repo create haremantra/aegis --private --source=. --push`, prototype branch becomes lift-able into a real PR",
+      "text": "AEGIS git remote \u2014 strategic decision (private GitHub vs. local-only). If created via `gh repo create shantanusinghesq/aegis --private --source=. --push`, prototype branch becomes lift-able into a real PR",
       "acc_seq": 1,
       "acc_date": "2026-05-01"
     },
@@ -292,14 +292,14 @@
     {
       "id": "oq-002-02",
       "type": "OpenQuestion",
-      "text": "Future `obviate` GH org strategy \u2014 register the org, transfer repo or republish, deprecate `@haremantra/crosswalk`?",
+      "text": "Future `obviate` GH org strategy \u2014 register the org, transfer repo or republish, deprecate `@shantanusinghesq/crosswalk`?",
       "acc_seq": 2,
       "acc_date": "2026-05-01"
     },
     {
       "id": "oq-002-03",
       "type": "OpenQuestion",
-      "text": "AEGIS consumption (Phase 4) \u2014 install `@haremantra/crosswalk@0.2.0` in `/Users/shantanusingh/Projects/AEGIS/packages/report`, replace prototype `link:` dep, delete the 26-line ambient shim `packages/report/src/obviate-crosswalk.d.ts`. Blocked only on user decision",
+      "text": "AEGIS consumption (Phase 4) \u2014 install `@shantanusinghesq/crosswalk@0.2.0` in `/Users/shantanusingh/Projects/AEGIS/packages/report`, replace prototype `link:` dep, delete the 26-line ambient shim `packages/report/src/obviate-crosswalk.d.ts`. Blocked only on user decision",
       "acc_seq": 2,
       "acc_date": "2026-05-01"
     },
@@ -439,7 +439,7 @@
     {
       "id": "rej-002-05",
       "type": "RejectedApproach",
-      "text": "`@obviate` scope publish \u2014 rejected by registry with `403 permission_denied: create_package` because no `obviate` GH user/org exists under `haremantra`'s account",
+      "text": "`@obviate` scope publish \u2014 rejected by registry with `403 permission_denied: create_package` because no `obviate` GH user/org exists under `shantanusinghesq`'s account",
       "acc_seq": 2,
       "acc_date": "2026-05-01"
     },
@@ -502,7 +502,7 @@
     {
       "id": "nxt-001-01",
       "type": "NextAction",
-      "text": "**User** \u2014 add `pnpm/action-setup@v4` to repo Actions allowlist (web UI: `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/settings/actions` \u2192 \"Allow specific actions\" patterns)",
+      "text": "**User** \u2014 add `pnpm/action-setup@v4` to repo Actions allowlist (web UI: `https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/settings/actions` \u2192 \"Allow specific actions\" patterns)",
       "acc_seq": 1,
       "acc_date": "2026-05-01"
     },
@@ -516,7 +516,7 @@
     {
       "id": "nxt-001-03",
       "type": "NextAction",
-      "text": "**Verify** \u2014 `gh run list` confirms publish workflow ran; package appears at `https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/packages`",
+      "text": "**Verify** \u2014 `gh run list` confirms publish workflow ran; package appears at `https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/packages`",
       "acc_seq": 1,
       "acc_date": "2026-05-01"
     },
@@ -530,7 +530,7 @@
     {
       "id": "nxt-001-05",
       "type": "NextAction",
-      "text": "**User decision** \u2014 AEGIS git remote (yes/no). If yes, lift `prototype/obviate-crosswalk-integration` (`/Users/shantanusingh/Projects/AEGIS`) into real AEGIS PR using `@haremantra/crosswalk@^0.2.0`; delete the type shim `packages/report/src/obviate-crosswalk.d.ts`",
+      "text": "**User decision** \u2014 AEGIS git remote (yes/no). If yes, lift `prototype/obviate-crosswalk-integration` (`/Users/shantanusingh/Projects/AEGIS`) into real AEGIS PR using `@shantanusinghesq/crosswalk@^0.2.0`; delete the type shim `packages/report/src/obviate-crosswalk.d.ts`",
       "acc_seq": 1,
       "acc_date": "2026-05-01"
     },
@@ -551,7 +551,7 @@
     {
       "id": "nxt-002-01",
       "type": "NextAction",
-      "text": "**Wire AEGIS to consume** \u2014 `cd /Users/shantanusingh/Projects/AEGIS && pnpm add @haremantra/crosswalk@0.2.0 --filter @aegis/report` (after `~/.npmrc` is set up there too); update `packages/report/src/pdf/RemediationRoadmap.tsx` import; delete `packages/report/src/obviate-crosswalk.d.ts` shim; lift prototype branch into a real PR if AEGIS gets a remote",
+      "text": "**Wire AEGIS to consume** \u2014 `cd /Users/shantanusingh/Projects/AEGIS && pnpm add @shantanusinghesq/crosswalk@0.2.0 --filter @aegis/report` (after `~/.npmrc` is set up there too); update `packages/report/src/pdf/RemediationRoadmap.tsx` import; delete `packages/report/src/obviate-crosswalk.d.ts` shim; lift prototype branch into a real PR if AEGIS gets a remote",
       "acc_seq": 2,
       "acc_date": "2026-05-01"
     },

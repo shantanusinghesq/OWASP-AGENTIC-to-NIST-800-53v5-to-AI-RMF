@@ -7,7 +7,7 @@ Continues from ACC 003 (TRD backlog complete). This session = UX audit → imple
 
 ## Decisions
 - D: Ran a 3-persona UX audit (OpenAI/clarity, Palo Alto/workflow, Wiz/PLG) of the live app → `docs/UX-AUDIT-2026-07-11.md`. Scores 72/63/61; convergent thesis: "rotate the product 90° — make a **defensible control set** the atomic object; **lead with the evidence** (real incidents), not the map."
-- D: Implemented ALL recs across **5 sequenced PRs #31-#35** (each green through ci.yml, squash-merged, live-verified). Package `@haremantra/crosswalk` v0.8.0→**v0.9.0**; tests **67→107**.
+- D: Implemented ALL recs across **5 sequenced PRs #31-#35** (each green through ci.yml, squash-merged, live-verified). Package `@shantanusinghesq/crosswalk` v0.8.0→**v0.9.0**; tests **67→107**.
 - D: Assessment tray uses **provider-tolerant hooks** — `useAssessment()` throws / `useAssessmentMaybe()` returns null — so `SelectToggle` renders nothing without the provider, keeping `App.smoke` + `RiskDetail.validation` tests byte-identical (verified empty diff every PR).
 - D: Committee brief = pure `buildBriefHtml()` → `window.open`+`document.write` of a **self-contained light-theme** doc (dark app theme can't leak); `esc()` on every interpolated value (XSS guard). Not a route/iframe.
 - D: Package publish uses **publishConfig** to point the published artifact at `dist`; workspace client keeps consuming raw `src` (no build coupling). Simulator **React.lazy** code-split (main bundle 879→741 KB + 142 KB lazy chunk). Hero image **self-hosted** (`client/public/hero-banner.webp`, dropped CloudFront) + preload.

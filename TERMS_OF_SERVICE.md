@@ -15,7 +15,7 @@ These Terms govern your use of the **hosted web application** (the "Service") as
 
 ## 2. Distinction Between Source Code and the Service
 
-The source code for this project is made available under the AGPL-3.0 license at [https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF](https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF). Under the AGPL-3.0, you have the right to use, study, modify, and redistribute the source code, provided that any modified versions or derivative works are also licensed under the AGPL-3.0 and that the source code is made available to users who interact with the software over a network.
+The source code for this project is made available under the AGPL-3.0 license at [https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF](https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF). Under the AGPL-3.0, you have the right to use, study, modify, and redistribute the source code, provided that any modified versions or derivative works are also licensed under the AGPL-3.0 and that the source code is made available to users who interact with the software over a network.
 
 **However, the hosted Service is not the source code.** The Service includes proprietary deployment configurations, infrastructure, domain, branding, design assets, hosting environment, and operational elements that are not covered by the AGPL-3.0 license. You may not copy, replicate, mirror, scrape, or create a substantially similar hosted service using the visual design, layout, user experience, branding, or trade dress of this Service without the Developer's prior written consent. Running your own instance from the AGPL-3.0 source code is permitted under the terms of that license; copying the hosted Service's presentation, branding, and operational configuration is not.
 
@@ -37,7 +37,7 @@ You agree not to engage in any of the following activities:
 
 **4.1 Service Replication.** You may not copy, mirror, frame, scrape, crawl, or otherwise reproduce the Service or any substantial portion of its content, design, or functionality for the purpose of creating a competing or substantially similar hosted service, whether for commercial or non-commercial purposes.
 
-**4.2 Automated Access.** You may not use bots, scrapers, spiders, crawlers, or any other automated means to access, download, or extract data from the Service, except as expressly permitted by a robots.txt file or with the Developer's prior written consent. The JSON and CSV export features provided within the Service, and the machine-readable artifacts published with the @haremantra/crosswalk package, are expressly permitted for automated consumption.
+**4.2 Automated Access.** You may not use bots, scrapers, spiders, crawlers, or any other automated means to access, download, or extract data from the Service, except as expressly permitted by a robots.txt file or with the Developer's prior written consent. The JSON and CSV export features provided within the Service, and the machine-readable artifacts published with the @shantanusinghesq/crosswalk package, are expressly permitted for automated consumption.
 
 **4.3 Reverse Engineering of Service Infrastructure.** While the source code is available under the AGPL-3.0, you may not reverse engineer, decompile, or disassemble the Service's deployment infrastructure, hosting configuration, or operational environment.
 
@@ -134,7 +134,7 @@ These Terms, together with the AGPL-3.0 license (as it applies to the source cod
 
 ## 14. Contact
 
-For questions about these Terms, the AGPL-3.0 license, or the Service, please open an issue on the project's GitHub repository at [https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF](https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF).
+For questions about these Terms, the AGPL-3.0 license, or the Service, please open an issue on the project's GitHub repository at [https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF](https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF).
 
 ---
 

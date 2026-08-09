@@ -3,7 +3,7 @@
 Comprehension study transcript. Participant persona: second-line AI/model-risk manager, large
 financial-services firm. Site-only; no repo, no README, no search.
 
-Site under study: https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/
+Site under study: https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/
 Session date: 2026-07-14. Crosswalk data version shown on site: **v0.9.0**.
 
 ---
@@ -288,7 +288,7 @@ Every substantive factual claim above, tagged.
 | 25 | There is no multi-risk scoping or selection anywhere | [SITE: absence — no checkboxes or multi-select on Overview cards, heatmap rows, or detail view; `Export brief` is single-risk; CSV/JSON are all-ten] |
 | 26 | The entire site accepts only three kinds of user input: a search string, an image upload, and a 3-way governance-posture radio | [SITE: absence — the only editable elements I found across all four tabs were the header search box ("Search for specific controls or standards…"), the Architecture Analyzer file upload ("Drag & drop an architecture diagram here"), and the Minimal/Standard/Full posture radios] |
 | 27 | Data version is v0.9.0 | [SITE: footer "Export data (v0.9.0)"; brief footer "Crosswalk data version 0.9.0"] |
-| 28 | Licensed AGPL-3.0; "All rights reserved for the hosted service" | [SITE: footer — "Licensed under AGPL-3.0"; "Copyright © 2026 haremantra. All rights reserved for the hosted service."] |
+| 28 | Licensed AGPL-3.0; "All rights reserved for the hosted service" | [SITE: footer — "Licensed under AGPL-3.0"; "Copyright © 2026 shantanusinghesq. All rights reserved for the hosted service."] |
 | — | SR 11-7 / OCC 2011-12 require independent validation, effective challenge, and a documented owner before a model is used; an unvalidated quantitative model in a risk pack is an examiner finding | **[PRIOR KNOWLEDGE — not from the site]** The site references SR 11-7 by name but never states what it requires. My judgement that the simulator would fail validation, and that a mapping needs a named reviewer to survive an exam, is entirely mine. |
 | — | Excluding Awareness & Training (AT) and Personnel Security (PS) is the wrong call for ASI09 human-agent trust exploitation | **[PRIOR KNOWLEDGE — not from the site]** The site discloses the exclusion and its reason ("lower relevance"); the disagreement is mine. The site never says AT covers human over-trust. |
 | — | Vendor spreadsheets loaded into GRC platforms become de-facto policy and this pattern draws MRAs | **[PRIOR KNOWLEDGE — not from the site]** Entirely from my own experience. The site says nothing about GRC platforms, Archer, or downstream use. |
@@ -316,7 +316,7 @@ Not T0 — the hero sells three numbers and a CVE, which reads like marketing. N
 onboarding modal actively points away from the thing that turns out to be the product.
 
 **Still unsure of:**
-- Who "haremantra" is, and what standing the author has. The site tells me the process was
+- Who "shantanusinghesq" is, and what standing the author has. The site tells me the process was
   single-author and unreviewed; it never tells me *whose* judgement I'm reading.
 - Whether the crosswalk is maintained. The upstream pinning is dated 2026-07-11 (three days before I
   looked), which is encouraging, but nothing tells me the cadence or what happens when OWASP revises

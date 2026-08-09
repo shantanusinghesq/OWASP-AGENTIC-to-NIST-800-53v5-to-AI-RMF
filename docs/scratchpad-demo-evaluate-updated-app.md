@@ -51,7 +51,7 @@ Context: the crosswalk app shipped a five-PR UX overhaul (#31–#35, `crosswalk-
 **Rejected:** Option B
 **Reasoning against B:** same browser-driving limitation as A, minus the "it's actually live" signal; strictly worse than A for the human layer and no better than C for the machine layer.
 
-**Assumption accepted:** vitest resolves the `@/` alias and `@haremantra/crosswalk`, so a generator spec can import `brief.ts` / `export-oscal.ts` and write files. **Verified — see CoVE-01/02.**
+**Assumption accepted:** vitest resolves the `@/` alias and `@shantanusinghesq/crosswalk`, so a generator spec can import `brief.ts` / `export-oscal.ts` and write files. **Verified — see CoVE-01/02.**
 
 ---
 
@@ -116,7 +116,7 @@ Context: the crosswalk app shipped a five-PR UX overhaul (#31–#35, `crosswalk-
 | ID | Assumption | Rationale | Decision |
 |---|---|---|---|
 | A1 | Export logic is pure + Node-importable via vitest | Enables real-function eval, no browser | D-01 |
-| A2 | vitest resolves `@/` + `@haremantra/crosswalk` | A generator spec can build artifacts | D-02 |
+| A2 | vitest resolves `@/` + `@shantanusinghesq/crosswalk` | A generator spec can build artifacts | D-02 |
 | A3 | Runtime-picked first N families/funcs = valid scope | Avoids guessing control ids | D-03 |
 | A4 | The audit's 5 jobs are the correct yardstick | They are the persona's own JTBD | D-04 |
 | A5 | The `committee-brief.html` is the highest-fidelity deliverable | It's what the persona hands over | D-05 |
@@ -168,7 +168,7 @@ Context: the crosswalk app shipped a five-PR UX overhaul (#31–#35, `crosswalk-
 **Demo verdict: PASS.** The update converted a reference atlas into a workflow-of-record — the 5 persona jobs go from 0/5 to 5/5 completable, and the tool now emits a real, cited, provenance-stamped committee brief + scoped OSCAL. Evidence is the generated artifacts, not prose.
 
 **To run the human-in-the-loop demo (5 minutes):**
-1. Open the deployed app: https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/ — land on the hero, click **"See the 4 Critical risks →"**, then the **EchoLeak featured-incident** card.
+1. Open the deployed app: https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/ — land on the hero, click **"See the 4 Critical risks →"**, then the **EchoLeak featured-incident** card.
 2. In **Evidence Explorer**, select ASI01/ASI02/ASI03; on each, tick a few mapping checkboxes → watch the **Assessment tray** count + coverage grow; expand a row and add an **owner / RACI / note**.
 3. From the tray: **Committee brief** (prints light-themed), **OSCAL (scoped)**, **JSON**.
 4. Compare against the pre-generated artifact this analysis produced:

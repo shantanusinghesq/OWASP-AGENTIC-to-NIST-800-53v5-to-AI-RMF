@@ -4,7 +4,7 @@
 **Token estimate after:** ~2k
 
 ## Decisions
-- D: Executed entire TRD backlog (`docs/trd/TRD-GAP-REMEDIATION.md`) Waves 1-6, PRs #18-#30 — after the S1-S7 refactor (PRs #9-#17). Package `@haremantra/crosswalk` v0.2.0→**v0.8.0**; tests 21→**67**.
+- D: Executed entire TRD backlog (`docs/trd/TRD-GAP-REMEDIATION.md`) Waves 1-6, PRs #18-#30 — after the S1-S7 refactor (PRs #9-#17). Package `@shantanusinghesq/crosswalk` v0.2.0→**v0.8.0**; tests 21→**67**.
 - D: Honest counts over padded — removed withdrawn SA-12, dropping distinct controls 55→**54** / mappings 90→**89**, rather than substituting a mismatched successor.
 - D: Orphans handled non-destructively (user choice) — claim "complete 19"→"**17 of 19 referenced**"; keep GV-3/MS-4 on T16 allowlist; delete stray GV-7.
 - D: Fixed systemic GOVERN/MANAGE description-title mismatch (user-approved) — was rendering wrong Evidence-Explorer tooltips (e.g. GV-6→"Resource Allocation").
@@ -15,8 +15,8 @@
 - D: OSCAL title validation + Tier-2 rationale-cross-reference are **report-only** (editorial debt surfaced, not blocking).
 
 ## Current State
-- main @ `0d7c3bf`; site live (200) at https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/; 67 tests green; `crosswalk-v0.8.0` published (GitHub Packages).
-- Repo: `C:\Users\shant\linuxshanti\OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF` (private; gh authed as owner haremantra).
+- main @ `0d7c3bf`; site live (200) at https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/; 67 tests green; `crosswalk-v0.8.0` published (GitHub Packages).
+- Repo: `C:\Users\shant\linuxshanti\OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF` (private; gh authed as owner shantanusinghesq).
 - Data truth (test-pinned): 54 controls / 89 mappings; 16 families in scope, **14 mapped** (MP/PE unmapped); 17 of 19 AI-RMF subcategories; evidence = `EvidenceItem[]`, 33 verified sources.
 - New infra: vendored OSCAL index (`packages/crosswalk/src/oscal-index.ts`, pinned oscal-content v1.5.0) + monthly `oscal-drift.yml`; tsup `dist/` (ESM+CJS+.d.ts) + `crosswalk.json`/`.csv`/`.oscal.json`; SPA Download JSON/CSV + Provenance panel; `UPSTREAM_VERSIONS` export.
 - Governance/docs: `GOVERNANCE.md` (two-mode, Solo active), `docs/EXPANSION_ROADMAP.md` (6 families), `VALIDATION.md` (3-tier), `docs/EVIDENCE_AUDIT.md`, CHANGELOG 2026-07-11 decision points + `(superseded)` errata, CODEOWNERS + issue/PR templates.

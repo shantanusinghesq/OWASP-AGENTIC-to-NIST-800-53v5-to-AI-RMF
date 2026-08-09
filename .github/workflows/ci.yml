@@ -34,13 +34,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # The client consumes crosswalk data exclusively from
-      # @haremantra/crosswalk (via the client/src/data/crosswalk.ts adapter).
+      # @shantanusinghesq/crosswalk (via the client/src/data/crosswalk.ts adapter).
       # Fail if a duplicate data copy reappears under client/src/lib — that
       # dual-copy drift is how the shipped app diverged from the tested data.
       - name: Guard single data source
         run: |
           if grep -rE "export const (CROSSWALK|OWASP_ASI|NIST_800_53|AI_RMF|NIST_CONTROL_DESCRIPTIONS|NIST_AI_RMF_DESCRIPTIONS)" client/src/lib/ 2>/dev/null; then
-            echo "::error::Crosswalk data constants found under client/src/lib — import from @haremantra/crosswalk instead."
+            echo "::error::Crosswalk data constants found under client/src/lib — import from @shantanusinghesq/crosswalk instead."
             exit 1
           fi
 

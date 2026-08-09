@@ -1,4 +1,4 @@
-## @haremantra/crosswalk
+## @shantanusinghesq/crosswalk
 
 Reference data mapping the **OWASP Top 10 for Agentic Applications (ASI 2026)** to **NIST SP 800-53 Rev 5** security controls and the **NIST AI Risk Management Framework (AI 100-1)**.
 
@@ -21,7 +21,7 @@ Plus the corresponding TypeScript interfaces.
 ### Usage
 
 ```ts
-import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@haremantra/crosswalk";
+import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@shantanusinghesq/crosswalk";
 
 const asi01 = CROSSWALK.ASI01;
 for (const mapping of asi01.nist53) {
@@ -50,9 +50,9 @@ The generated `dist/crosswalk.json` carries a `dataVersion` field that always eq
 
 ### Distribution artifacts
 
-`pnpm --filter @haremantra/crosswalk build` (also run automatically on publish via `prepublishOnly`) emits, alongside the ESM/CJS/`.d.ts` bundles:
+`pnpm --filter @shantanusinghesq/crosswalk build` (also run automatically on publish via `prepublishOnly`) emits, alongside the ESM/CJS/`.d.ts` bundles:
 
-- `dist/crosswalk.json` — the full data payload (also exposed to published consumers as `@haremantra/crosswalk/data.json`).
+- `dist/crosswalk.json` — the full data payload (also exposed to published consumers as `@shantanusinghesq/crosswalk/data.json`).
 - `dist/crosswalk.csv` — one row per `(ASI, family, control)` mapping pair, for spreadsheet / non-TS tooling.
 
 These artifacts are build outputs and are **not** committed. The workspace SPA keeps consuming the raw `src/` TypeScript; only the *published* package points at `dist/` (via `publishConfig`).
@@ -65,25 +65,25 @@ The parent repository (the React/Vite SPA that consumes this package) is license
 
 ### Consuming from GitHub Packages
 
-This package is published to the GitHub Packages npm registry under the `@haremantra` scope. Consumers need a `GITHUB_TOKEN` env var with at least the `read:packages` scope.
+This package is published to the GitHub Packages npm registry under the `@shantanusinghesq` scope. Consumers need a `GITHUB_TOKEN` env var with at least the `read:packages` scope.
 
 Add a `.npmrc` at the root of your consuming project:
 
 ```
-@haremantra:registry=https://npm.pkg.github.com
+@shantanusinghesq:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
 Then install:
 
 ```sh
-pnpm add @haremantra/crosswalk
+pnpm add @shantanusinghesq/crosswalk
 ```
 
 Usage:
 
 ```ts
-import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@haremantra/crosswalk";
+import { CROSSWALK, NIST_CONTROL_DESCRIPTIONS } from "@shantanusinghesq/crosswalk";
 
 const asi01 = CROSSWALK.ASI01;
 console.log(asi01.nist53, asi01.aiRmf, asi01.evidence);

@@ -1,5 +1,5 @@
 {
-  "name": "@haremantra/crosswalk",
+  "name": "@shantanusinghesq/crosswalk",
   "version": "0.10.0",
   "description": "OWASP Agentic AI (ASI) ↔ NIST SP 800-53 Rev 5 ↔ NIST AI-RMF (AI 100-1) reference crosswalk data.",
   "license": "MIT",
@@ -31,7 +31,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/haremantra/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF.git",
+    "url": "git+https://github.com/shantanusinghesq/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF.git",
     "directory": "packages/crosswalk"
   },
   "publishConfig": {

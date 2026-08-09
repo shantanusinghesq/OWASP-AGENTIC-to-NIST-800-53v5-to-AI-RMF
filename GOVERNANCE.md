@@ -10,7 +10,7 @@ trigger that graduates it to a multi-reviewer model.
 
 | Role | Who | Responsibilities |
 |---|---|---|
-| **Maintainer** | `@haremantra` | Final decision authority on all mappings, scope, and releases. Reviews and merges PRs. Records Decision Points in `CHANGELOG.md`. Owns the canonical data location and the CI gate. |
+| **Maintainer** | `@shantanusinghesq` | Final decision authority on all mappings, scope, and releases. Reviews and merges PRs. Records Decision Points in `CHANGELOG.md`. Owns the canonical data location and the CI gate. |
 | **Reviewer** | *(none yet — see Board Mode)* | An external contributor who has completed ≥1 public data-PR review. Reviewers advise; in Board Mode a Reviewer approval becomes a required merge gate for canonical-data changes. |
 | **Contributor** | Anyone | Opens issues (new mapping / mapping correction) and pull requests. Must meet the Mapping Provenance Standard for any data change. Has no merge rights. |
 
@@ -49,7 +49,7 @@ Board Mode is a documented future state, **not** enabled now.
 1. Confirm the trigger: at least two external Reviewers each have ≥1 merged public
    data-PR review on record.
 2. Add each Reviewer to `.github/CODEOWNERS` for `/packages/crosswalk/**` alongside
-   `@haremantra`.
+   `@shantanusinghesq`.
 3. In GitHub → Settings → Branches → Branch protection rules for `main`: enable
    **Require a pull request before merging**, **Require approvals = 1**, and
    **Require review from Code Owners**. Keep **Require status checks to pass** (CI) on.
@@ -62,7 +62,7 @@ Board Mode is a documented future state, **not** enabled now.
 
 `packages/crosswalk/src` is the **sole canonical location** for crosswalk data
 (`CROSSWALK`, `OWASP_ASI`, `NIST_800_53`, `AI_RMF`, and the description databases). The
-client consumes this data exclusively through the `@haremantra/crosswalk` package; a CI
+client consumes this data exclusively through the `@shantanusinghesq/crosswalk` package; a CI
 guard (`ci.yml` → "Guard single data source") fails the build if crosswalk data constants
 reappear under `client/src/lib/`. **Never** introduce a second copy of the data. Any PR
 that edits mappings must edit files under `packages/crosswalk/src`.

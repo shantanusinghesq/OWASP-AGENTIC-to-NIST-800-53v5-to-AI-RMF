@@ -1,5 +1,5 @@
 {
-  "name": "@haremantra/agentic-crosswalk-app",
+  "name": "@shantanusinghesq/agentic-crosswalk-app",
   "version": "1.0.0",
   "type": "module",
   "license": "AGPL-3.0-only",
@@ -16,7 +16,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@haremantra/crosswalk": "workspace:*",
+    "@shantanusinghesq/crosswalk": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",

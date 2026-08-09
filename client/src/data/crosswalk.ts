@@ -1,5 +1,5 @@
 // ─── Crosswalk Data Adapter ─────────────────────────────────────────
-// The ONLY module in the client allowed to import @haremantra/crosswalk.
+// The ONLY module in the client allowed to import @shantanusinghesq/crosswalk.
 // Everything else imports from here, so the data dependency has a one-file
 // blast radius (package build step, versioned API, etc. land here alone).
 
@@ -11,7 +11,7 @@ import {
   computeCoverage,
   computeStats,
   type AIRMFControlDesc,
-} from "@haremantra/crosswalk";
+} from "@shantanusinghesq/crosswalk";
 
 export {
   AI_RMF,
@@ -44,7 +44,7 @@ export {
   type OscalMapping,
   type OscalMappingEntry,
   type ValidationStatus,
-} from "@haremantra/crosswalk";
+} from "@shantanusinghesq/crosswalk";
 
 export type Framework = "nist" | "aiRmf";
 

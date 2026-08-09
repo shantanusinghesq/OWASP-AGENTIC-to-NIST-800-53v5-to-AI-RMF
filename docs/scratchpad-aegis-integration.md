@@ -1,10 +1,10 @@
-# Scratchpad — Integrate AEGIS with `@haremantra/crosswalk`
+# Scratchpad — Integrate AEGIS with `@shantanusinghesq/crosswalk`
 **Status:** Draft (post-CoVE)
 **Date opened:** 2026-05-01
 
 ## Context
 
-`@haremantra/crosswalk` was extracted from the SPA in this repo earlier today (Phase 3 of the recommended sequence; see `scratchpad-aegis-relationship.md` D-01/D-02/D-03). Phase 4 — actually wiring AEGIS to consume it — was deferred. This scratchpad plans Phase 4.
+`@shantanusinghesq/crosswalk` was extracted from the SPA in this repo earlier today (Phase 3 of the recommended sequence; see `scratchpad-aegis-relationship.md` D-01/D-02/D-03). Phase 4 — actually wiring AEGIS to consume it — was deferred. This scratchpad plans Phase 4.
 
 Implementation work executes in `/Users/shantanusingh/Projects/AEGIS`. This file lives here because it records this repo's stance on consumption (versioning, publication, surface area).
 
@@ -51,7 +51,7 @@ git diff pnpm-lock.yaml
 ```
 Lockfile changes require explicit PR review.
 
-**Impact:** Cannot use `file:` or `link:` for production builds — those don't satisfy `frozen-lockfile`. Either publish `@haremantra/crosswalk` to a registry that produces a deterministic integrity hash, or vendor (copy the source into AEGIS). Frames D-01.
+**Impact:** Cannot use `file:` or `link:` for production builds — those don't satisfy `frozen-lockfile`. Either publish `@shantanusinghesq/crosswalk` to a registry that produces a deterministic integrity hash, or vendor (copy the source into AEGIS). Frames D-01.
 
 ### CoVE-04 — AEGIS AI-RMF awareness
 **FINDING:** Zero. Confirmed by prior CoVE in `scratchpad-aegis-relationship.md`. Reinforced — no AI-RMF symbols anywhere in `packages/`.
@@ -62,7 +62,7 @@ Lockfile changes require explicit PR review.
 
 ## Decision Points
 
-### D-01 — How does AEGIS pull in `@haremantra/crosswalk` given strict frozen-lockfile policy?
+### D-01 — How does AEGIS pull in `@shantanusinghesq/crosswalk` given strict frozen-lockfile policy?
 
 | Criterion | A: GitHub Packages | B: npm Pro | C: Vendor (copy source) | D: `file:` link |
 |---|---|---|---|---|
@@ -90,7 +90,7 @@ Lockfile changes require explicit PR review.
 **Rejected:** Option D
 **Reasoning against D:** `file:` paths produce different lockfile entries per developer machine (absolute path differences) and don't generate integrity hashes. Breaks AEGIS's `frozen-lockfile=true` immediately.
 
-**Assumption accepted:** Both repos are/will be hosted under the same GitHub org or user account (`haremantra`), so a single `GITHUB_TOKEN` at AEGIS's CI grants read access to packages published from this repo.
+**Assumption accepted:** Both repos are/will be hosted under the same GitHub org or user account (`shantanusinghesq`), so a single `GITHUB_TOKEN` at AEGIS's CI grants read access to packages published from this repo.
 **Assumption rejected:** That a registry-less workspace symlink across two unrelated git repos is feasible — pnpm workspaces don't span repository roots without bespoke tooling.
 
 ---
@@ -203,7 +203,7 @@ T6b: 28 missing AI-RMF cat descriptions (entire MAP/MEASURE/MANAGE).
 
 **Options considered:**
 - A: Snapshot test the new `AuthoritativeReferences` PDF section against a fixed assessment fixture.
-- B: Differential test: render the report twice (with and without `@haremantra/crosswalk` import), assert the new section appears + is non-empty for every ASI in the fixture.
+- B: Differential test: render the report twice (with and without `@shantanusinghesq/crosswalk` import), assert the new section appears + is non-empty for every ASI in the fixture.
 - C: Both A + B.
 - D: No new tests; rely on existing report snapshot tests to detect breakage.
 
@@ -248,7 +248,7 @@ T6b: 28 missing AI-RMF cat descriptions (entire MAP/MEASURE/MANAGE).
 
 | Decision | Outcome |
 |---|---|
-| D-01 | **A** — Publish `@haremantra/crosswalk` to GitHub Packages; AEGIS pulls via authenticated `.npmrc` |
+| D-01 | **A** — Publish `@shantanusinghesq/crosswalk` to GitHub Packages; AEGIS pulls via authenticated `.npmrc` |
 | D-02 | **C** — Both: 1-line evidence citation in `RemediationRoadmap` + new `AuthoritativeReferences` section |
 | D-03 | Ship NIST mappings + AI-RMF mappings + evidence in PR1; defer description rendering to PR2 (post-backfill) |
 | D-04 | **A** — Default-on; no feature flag |
@@ -258,19 +258,19 @@ T6b: 28 missing AI-RMF cat descriptions (entire MAP/MEASURE/MANAGE).
 
 ## Execution sequence (PR1 + parallel work)
 
-**Track A — `@haremantra/crosswalk` publishing (this repo)**
+**Track A — `@shantanusinghesq/crosswalk` publishing (this repo)**
 1. Add `publishConfig.registry` and `repository` to `packages/crosswalk/package.json`.
 2. Create `.github/workflows/publish-crosswalk.yml` triggered on tags matching `crosswalk-v*`.
 3. Tag `crosswalk-v0.1.0`, push, verify package appears in GH Packages.
 
 **Track B — AEGIS PR1 (in `/Users/shantanusingh/Projects/AEGIS`)**
 1. Configure `.npmrc` for `@obviate` scope pointing to GH Packages registry.
-2. `pnpm add @haremantra/crosswalk@0.1.0 --filter @aegis/report`. Review lockfile diff per AEGIS CLAUDE.md "Adding New Dependencies Safely".
+2. `pnpm add @shantanusinghesq/crosswalk@0.1.0 --filter @aegis/report`. Review lockfile diff per AEGIS CLAUDE.md "Adding New Dependencies Safely".
 3. Modify `packages/report/src/pdf/RemediationRoadmap.tsx:161` — append a one-line evidence citation pulled from `CROSSWALK[gap.asi_id].evidence` after the "Mitigating Controls" row.
 4. Create `packages/report/src/pdf/AuthoritativeReferences.tsx` — per-ASI section rendering `nist53` mappings (family + control IDs + rationale) and `aiRmf` mappings (function + cats + rationale).
 5. Wire into `ReportDocument.tsx` after `ControlGapAnalysis`.
 6. Snapshot test (`packages/report/tests/authoritative-references.test.tsx`) + differential test (rendering with vs. without crosswalk; assert section non-empty for every ASI in fixture).
-7. Update AEGIS HANDOFF.md "Carryover from AEGIS HANDOFF" → mark P1.5 enhanced via `@haremantra/crosswalk`.
+7. Update AEGIS HANDOFF.md "Carryover from AEGIS HANDOFF" → mark P1.5 enhanced via `@shantanusinghesq/crosswalk`.
 
 **Track C — Description backfill (this repo, in parallel)**
 - T4 (`AC-25`, `AU-16`, `CM-14`): 3 NIST control descriptions in `nist-control-descriptions.ts`.
@@ -278,7 +278,7 @@ T6b: 28 missing AI-RMF cat descriptions (entire MAP/MEASURE/MANAGE).
 - Unskip the corresponding tests in `packages/crosswalk/tests/data.integrity.test.ts`.
 - Bump to `0.2.0` and re-publish.
 
-**AEGIS PR2** (after Track C lands): import descriptions from `@haremantra/crosswalk@^0.2.0`, render expandable per-control descriptions in `AuthoritativeReferences`.
+**AEGIS PR2** (after Track C lands): import descriptions from `@shantanusinghesq/crosswalk@^0.2.0`, render expandable per-control descriptions in `AuthoritativeReferences`.
 
 ## Sequencing note
 

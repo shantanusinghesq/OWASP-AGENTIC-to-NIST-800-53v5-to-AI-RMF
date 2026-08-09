@@ -66,7 +66,7 @@ named in `VALIDATION.md` so they are never cited. Before this backs a paid
 deliverable, buy the standard; the index reduces that reconciliation to a single-file
 diff.
 
-**Version.** `@haremantra/crosswalk` **0.9.0 → 0.10.0** (MINOR — new exports per the
+**Version.** `@shantanusinghesq/crosswalk` **0.9.0 → 0.10.0** (MINOR — new exports per the
 package's data-contract table).
 
 ---
@@ -121,7 +121,7 @@ A series of data-accuracy corrections closing the gap-analysis remediation backl
 
 ### Decision Point: Consumable data product — machine-readable exports and provenance
 
-**What changed.** The `@haremantra/crosswalk` package now builds distributable artifacts (`tsup` → ESM + CJS + type declarations) and emits, at build time, `crosswalk.json` (the full dataset with `dataVersion` and `upstreamVersions`), `crosswalk.csv` (one row per ASI × control mapping — 89 rows), and `crosswalk.oscal.json` (an OSCAL-aligned mapping whose every control is resolved against the pinned Rev 5 catalog, throwing on any missing or withdrawn id). `publishConfig` points the *published* package at `dist/` and exposes a `./data.json` subpath, while the workspace app keeps consuming raw `src`. The hosted app gained client-side **Download JSON / Download CSV** actions (Blob only — no server) and a **Provenance & Limitations** panel that renders the pinned upstream editions and the crosswalk's disclosed limitations. `TERMS_OF_SERVICE.md` §4.2 now expressly permits these sanctioned export artifacts.
+**What changed.** The `@shantanusinghesq/crosswalk` package now builds distributable artifacts (`tsup` → ESM + CJS + type declarations) and emits, at build time, `crosswalk.json` (the full dataset with `dataVersion` and `upstreamVersions`), `crosswalk.csv` (one row per ASI × control mapping — 89 rows), and `crosswalk.oscal.json` (an OSCAL-aligned mapping whose every control is resolved against the pinned Rev 5 catalog, throwing on any missing or withdrawn id). `publishConfig` points the *published* package at `dist/` and exposes a `./data.json` subpath, while the workspace app keeps consuming raw `src`. The hosted app gained client-side **Download JSON / Download CSV** actions (Blob only — no server) and a **Provenance & Limitations** panel that renders the pinned upstream editions and the crosswalk's disclosed limitations. `TERMS_OF_SERVICE.md` §4.2 now expressly permits these sanctioned export artifacts.
 
 **Why it matters.** The framework's flexibility claim depends on the crosswalk functioning as a data product other governance tooling can adapt around. Previously the package shipped only raw TypeScript — unusable by Python GRC pipelines, spreadsheets, or SIEM ingestion, and the hosted app's terms forbade extraction. Now the data travels in JSON/CSV/OSCAL with a version stamp and its provenance and limitations attached.
 
@@ -181,7 +181,7 @@ Five surgical fixes applied without altering existing functionality, data, or la
 
 **Fix 1: Title Tag.** Browser tab title already matched the OG meta tags ("OWASP Agentic AI ↔ NIST Crosswalk"). Confirmed correct.
 
-**Fix 2: OG Image and Meta Tags.** Added `og:url`, `og:image`, and `twitter:image` meta tags to `index.html`. Generated a 1200×630 `og-card.png` using Pillow with the app's dark navy background (#0a0f1a), shield icon, cyan "COMPLIANCE MIDDLEWARE" label, white title, slate-400 subtitle with key stats, cyan accent line, and "haremantra" attribution.
+**Fix 2: OG Image and Meta Tags.** Added `og:url`, `og:image`, and `twitter:image` meta tags to `index.html`. Generated a 1200×630 `og-card.png` using Pillow with the app's dark navy background (#0a0f1a), shield icon, cyan "COMPLIANCE MIDDLEWARE" label, white title, slate-400 subtitle with key stats, cyan accent line, and "shantanusinghesq" attribution.
 
 **Fix 3: Column Header Tooltips.** Wrapped all 16 NIST 800-53 column headers (AC through SR) in Radix `<Tooltip>` components showing the full family name (e.g., "AC — Access Control"). Added `title` attribute fallback for non-hover devices. Wrapped the heatmap table in `<TooltipProvider delayDuration={200}>`.
 

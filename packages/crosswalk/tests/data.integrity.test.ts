@@ -15,7 +15,7 @@ const ASI_IDS = new Set(OWASP_ASI.map((r) => r.id));
 
 const firstToken = (s: string): string => s.split(/\s+/)[0];
 
-describe("@haremantra/crosswalk integrity", () => {
+describe("@shantanusinghesq/crosswalk integrity", () => {
   it("T1 every OWASP_ASI has a CROSSWALK entry", () => {
     const missing = OWASP_ASI.filter((r) => !CROSSWALK[r.id]).map((r) => r.id);
     expect(missing).toEqual([]);

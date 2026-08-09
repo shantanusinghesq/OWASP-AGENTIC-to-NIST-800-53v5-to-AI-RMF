@@ -2,7 +2,7 @@
 
 Participant profile: builds LLM agent systems (tool-calling, RAG, multi-agent, MCP). Has shipped agents to prod. Has personally watched an agent get talked into something stupid by webpage text. Has never opened NIST 800-53. Default posture toward "compliance tool": skeptical.
 
-Source: https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/ (site only; no repo, no README, no search)
+Source: https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/ (site only; no repo, no README, no search)
 
 ---
 

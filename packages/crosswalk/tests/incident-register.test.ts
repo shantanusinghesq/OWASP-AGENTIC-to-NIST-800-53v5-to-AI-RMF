@@ -7,14 +7,15 @@ import { CROSSWALK, INCIDENT_REGISTER, OWASP_ASI, buildRegisterReport } from "..
 
 const ASI_IDS = new Set(OWASP_ASI.map((r) => r.id));
 
-// Ground-truth count derived from the data (33 at time of writing), asserted
+// Ground-truth count derived from the data (41 at time of writing: the
+// original 33 plus 8 public primary sources added 2026-11-19), asserted
 // against the hard-pinned expectation so a stray evidence add/remove is caught.
 const DERIVED_TOTAL = Object.values(CROSSWALK).reduce((n, e) => n + e.evidence.length, 0);
 
 describe("incident register", () => {
-  it("has exactly 33 entries (one per evidence item), matching the derived total", () => {
-    expect(DERIVED_TOTAL).toBe(33);
-    expect(INCIDENT_REGISTER).toHaveLength(33);
+  it("has exactly 41 entries (one per evidence item), matching the derived total", () => {
+    expect(DERIVED_TOTAL).toBe(41);
+    expect(INCIDENT_REGISTER).toHaveLength(41);
     expect(INCIDENT_REGISTER.length).toBe(DERIVED_TOTAL);
   });
 
@@ -30,8 +31,8 @@ describe("incident register", () => {
 
   it("buildRegisterReport totals reconcile and asisWithNoIncident is empty", () => {
     const report = buildRegisterReport();
-    expect(report.totalIncidents).toBe(33);
-    expect(report.byType.incident + report.byType.research + report.byType.guidance).toBe(33);
+    expect(report.totalIncidents).toBe(41);
+    expect(report.byType.incident + report.byType.research + report.byType.guidance).toBe(41);
     // Register-relative: every ASI carries >=1 evidence item post-WS7 backfill.
     expect(report.asisWithNoIncident).toEqual([]);
   });

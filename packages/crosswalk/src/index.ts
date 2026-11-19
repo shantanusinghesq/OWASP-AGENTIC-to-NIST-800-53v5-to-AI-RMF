@@ -11,6 +11,8 @@ export {
   type ConfidenceLevel,
   type CrosswalkEntry,
   type EvidenceItem,
+  type EvidenceReference,
+  type EvidenceSourceType,
   type FrameworkRefs,
   type NISTFamily,
   type NISTMapping,

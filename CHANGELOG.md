@@ -6,6 +6,31 @@ This project follows a philosophy of **transparent provenance**: every editorial
 
 ---
 
+## [Unreleased] — 2026-11-19 — Public primary sources, no remapping
+
+### Decision Point: Eight public primary sources added; ASI labels left where they were
+
+**What changed.** `@haremantra/crosswalk` **0.10.0 → 0.11.0** (MINOR). `CrosswalkEntry` gains an optional `evidenceReferences` array (`id`, `asiId`, `title`, `url`, `sourceType`). Existing readers of `evidence` are unchanged: the Evidence Explorer, the search index, and `Home.tsx` still render `evidence` only. Each new reference is also an `evidence` item, so the register and the explorer show it. The integrity suite (T18) requires every reference to carry a parseable `https` URL, an allowed source type, and an ASI id that is a real OWASP ASI id and that matches the parent key.
+
+Eight items were added after the public page was fetched on 2026-11-19. Nothing from a private note was copied.
+
+| ASI | Added | Public URL |
+|---|---|---|
+| ASI01 | NVD CVE-2025-32711 (NIST CVSS 3.1 7.5 HIGH; Microsoft CNA 9.3 CRITICAL; CWE-74) | https://nvd.nist.gov/vuln/detail/CVE-2025-32711 |
+| ASI01 | EchoLeak case study, arXiv:2509.10540 | https://arxiv.org/abs/2509.10540 |
+| ASI01 | Greshake et al., indirect prompt injection, arXiv:2302.12173 | https://arxiv.org/abs/2302.12173 |
+| ASI02 | GitHub MCP private-repo leak (Invariant Labs, 2025-05-26) | https://invariantlabs.ai/blog/mcp-github-vulnerability |
+| ASI02 | AgentDojo, arXiv:2406.13352 | https://arxiv.org/abs/2406.13352 |
+| ASI03 | MCP authorization spec, 2025-06-18 (audience binding; token passthrough forbidden) | https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization |
+| ASI06 | PoisonedRAG, arXiv:2402.07867 | https://arxiv.org/abs/2402.07867 |
+| ASI06 | AgentPoison, arXiv:2407.12784 | https://arxiv.org/abs/2407.12784 |
+
+Evidence count **33 → 41**. No NIST control row and no AI-RMF row was added, removed, or retargeted.
+
+**Why it matters.** ASI01's previous EchoLeak citation was a secondary write-up. The NVD record and the case study are now in the data. Disagreements with the OWASP PDF's incident tags — EchoLeak included — are written up in `docs/GAP_REPORT.md` and were **not** applied. ASI04 still has no verified NVD CVE; that gap is stated there rather than filled with a guessed identifier.
+
+---
+
 ## [Unreleased] — 2026-07-22 — The Governance Bridge Cites the Wrong Clauses
 
 ### Decision Point: ISO 42001 references corrected; clause citations moved out of "editorial"

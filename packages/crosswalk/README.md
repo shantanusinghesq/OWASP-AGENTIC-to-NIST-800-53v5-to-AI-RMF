@@ -11,7 +11,7 @@ This package contains the curated crosswalk that powers the [OWASP Agentic AI �
 | `OWASP_ASI` | `ASIRisk[]` (10 entries: ASI01–ASI10) | OWASP ASI 2026 |
 | `NIST_800_53` | `NISTFamily[]` (16 control families) | NIST SP 800-53 Rev 5 |
 | `AI_RMF` | `AIRMFFunction[]` (4 functions × N subcategories) | NIST AI 100-1 |
-| `CROSSWALK` | `Record<ASIId, CrosswalkEntry>` — per-ASI control + AI-RMF mappings with rationale and evidence | Editorial |
+| `CROSSWALK` | `Record<ASIId, CrosswalkEntry>` — per-ASI control + AI-RMF mappings with rationale, `evidence`, and optional `evidenceReferences` (`id`, `asiId`, `title`, `url`, `sourceType`) | Editorial |
 | `severityColor` | `Record<Severity, hexstring>` | Editorial |
 | `NIST_CONTROL_DESCRIPTIONS` | `Record<ControlId, {title, description, implementation, relatedASI}>` | NIST + editorial |
 | `NIST_AI_RMF_DESCRIPTIONS` | `Record<CatId, AIRMFControlDesc>` | NIST + editorial (all four functions: GOVERN, MAP, MEASURE, MANAGE) |
@@ -45,6 +45,8 @@ This package follows [Semantic Versioning](https://semver.org/). Because it ship
 | Key renames or interface / type changes (rename a field, change an export's shape) | **MAJOR** |
 | New ASI risks, new NIST controls, or new mappings added | **MINOR** |
 | Rationale / description / evidence text edits (no structural change) | **PATCH** |
+
+An optional field that existing readers can ignore is a **MINOR** bump. 0.10.0 added optional governance-framework refs that way; 0.11.0 adds optional `evidenceReferences` the same way. Renaming or removing a field is **MAJOR**.
 
 The generated `dist/crosswalk.json` carries a `dataVersion` field that always equals the package version, so consumers of the raw JSON can pin the exact data revision they built against. The exported constant `CROSSWALK_DATA_VERSION` mirrors the same value, and `tests/version.test.ts` pins the two together so they can never drift.
 

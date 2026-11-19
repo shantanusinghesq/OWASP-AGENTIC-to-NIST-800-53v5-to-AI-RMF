@@ -6,6 +6,7 @@ import {
   NIST_AI_RMF_DESCRIPTIONS,
   NIST_CONTROL_DESCRIPTIONS,
   OWASP_ASI,
+  type EvidenceSourceType,
 } from "../src";
 
 const NIST_FAMILY_IDS = new Set(NIST_800_53.map((f) => f.id));
@@ -260,5 +261,40 @@ describe("@haremantra/crosswalk integrity", () => {
       }
     }
     expect(violations, `promoted mappings missing reviewIssue: ${violations.join("; ")}`).toEqual([]);
+  });
+
+  it("T18 evidenceReferences, when present, have https URLs, allowed source types, and a real ASI key matching the parent", () => {
+    const ALLOWED: Set<EvidenceSourceType> = new Set(["nvd", "arxiv", "incident-writeup", "specification"]);
+    const bad: string[] = [];
+    const seenIds = new Set<string>();
+    for (const [asiId, entry] of Object.entries(CROSSWALK)) {
+      if (!ASI_IDS.has(asiId)) bad.push(`parent key ${asiId} is not an OWASP ASI id`);
+      const refs = entry.evidenceReferences;
+      if (refs === undefined) continue;
+      expect(Array.isArray(refs), `${asiId}: evidenceReferences must be an array`).toBe(true);
+      const evidenceUrls = new Set(entry.evidence.map((item) => item.sourceUrl).filter((u): u is string => !!u));
+      for (const ref of refs) {
+        const label = `${asiId} ${ref.id || "(no id)"}`;
+        if (!ref.id || ref.id.trim().length === 0) bad.push(`${label}: empty id`);
+        if (seenIds.has(ref.id)) bad.push(`${label}: duplicate id`);
+        seenIds.add(ref.id);
+        if (!ref.title || ref.title.trim().length === 0) bad.push(`${label}: empty title`);
+        if (!ASI_IDS.has(ref.asiId)) bad.push(`${label}: asiId "${ref.asiId}" is not an OWASP ASI id`);
+        if (ref.asiId !== asiId) bad.push(`${label}: asiId "${ref.asiId}" does not match parent ${asiId}`);
+        if (!ALLOWED.has(ref.sourceType)) bad.push(`${label}: sourceType "${ref.sourceType}"`);
+        let parsed: URL | undefined;
+        try {
+          parsed = new URL(ref.url);
+        } catch {
+          bad.push(`${label}: url is not parseable`);
+        }
+        if (parsed && (parsed.protocol !== "https:" || !parsed.hostname.includes("."))) {
+          bad.push(`${label}: url is not a well-formed https URL (${ref.url})`);
+        }
+        if (/second_brain|shantanusinghesq/i.test(ref.url)) bad.push(`${label}: url must not point at a private note`);
+        if (!evidenceUrls.has(ref.url)) bad.push(`${label}: url is not also an evidence sourceUrl on ${asiId}`);
+      }
+    }
+    expect(bad, bad.join("; ")).toEqual([]);
   });
 });

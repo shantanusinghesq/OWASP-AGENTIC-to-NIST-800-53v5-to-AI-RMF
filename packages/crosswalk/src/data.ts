@@ -68,10 +68,37 @@ export interface EvidenceItem {
   relatedControls?: string[];
 }
 
+/**
+ * Public primary-source kinds. Closed so a new kind fails the integrity
+ * suite instead of drifting into free text. `nvd` and `arxiv` are the
+ * preferred kinds; `incident-writeup` and `specification` are for a
+ * vendor disclosure or a protocol spec that was fetched and confirmed.
+ */
+export type EvidenceSourceType = "nvd" | "arxiv" | "incident-writeup" | "specification";
+
+/**
+ * Optional structured pointer at a public primary source. Additive:
+ * readers that only consume `evidence` keep working. `asiId` must equal
+ * the parent CROSSWALK key. `url` is a public https link — never a
+ * private note.
+ */
+export interface EvidenceReference {
+  /** Stable public id: CVE, arXiv id, or a short slug. */
+  id: string;
+  /** OWASP ASI id this reference is filed under. Must match the parent key. */
+  asiId: string;
+  title: string;
+  /** Public https URL. */
+  url: string;
+  sourceType: EvidenceSourceType;
+}
+
 export interface CrosswalkEntry {
   nist53: NISTMapping[];
   aiRmf: AIRMFMapping[];
   evidence: EvidenceItem[];
+  /** Present only where a public primary source was fetched and confirmed. */
+  evidenceReferences?: EvidenceReference[];
 }
 
 /**
@@ -179,9 +206,17 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
     ],
     evidence: [
       { title: "EchoLeak (CVE-2025-32711): zero-click prompt-injection data exfiltration in Microsoft 365 Copilot", type: "incident", sourceUrl: "https://thehackernews.com/2025/06/zero-click-ai-vulnerability-exposes.html", cveId: "CVE-2025-32711", datePublished: "2025-06", dateVerified: "2026-07-11" },
+      { title: "NVD CVE-2025-32711: AI command injection in Microsoft 365 Copilot discloses information over a network (NIST CVSS 3.1 7.5 HIGH; Microsoft CNA 9.3 CRITICAL; CWE-74)", type: "incident", sourceUrl: "https://nvd.nist.gov/vuln/detail/CVE-2025-32711", cveId: "CVE-2025-32711", datePublished: "2025-06-11", dateVerified: "2026-11-19" },
+      { title: "EchoLeak case study (arXiv:2509.10540): crafted email, reference-style Markdown, and an auto-fetched image exfiltrate data from Microsoft 365 Copilot", type: "research", sourceUrl: "https://arxiv.org/abs/2509.10540", cveId: "CVE-2025-32711", datePublished: "2025-09-06", dateVerified: "2026-11-19" },
+      { title: "Greshake et al.: indirect prompt injection against LLM-integrated applications (arXiv:2302.12173)", type: "research", sourceUrl: "https://arxiv.org/abs/2302.12173", datePublished: "2023-02-23", dateVerified: "2026-11-19" },
       { title: "Invitation Is All You Need: Gemini calendar-invite prompt injection (SafeBreach)", type: "incident", sourceUrl: "https://www.safebreach.com/blog/invitation-is-all-you-need-hacking-gemini/", datePublished: "2025-08", dateVerified: "2026-07-11" },
       { title: "AgentFlayer: ChatGPT Connectors 0-click attack (Zenity Labs)", type: "incident", sourceUrl: "https://labs.zenity.io/p/agentflayer-chatgpt-connectors-0click-attack-5b41", datePublished: "2025-08-06", dateVerified: "2026-07-11" },
-    ]
+    ],
+    evidenceReferences: [
+      { id: "CVE-2025-32711", asiId: "ASI01", title: "NVD CVE-2025-32711", url: "https://nvd.nist.gov/vuln/detail/CVE-2025-32711", sourceType: "nvd" },
+      { id: "arXiv:2509.10540", asiId: "ASI01", title: "EchoLeak: The First Real-World Zero-Click Prompt Injection Exploit in a Production LLM System", url: "https://arxiv.org/abs/2509.10540", sourceType: "arxiv" },
+      { id: "arXiv:2302.12173", asiId: "ASI01", title: "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection", url: "https://arxiv.org/abs/2302.12173", sourceType: "arxiv" },
+    ],
   },
   ASI02: {
     nist53: [
@@ -198,9 +233,15 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
     ],
     evidence: [
       { title: "Amazon Q Developer Vulnerability: Secrets Leaked via DNS and Prompt Injection", type: "incident", sourceUrl: "https://embracethered.com/blog/posts/2025/amazon-q-developer-data-exfil-via-dns/", datePublished: "2025-08-18", dateVerified: "2026-07-11" },
+      { title: "GitHub MCP: a malicious public issue coerced an agent into leaking private-repository data into a public pull request (Invariant Labs)", type: "incident", sourceUrl: "https://invariantlabs.ai/blog/mcp-github-vulnerability", datePublished: "2025-05-26", dateVerified: "2026-11-19" },
+      { title: "AgentDojo: tool-using agents hijacked by untrusted data returned from tools (arXiv:2406.13352)", type: "research", sourceUrl: "https://arxiv.org/abs/2406.13352", datePublished: "2024-06-19", dateVerified: "2026-11-19" },
       { title: "MCP Tool Poisoning (OWASP community attack reference)", type: "guidance", sourceUrl: "https://owasp.org/www-community/attacks/MCP_Tool_Poisoning", dateVerified: "2026-07-11" },
       { title: "MITRE ATT&CK T1218 — System/Signed Binary Proxy Execution (LOLBins)", type: "guidance", sourceUrl: "https://attack.mitre.org/techniques/T1218/", dateVerified: "2026-07-11" },
-    ]
+    ],
+    evidenceReferences: [
+      { id: "invariant-github-mcp-2025-05-26", asiId: "ASI02", title: "GitHub MCP Exploited: Accessing private repositories via MCP", url: "https://invariantlabs.ai/blog/mcp-github-vulnerability", sourceType: "incident-writeup" },
+      { id: "arXiv:2406.13352", asiId: "ASI02", title: "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents", url: "https://arxiv.org/abs/2406.13352", sourceType: "arxiv" },
+    ],
   },
   ASI03: {
     nist53: [
@@ -220,7 +261,11 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { title: "CSA Research Note: Confused Deputy Attacks on Autonomous AI Agents", type: "research", sourceUrl: "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-confused-deputy-prompt-injection/", datePublished: "2026-03-23", dateVerified: "2026-07-11" },
       { title: "OWASP AI Agent Security Cheat Sheet — memory poisoning & credential/privilege escalation", type: "guidance", sourceUrl: "https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html", dateVerified: "2026-07-11" },
       { title: "Security Analysis of Agentic AI Communication Protocols — agent registration/discovery spoofing (CWE-290)", type: "research", sourceUrl: "https://arxiv.org/abs/2511.03841", datePublished: "2025-11", dateVerified: "2026-07-11" },
-    ]
+      { title: "MCP authorization specification (2025-06-18): tokens must be audience-bound; token passthrough is forbidden as a confused-deputy control", type: "guidance", sourceUrl: "https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization", datePublished: "2025-06-18", dateVerified: "2026-11-19" },
+    ],
+    evidenceReferences: [
+      { id: "mcp-authorization-2025-06-18", asiId: "ASI03", title: "MCP specification: Authorization (revision 2025-06-18)", url: "https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization", sourceType: "specification" },
+    ],
   },
   ASI04: {
     nist53: [
@@ -278,7 +323,13 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
       { title: "Hacking Gemini's Memory with Prompt Injection and Delayed Tool Invocation (Johann Rehberger / Embrace The Red)", type: "incident", sourceUrl: "https://embracethered.com/blog/posts/2025/gemini-memory-persistence-prompt-injection/", datePublished: "2025-02-10", dateVerified: "2026-07-11" },
       { title: "SpAIware: Spyware/false-memory injection into ChatGPT's long-term memory (Johann Rehberger / Embrace The Red)", type: "incident", sourceUrl: "https://embracethered.com/blog/posts/2024/chatgpt-macos-app-persistent-data-exfiltration/", datePublished: "2024-09-20", dateVerified: "2026-07-11" },
       { title: "OWASP LLM08:2025 Vector and Embedding Weaknesses (cross-context / multi-tenant leakage)", type: "guidance", sourceUrl: "https://genai.owasp.org/llmrisk/llm08-excessive-agency/", datePublished: "2025", dateVerified: "2026-07-11" },
-    ]
+      { title: "PoisonedRAG: injecting a few malicious texts into a knowledge database can make RAG return attacker-chosen answers (arXiv:2402.07867)", type: "research", sourceUrl: "https://arxiv.org/abs/2402.07867", datePublished: "2024-02-12", dateVerified: "2026-11-19" },
+      { title: "AgentPoison: backdoor attack on an agent's long-term memory or RAG knowledge base (arXiv:2407.12784)", type: "research", sourceUrl: "https://arxiv.org/abs/2407.12784", datePublished: "2024-07-17", dateVerified: "2026-11-19" },
+    ],
+    evidenceReferences: [
+      { id: "arXiv:2402.07867", asiId: "ASI06", title: "PoisonedRAG: Knowledge Corruption Attacks to Retrieval-Augmented Generation of Large Language Models", url: "https://arxiv.org/abs/2402.07867", sourceType: "arxiv" },
+      { id: "arXiv:2407.12784", asiId: "ASI06", title: "AgentPoison: Red-teaming LLM Agents via Poisoning Memory or Knowledge Bases", url: "https://arxiv.org/abs/2407.12784", sourceType: "arxiv" },
+    ],
   },
   ASI07: {
     nist53: [

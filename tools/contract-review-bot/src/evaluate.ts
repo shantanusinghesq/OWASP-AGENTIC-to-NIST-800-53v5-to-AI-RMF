@@ -9,7 +9,9 @@ import {
   findTrackedEnv,
   matchProtected,
   resultEvidence,
+  scriptsFromPackageJson,
   testIntegrityFindings,
+  toolingFindings,
   uncoveredSurfaces,
 } from "./checks.ts";
 
@@ -132,10 +134,58 @@ export async function evaluate(input: EvaluateInput): Promise<Report> {
           status: failed ? "fail" : "pass",
           command: check.command,
           exit_code: ran.code,
-          log: patternBad
-            ? `fail_on_pattern is not a valid regular expression`
-            : ran.log,
+          log: !failed
+            ? ""
+            : patternBad
+              ? `fail_on_pattern is not a valid regular expression`
+              : ran.log,
           fix_hint: failed ? hint : "",
+        }),
+      );
+      continue;
+    }
+
+    if (check.type === "tooling-integrity") {
+      let names: string[] = [];
+      let gitError = "";
+      try {
+        names = input.io.names();
+      } catch (error) {
+        gitError = error instanceof Error ? error.message : String(error);
+      }
+      const findings = gitError
+        ? [`git diff failed: ${gitError}`]
+        : toolingFindings({
+            scriptNames: check.script_names,
+            baseScripts: scriptsFromPackageJson(
+              input.io.readBase(check.package_file),
+            ),
+            headScripts: scriptsFromPackageJson(
+              input.io.read(check.package_file),
+            ),
+            changedFiles: names,
+          });
+      if (findings.length)
+        ownerPaths = Array.from(
+          new Set([
+            ...ownerPaths,
+            check.package_file,
+            ...names.filter((name) =>
+              findings.some((line) => line.includes(name)),
+            ),
+          ]),
+        );
+      results.push(
+        result({
+          gate_id: check.gate_id,
+          gate: check.gate,
+          area: check.area,
+          title: check.title,
+          status: findings.length ? "fail" : "pass",
+          command: `compare ${check.package_file} scripts, lockfiles, and tool configs`,
+          exit_code: findings.length ? 1 : 0,
+          log: findings.join("\n"),
+          fix_hint: findings.length ? hint : "",
         }),
       );
       continue;

@@ -77,7 +77,7 @@ describe("evaluate", () => {
         packageScripts: () => ({ check: "tsc --noEmit" }),
       }),
     });
-    expect(calls).toEqual(["pnpm check"]);
+    expect(calls).toEqual(["node_modules/.bin/tsc --noEmit"]);
     expect(calls.join("\n")).not.toContain("curl");
     expect(
       report.results.find((item) => item.gate_id === "gate-1-typecheck")
@@ -117,7 +117,9 @@ describe("evaluate", () => {
       }),
     });
     expect(report.results[0].status).toBe("skip");
-    expect(report.results[0].evidence.command).toBe("pnpm lint");
+    expect(report.results[0].evidence.command).toBe(
+      "node_modules/.bin/eslint --max-warnings 0 .",
+    );
   });
 
   it("fails a zero exit when the build log contains a warning", async () => {
@@ -234,7 +236,14 @@ describe("publish", () => {
       eventSha: sha,
       pull: { number: 7, headSha: sha },
       changedFiles: [],
-      comments: [{ id: 3, body: "<!-- contract-review-bot -->\nold" }],
+      comments: [
+        {
+          id: 3,
+          body: "<!-- contract-review-bot -->\nold",
+          authorLogin: "github-actions[bot]",
+          authorType: "Bot",
+        },
+      ],
       repo: "octo/repo",
     });
     expect(plan.comment).toBeNull();
@@ -248,8 +257,16 @@ describe("publish", () => {
       eventSha: sha,
       pull: { number: 7, headSha: sha },
       changedFiles: ["README.md"],
-      comments: [{ id: 42, body: "<!-- contract-review-bot -->\nprevious" }],
+      comments: [
+        {
+          id: 42,
+          body: "<!-- contract-review-bot -->\nprevious",
+          authorLogin: "github-actions[bot]",
+          authorType: "Bot",
+        },
+      ],
       repo: "octo/repo",
+      commandsBound: true,
     });
     expect(plan.comment?.method).toBe("PATCH");
     expect(plan.comment?.path).toBe("/repos/octo/repo/issues/comments/42");
@@ -272,20 +289,26 @@ describe("issue classification", () => {
 });
 
 describe("command environment", () => {
-  it("drops tokens and keeps PATH", () => {
-    const env = commandEnv({
-      PATH: "/usr/bin",
-      GITHUB_TOKEN: "ghp_secret",
-      GH_TOKEN: "secret",
-      NPM_TOKEN: "secret",
-      MY_SECRET: "secret",
-      NODE_AUTH_TOKEN: "secret",
-    });
-    expect(env.PATH).toBe("/usr/bin");
+  it("drops tokens and does not keep a caller-supplied PATH", () => {
+    const env = commandEnv(
+      {
+        PATH: "/tmp/evil:/usr/bin",
+        GITHUB_TOKEN: "ghp_secret",
+        GH_TOKEN: "secret",
+        NPM_TOKEN: "secret",
+        MY_SECRET: "secret",
+        NODE_AUTH_TOKEN: "secret",
+        BASH_ENV: "/tmp/evil.bashrc",
+      },
+      "/opt/hosted/node",
+    );
+    expect(env.PATH?.startsWith("/opt/hosted:")).toBe(true);
+    expect(env.PATH).not.toContain("/tmp/evil");
     expect(env.GITHUB_TOKEN).toBeUndefined();
     expect(env.GH_TOKEN).toBeUndefined();
     expect(env.NPM_TOKEN).toBeUndefined();
     expect(env.MY_SECRET).toBeUndefined();
     expect(env.NODE_AUTH_TOKEN).toBeUndefined();
+    expect(env.BASH_ENV).toBeUndefined();
   });
 });

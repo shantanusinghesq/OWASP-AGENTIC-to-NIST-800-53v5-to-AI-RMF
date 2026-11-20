@@ -20,7 +20,11 @@
     "version": { "const": 1 },
     "head_sha": { "type": "string" },
     "base_sha": { "type": "string" },
-    "pr_number": { "type": ["integer", "null"] },
+    "pr_number": {
+      "type": ["integer", "null"],
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000
+    },
     "needs_owner_review": { "type": "boolean" },
     "owner_review_paths": { "type": "array", "items": { "type": "string" } },
     "protected_paths": { "type": "array", "items": { "type": "string" } },

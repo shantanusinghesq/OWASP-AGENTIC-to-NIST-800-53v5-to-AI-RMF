@@ -1,18 +1,33 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { classifyIssue } from "./classify.ts";
 import { parseConfig } from "./config.ts";
 import { evaluate } from "./evaluate.ts";
+import { loadGitSnapshot } from "./git-snapshot.ts";
 import { createIo, isSha, workspaceHead } from "./io.ts";
 import {
   buildIssueComment,
   buildPublishPlan,
+  failureCheckBody,
   readChangedFiles,
   readComments,
   readPull,
 } from "./publish.ts";
+import { recomputeStructural } from "./recompute.ts";
 import { renderIssueComment, renderMarkdown } from "./render.ts";
-import type { Report } from "./types.ts";
+import {
+  parsePrNumber,
+  readTextCapped,
+  validateReport,
+  type ResultSchema,
+} from "./schema.ts";
+import type { CheckResult, Report } from "./types.ts";
+
+const SCHEMA_PATH = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../result.schema.json",
+);
 
 function flags(argv: string[]): Record<string, string> {
   const out: Record<string, string> = {};
@@ -30,8 +45,23 @@ function flags(argv: string[]): Record<string, string> {
   return out;
 }
 
-function readJson(file: string): unknown {
-  return JSON.parse(readFileSync(file, "utf8"));
+function readJson(file: string, maxBytes = 5_000_000): unknown {
+  return JSON.parse(readTextCapped(file, maxBytes));
+}
+
+function loadSchema(): ResultSchema {
+  return JSON.parse(readTextCapped(SCHEMA_PATH, 200_000)) as ResultSchema;
+}
+
+function loadReport(file: string): Report {
+  return validateReport(JSON.parse(readTextCapped(file)), loadSchema());
+}
+
+function eventPrNumber(raw: string | undefined): number | null {
+  if (!raw || raw === "true") return null;
+  if (!/^[0-9]+$/.test(raw))
+    throw new Error("--event-pr must be a decimal integer");
+  return parsePrNumber(Number(raw));
 }
 
 function failureReport(
@@ -154,20 +184,12 @@ function publish(args: Record<string, string>): void {
     mkdirSync(out, { recursive: true });
     writeFileSync(
       path.join(out, "check-body.json"),
-      `${JSON.stringify({
-        name: "contract-review",
-        head_sha: eventSha,
-        status: "completed",
-        conclusion: "failure",
-        output: {
-          title: "Contract review failed closed",
-          summary: message.slice(0, 1200),
-        },
-      })}\n`,
+      `${JSON.stringify(failureCheckBody(eventSha, message))}\n`,
     );
     writeFileSync(path.join(out, "check-path"), `/repos/${repo}/check-runs\n`);
     writeFileSync(path.join(out, "comment-method"), "SKIP\n");
     writeFileSync(path.join(out, "comment-path"), "\n");
+    writeFileSync(path.join(out, "comment-fallback-path"), "\n");
     writeFileSync(path.join(out, "comment-body.json"), "{}\n");
     writeFileSync(path.join(out, "binding"), "refused\n");
     process.stderr.write(`${message}\n`);
@@ -177,9 +199,56 @@ function publish(args: Record<string, string>): void {
       throw new Error("--repo must be owner/name");
     if (!isSha(eventSha))
       throw new Error("--event-sha must be 40 hex characters");
-    const report = readJson(args.results ?? "") as Report;
+    const report = loadReport(args.results ?? "");
+    const eventPr = eventPrNumber(args["event-pr"]);
+    if (eventPr !== null && report.pr_number !== eventPr) {
+      throw new Error(
+        `artifact pr_number ${String(report.pr_number)} does not match workflow_run pr ${eventPr}`,
+      );
+    }
     const pull = readPull(readJson(args.pr ?? ""));
     if (!pull) throw new Error("pull request JSON has no number and head SHA");
+    if (report.pr_number !== null && pull.number !== report.pr_number) {
+      throw new Error("pull request API number does not match the artifact");
+    }
+    const configPath = path.resolve(
+      args["contract-root"] ?? ".",
+      args.config ?? "tools/contract-review-bot/contract-review.config.json",
+    );
+    const config = parseConfig(JSON.parse(readTextCapped(configPath)));
+    let structural: CheckResult[] | undefined;
+    let commandsBound = false;
+    if (args["git-dir"]) {
+      try {
+        const snap = loadGitSnapshot(
+          args["git-dir"],
+          report.base_sha,
+          report.head_sha,
+        );
+        const recomputed = recomputeStructural(config, snap);
+        structural = recomputed.results;
+        commandsBound = recomputed.commandsBound;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        structural = [
+          {
+            gate_id: "hard-tooling",
+            gate: "hard-tooling",
+            area: "security",
+            title: "Reporter could not read the pull request tree",
+            status: "fail",
+            evidence: {
+              command: "git show",
+              exit_code: 1,
+              log_excerpt: message.slice(0, 1200),
+            },
+            fix_hint:
+              "Command results stay unbound when the reporter cannot read the commits. This is a failure.",
+          },
+        ];
+        commandsBound = false;
+      }
+    }
     const plan = buildPublishPlan({
       report,
       eventSha,
@@ -187,6 +256,9 @@ function publish(args: Record<string, string>): void {
       changedFiles: readChangedFiles(readJson(args.files ?? "")),
       comments: readComments(readJson(args.comments ?? "")),
       repo,
+      structural,
+      commandsBound,
+      botLogin: args["bot-login"],
     });
     mkdirSync(out, { recursive: true });
     writeFileSync(
@@ -201,12 +273,17 @@ function publish(args: Record<string, string>): void {
       );
       writeFileSync(path.join(out, "comment-path"), `${plan.comment.path}\n`);
       writeFileSync(
+        path.join(out, "comment-fallback-path"),
+        `${plan.comment.fallbackPath}\n`,
+      );
+      writeFileSync(
         path.join(out, "comment-body.json"),
         `${JSON.stringify({ body: plan.comment.body })}\n`,
       );
     } else {
       writeFileSync(path.join(out, "comment-method"), "SKIP\n");
       writeFileSync(path.join(out, "comment-path"), "\n");
+      writeFileSync(path.join(out, "comment-fallback-path"), "\n");
       writeFileSync(path.join(out, "comment-body.json"), "{}\n");
     }
     writeFileSync(path.join(out, "binding"), `${plan.binding}\n`);
@@ -234,27 +311,31 @@ function issuePlan(args: Record<string, string>): void {
   writeFileSync(path.join(out, "comment-method"), `${plan.method}\n`);
   writeFileSync(path.join(out, "comment-path"), `${plan.path}\n`);
   writeFileSync(
+    path.join(out, "comment-fallback-path"),
+    `${plan.fallbackPath}\n`,
+  );
+  writeFileSync(
     path.join(out, "comment-body.json"),
     `${JSON.stringify({ body: plan.body })}\n`,
   );
 }
 
 function readBinding(args: Record<string, string>): void {
-  const report = readJson(args.results ?? "") as Report;
   const out = args.out ?? "";
   if (!out) throw new Error("--out is required");
-  if (
-    typeof report.pr_number !== "number" ||
-    !Number.isInteger(report.pr_number) ||
-    report.pr_number <= 0
-  ) {
+  const report = loadReport(args.results ?? "");
+  if (report.pr_number === null)
     throw new Error("results have no pull request number");
+  const eventPr = eventPrNumber(args["event-pr"]);
+  if (eventPr !== null && report.pr_number !== eventPr) {
+    throw new Error(
+      `artifact pr_number ${report.pr_number} does not match workflow_run pr ${eventPr}`,
+    );
   }
-  if (!isSha(report.head_sha))
-    throw new Error("results head_sha is not 40 hex characters");
   mkdirSync(out, { recursive: true });
   writeFileSync(path.join(out, "pr"), `${report.pr_number}\n`);
   writeFileSync(path.join(out, "sha"), `${report.head_sha}\n`);
+  writeFileSync(path.join(out, "base"), `${report.base_sha}\n`);
 }
 
 const [command, ...rest] = process.argv.slice(2);

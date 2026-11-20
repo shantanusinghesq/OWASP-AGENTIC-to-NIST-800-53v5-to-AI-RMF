@@ -32,16 +32,85 @@ const PASS_EXACT = new Set([
   "NO_PROXY",
 ]);
 
-/** Environment for commands that execute pull-request code. Secrets are not copied. */
+const SYSTEM_PATH = [
+  "/usr/local/sbin",
+  "/usr/local/bin",
+  "/usr/sbin",
+  "/usr/bin",
+  "/sbin",
+  "/bin",
+];
+
+/**
+ * Environment for commands that execute pull-request code.
+ * PATH is rebuilt. The caller's PATH is dropped so an install step cannot prepend a fake `node`.
+ * Secrets are not copied. BASH_ENV is not copied.
+ */
 export function commandEnv(
   base: NodeJS.ProcessEnv = process.env,
+  trustedNode?: string,
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const [key, value] of Object.entries(base)) {
     if (value === undefined) continue;
+    if (key === "PATH" || key === "BASH_ENV" || key === "ENV") continue;
     if (PASS_EXACT.has(key)) env[key] = value;
   }
+  const nodeDir = trustedNode ? path.dirname(trustedNode) : "";
+  const dirs = nodeDir ? [nodeDir, ...SYSTEM_PATH] : SYSTEM_PATH;
+  env.PATH = dirs.join(":");
   return env;
+}
+
+/** Split a base-config command without invoking a shell. */
+export function splitCommand(command: string): string[] {
+  const parts: string[] = [];
+  const re = /"([^"]*)"|'([^']*)'|(\S+)/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(command)) !== null) {
+    parts.push(match[1] ?? match[2] ?? match[3] ?? "");
+  }
+  if (parts.length === 0) throw new Error("empty command");
+  return parts;
+}
+
+export interface TrustedBins {
+  node?: string;
+  pnpm?: string;
+}
+
+/**
+ * Resolve argv for a direct exec. `pnpm` and `node` use the absolute binaries recorded
+ * before install. Relative paths resolve inside the workspace. No shell.
+ */
+export function commandSpawn(
+  command: string,
+  cwd: string,
+  trusted: TrustedBins = {},
+): { file: string; args: string[]; shell: false } {
+  const parts = splitCommand(command);
+  let file = parts[0];
+  if ((file === "pnpm" || file === "pnpm.cmd") && trusted.pnpm)
+    file = trusted.pnpm;
+  else if (file === "node" && trusted.node) file = trusted.node;
+  else if (
+    !path.isAbsolute(file) &&
+    (file.includes("/") || file.includes("\\"))
+  ) {
+    file = path.resolve(cwd, file);
+  }
+  return { file, args: parts.slice(1), shell: false };
+}
+
+export function trustedBinsFromEnv(
+  env: NodeJS.ProcessEnv = process.env,
+): TrustedBins {
+  const node = env.CONTRACT_REVIEW_NODE;
+  const pnpm = env.CONTRACT_REVIEW_PNPM;
+  return {
+    node: node && path.isAbsolute(node) ? node : undefined,
+    pnpm: pnpm && path.isAbsolute(pnpm) ? pnpm : undefined,
+  };
 }
 
 export function isSha(value: string): boolean {
@@ -184,9 +253,12 @@ export function runCommand(
       resolve({ code, log: `${log}${extra}` });
     };
     let log = "";
-    const child = spawn("bash", ["-lc", command], {
+    const trusted = trustedBinsFromEnv();
+    const spawned = commandSpawn(command, cwd, trusted);
+    const child = spawn(spawned.file, spawned.args, {
       cwd,
-      env: commandEnv(),
+      env: commandEnv(process.env, trusted.node),
+      shell: false,
       stdio: ["pipe", "pipe", "pipe"],
       signal: AbortSignal.timeout(timeoutMs),
     });

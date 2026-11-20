@@ -3,6 +3,8 @@ import path from "node:path";
 export interface DiffFile {
   path: string;
   deleted: boolean;
+  renamed: boolean;
+  renameFrom: string;
   addedLines: string[];
   removedLines: string[];
 }
@@ -17,6 +19,8 @@ export function parseUnifiedDiff(diff: string): DiffFile[] {
       current = {
         path: match ? match[2] : "",
         deleted: false,
+        renamed: false,
+        renameFrom: "",
         addedLines: [],
         removedLines: [],
       };
@@ -28,6 +32,15 @@ export function parseUnifiedDiff(diff: string): DiffFile[] {
       current.deleted = true;
       continue;
     }
+    if (line.startsWith("rename from ")) {
+      current.renamed = true;
+      current.renameFrom = line.slice("rename from ".length).trim();
+      continue;
+    }
+    if (line.startsWith("rename to ")) {
+      current.renamed = true;
+      continue;
+    }
     if (
       line.startsWith("+++ ") ||
       line.startsWith("--- ") ||
@@ -35,7 +48,6 @@ export function parseUnifiedDiff(diff: string): DiffFile[] {
       line.startsWith("index ") ||
       line.startsWith("new file") ||
       line.startsWith("similarity ") ||
-      line.startsWith("rename ") ||
       line.startsWith("old mode") ||
       line.startsWith("new mode") ||
       line.startsWith("Binary ")
@@ -78,7 +90,13 @@ export function testIntegrityFindings(
   }
   const findings: string[] = [];
   for (const file of parseUnifiedDiff(diff)) {
-    if (!testRe.test(file.path)) continue;
+    const fromIsTest = file.renameFrom ? testRe.test(file.renameFrom) : false;
+    const pathIsTest = testRe.test(file.path);
+    if (!pathIsTest && !fromIsTest) continue;
+    if (file.renamed)
+      findings.push(
+        `renamed test file ${file.renameFrom || "?"} -> ${file.path}`,
+      );
     if (file.deleted) findings.push(`deleted test file ${file.path}`);
     for (const line of file.addedLines) {
       if (SKIP_ADDED.test(line)) {
@@ -119,6 +137,71 @@ export function matchProtected(files: string[], patterns: string[]): string[] {
     }
   }
   return Array.from(hits);
+}
+
+/** Lockfiles and tool configs the gates execute or trust. Hardcoded so a forged artifact cannot shrink the set. */
+export const LOCKFILE_RE =
+  /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|npm-shrinkwrap\.json)$/;
+export const TOOL_CONFIG_RE =
+  /(^|\/)(vite\.config\.[cm]?[jt]s|vitest\.config\.[cm]?[jt]s|tsconfig[^/]*\.json)$/;
+
+export function scriptsFromPackageJson(
+  json: string | null,
+): Record<string, string> | null {
+  if (json === null) return null;
+  try {
+    const parsed = JSON.parse(json) as { scripts?: unknown };
+    const scripts = parsed.scripts;
+    if (scripts === undefined) return {};
+    if (
+      typeof scripts !== "object" ||
+      scripts === null ||
+      Array.isArray(scripts)
+    )
+      return null;
+    const out: Record<string, string> = {};
+    for (const [name, body] of Object.entries(scripts)) {
+      if (typeof body === "string") out[name] = body;
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Script bodies the base config names, plus lockfiles and tool configs.
+ * A difference fails the gate and is an owner-review flag. The runner does not execute the script body.
+ */
+export function toolingFindings(opts: {
+  scriptNames: string[];
+  baseScripts: Record<string, string> | null;
+  headScripts: Record<string, string> | null;
+  changedFiles: string[];
+}): string[] {
+  const findings: string[] = [];
+  if (!opts.baseScripts || !opts.headScripts) {
+    findings.push(
+      "package.json scripts could not be read on the base and the head",
+    );
+    return findings;
+  }
+  for (const name of opts.scriptNames) {
+    const base = opts.baseScripts[name];
+    const head = opts.headScripts[name];
+    if (base === head) continue;
+    findings.push(
+      `script ${name} changed: ${JSON.stringify(base ?? null)} -> ${JSON.stringify(head ?? null)}`,
+    );
+  }
+  for (const file of opts.changedFiles) {
+    const normalized = file.replace(/\\/g, "/");
+    if (LOCKFILE_RE.test(normalized))
+      findings.push(`lockfile changed: ${normalized}`);
+    if (TOOL_CONFIG_RE.test(normalized))
+      findings.push(`tool config changed: ${normalized}`);
+  }
+  return findings;
 }
 
 export function findTrackedEnv(files: string[]): string[] {

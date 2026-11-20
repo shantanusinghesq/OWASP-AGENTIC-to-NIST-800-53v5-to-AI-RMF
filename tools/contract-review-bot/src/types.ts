@@ -98,13 +98,22 @@ export interface TrackedEnvCheck extends CheckBase {
   type: "tracked-env";
 }
 
+export interface ToolingIntegrityCheck extends CheckBase {
+  type: "tooling-integrity";
+  /** package.json whose script bodies are compared to the base commit. */
+  package_file: string;
+  /** Script names the gates correspond to. Bodies are compared, never executed. */
+  script_names: string[];
+}
+
 export type Check =
   | CommandCheck
   | TestIntegrityCheck
   | ProtectedPathsCheck
   | RouteCoverageCheck
   | ForbiddenTextCheck
-  | TrackedEnvCheck;
+  | TrackedEnvCheck
+  | ToolingIntegrityCheck;
 
 export interface Config {
   version: 1;
@@ -160,6 +169,8 @@ export interface Io {
 export const COMMENT_MARKER = "<!-- contract-review-bot -->";
 export const ISSUE_MARKER = "<!-- contract-review-bot:issue -->";
 export const CHECK_NAME = "contract-review";
+/** Sticky comments are updated only when this login posted them and the account type is Bot. */
+export const DEFAULT_BOT_LOGIN = "github-actions[bot]";
 
 /** Paths the trusted publisher always enforces, even if a forged artifact omits them. */
 export const MINIMUM_PROTECTED_PATHS = [

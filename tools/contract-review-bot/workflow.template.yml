@@ -77,6 +77,15 @@ jobs:
           cache: pnpm
           cache-dependency-path: workspace/pnpm-lock.yaml
 
+      # Record the runner's node and pnpm BEFORE install. Later steps call these
+      # absolute paths. An install script must not be able to replace `node`.
+      - name: Record trusted node and pnpm
+        run: |
+          set -euo pipefail
+          command -v node > "$RUNNER_TEMP/trusted-node"
+          command -v pnpm > "$RUNNER_TEMP/trusted-pnpm"
+          [[ -s "$RUNNER_TEMP/trusted-node" && -s "$RUNNER_TEMP/trusted-pnpm" ]]
+
       - name: Install dependencies
         working-directory: workspace
         env:
@@ -84,7 +93,7 @@ jobs:
           GH_TOKEN: ""
           NPM_TOKEN: ""
           NODE_AUTH_TOKEN: ""
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Save the pull request body outside the shell script
         env:
@@ -100,7 +109,12 @@ jobs:
           NODE_AUTH_TOKEN: ""
         run: |
           set -euo pipefail
-          node --experimental-strip-types "$GITHUB_WORKSPACE/contract/tools/contract-review-bot/src/cli.ts" run \
+          NODE="$(tr -d '[:space:]' < "$RUNNER_TEMP/trusted-node")"
+          PNPM="$(tr -d '[:space:]' < "$RUNNER_TEMP/trusted-pnpm")"
+          [[ "$NODE" == /* && "$PNPM" == /* ]]
+          export CONTRACT_REVIEW_NODE="$NODE"
+          export CONTRACT_REVIEW_PNPM="$PNPM"
+          "$NODE" --experimental-strip-types "$GITHUB_WORKSPACE/contract/tools/contract-review-bot/src/cli.ts" run \
             --contract-root "$GITHUB_WORKSPACE/contract" \
             --workspace "$GITHUB_WORKSPACE/workspace" \
             --config tools/contract-review-bot/contract-review.config.json \
@@ -136,11 +150,15 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # issues: write posts the comment through the issue-comment API.
+    # pull-requests: read is only for GET /pulls and /pulls/files.
+    # There is no pull-requests: write, so this job cannot approve or edit the PR.
     permissions:
       contents: read
       actions: read
-      pull-requests: write
+      issues: write
       checks: write
+      pull-requests: read
     defaults:
       run:
         shell: bash
@@ -181,22 +199,50 @@ jobs:
             > "$RUNNER_TEMP/check.json"
           gh api --method POST "repos/${GITHUB_REPOSITORY}/check-runs" --input "$RUNNER_TEMP/check.json"
 
-      - name: Publish the sticky comment and the status check
+      - name: Publish the status check, then the sticky comment
         if: steps.download.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT_PR: ${{ github.event.workflow_run.pull_requests[0].number }}
         run: |
-          set -euo pipefail
+          # Comment failures must not skip the check. set -e is intentionally off.
+          set +e
+          set -u
+          post_check() {
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/check-runs" --input "$1"
+            return 0
+          }
           [[ "$EVENT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          if [ "$?" -ne 0 ]; then
+            exit 1
+          fi
+          jq -n \
+            --arg sha "$EVENT_SHA" \
+            '{name:"contract-review",head_sha:$sha,status:"completed",conclusion:"failure",output:{title:"Contract review failed closed",summary:"The result artifact could not be validated. This is a failure, not a skip."}}' \
+            > "$RUNNER_TEMP/fallback-check.json"
+          EVENT_PR_ARG=()
+          if [[ "${EVENT_PR:-}" =~ ^[0-9]+$ ]]; then
+            EVENT_PR_ARG=(--event-pr "$EVENT_PR")
+          fi
           node --experimental-strip-types tools/contract-review-bot/src/cli.ts read-binding \
             --results results/results.json \
-            --out "$RUNNER_TEMP/binding"
+            --out "$RUNNER_TEMP/binding" \
+            "${EVENT_PR_ARG[@]}"
+          if [ "$?" -ne 0 ]; then
+            post_check "$RUNNER_TEMP/fallback-check.json"
+            exit 0
+          fi
           PR="$(tr -d '[:space:]' < "$RUNNER_TEMP/binding/pr")"
-          [[ "$PR" =~ ^[0-9]+$ ]]
+          if [[ ! "$PR" =~ ^[0-9]+$ ]]; then
+            post_check "$RUNNER_TEMP/fallback-check.json"
+            exit 0
+          fi
           gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}" > "$RUNNER_TEMP/pr.json"
           gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/pulls/${PR}/files" > "$RUNNER_TEMP/files.json"
           gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" > "$RUNNER_TEMP/comments.json"
+          git fetch --no-tags origin "pull/${PR}/head" || true
+          git fetch --no-tags origin "$(tr -d '[:space:]' < "$RUNNER_TEMP/binding/base")" || true
           node --experimental-strip-types tools/contract-review-bot/src/cli.ts publish-plan \
             --results results/results.json \
             --event-sha "$EVENT_SHA" \
@@ -204,20 +250,39 @@ jobs:
             --files "$RUNNER_TEMP/files.json" \
             --comments "$RUNNER_TEMP/comments.json" \
             --repo "${GITHUB_REPOSITORY}" \
+            --git-dir "$GITHUB_WORKSPACE" \
+            --contract-root "$GITHUB_WORKSPACE" \
+            --config tools/contract-review-bot/contract-review.config.json \
+            "${EVENT_PR_ARG[@]}" \
             --out "$RUNNER_TEMP/plan"
+          if [ "$?" -ne 0 ] || [ ! -f "$RUNNER_TEMP/plan/check-body.json" ]; then
+            post_check "$RUNNER_TEMP/fallback-check.json"
+            exit 0
+          fi
+          # The check is posted before any comment request.
+          post_check "$RUNNER_TEMP/plan/check-body.json"
           method="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-method")"
           cpath="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-path")"
+          fallback="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-fallback-path")"
           case "$method" in
-            POST|PATCH)
-              [[ "$cpath" == /repos/* ]]
-              gh api --method "$method" "$cpath" --input "$RUNNER_TEMP/plan/comment-body.json"
-              ;;
-            SKIP) ;;
-            *) exit 1 ;;
+            POST|PATCH) ;;
+            SKIP) exit 0 ;;
+            *) exit 0 ;;
           esac
-          checkpath="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/check-path")"
-          [[ "$checkpath" == /repos/*/check-runs ]]
-          gh api --method POST "$checkpath" --input "$RUNNER_TEMP/plan/check-body.json"
+          case "$cpath" in
+            /repos/*) ;;
+            *) exit 0 ;;
+          esac
+          gh api --method "$method" "$cpath" --input "$RUNNER_TEMP/plan/comment-body.json"
+          comment_status="$?"
+          if [ "$comment_status" -ne 0 ]; then
+            case "$fallback" in
+              /repos/*/issues/*/comments)
+                gh api --method POST "$fallback" --input "$RUNNER_TEMP/plan/comment-body.json"
+                ;;
+            esac
+          fi
+          exit 0
 
 ---
 # ===== FILE: .github/workflows/contract-review-issues.yml =====
@@ -281,9 +346,20 @@ jobs:
             --out "$RUNNER_TEMP/plan"
           method="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-method")"
           cpath="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-path")"
+          fallback="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-fallback-path")"
           case "$method" in
             POST|PATCH) ;;
-            *) exit 1 ;;
+            *) exit 0 ;;
           esac
-          [[ "$cpath" == /repos/* ]]
-          gh api --method "$method" "$cpath" --input "$RUNNER_TEMP/plan/comment-body.json"
+          case "$cpath" in
+            /repos/*) ;;
+            *) exit 0 ;;
+          esac
+          gh api --method "$method" "$cpath" --input "$RUNNER_TEMP/plan/comment-body.json" || {
+            case "$fallback" in
+              /repos/*/issues/*/comments)
+                gh api --method POST "$fallback" --input "$RUNNER_TEMP/plan/comment-body.json" || true
+                ;;
+            esac
+          }
+          exit 0

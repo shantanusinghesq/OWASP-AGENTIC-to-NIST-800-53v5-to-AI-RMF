@@ -8,6 +8,7 @@ const TYPES = new Set([
   "route-coverage",
   "forbidden-text",
   "tracked-env",
+  "tooling-integrity",
 ]);
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -139,6 +140,14 @@ function parseCheck(value: unknown, index: number): Check {
       exclude_dir_names: value.exclude_dir_names
         ? stringList(value.exclude_dir_names, `${where}.exclude_dir_names`)
         : undefined,
+    };
+  }
+  if (type === "tooling-integrity") {
+    return {
+      ...base,
+      type,
+      package_file: needString(value, "package_file", where),
+      script_names: stringList(value.script_names, `${where}.script_names`),
     };
   }
   if (type === "protected-paths") return { ...base, type };

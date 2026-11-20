@@ -13,16 +13,36 @@ export function conclusionOf(report: Report): "success" | "failure" {
   return "success";
 }
 
-function cell(value: string): string {
+const ZWJ = "\u200d";
+
+/** Markdown and HTML are escaped. `@` is broken with a zero-width joiner so it cannot mention. */
+export function escapeText(value: string): string {
   return value
-    .replace(/\|/g, "\\|")
-    .replace(/\r?\n/g, " ")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/@/g, `@${ZWJ}`)
     .replace(/`/g, "'")
-    .slice(0, 220);
+    .replace(/\[/g, "&#91;")
+    .replace(/\]/g, "&#93;")
+    .replace(/\(/g, "&#40;")
+    .replace(/\)/g, "&#41;")
+    .replace(/\|/g, "\\|")
+    .replace(/\r?\n/g, " ");
 }
 
-function fence(text: string): string {
-  return "```text\n" + text.replace(/```/g, "'''") + "\n```";
+export function codeSpan(value: string): string {
+  return "`" + escapeText(value).slice(0, 300) + "`";
+}
+
+/** Fence is longer than any backtick run in the text, so a log cannot close it early. */
+export function fence(text: string): string {
+  const cleaned = text.replace(/@/g, `@${ZWJ}`).replace(/\u0000/g, "");
+  let ticks = 3;
+  const runs = cleaned.match(/`+/g) ?? [];
+  for (const run of runs) ticks = Math.max(ticks, run.length + 1);
+  const bar = "`".repeat(ticks);
+  return `${bar}text\n${cleaned}\n${bar}`;
 }
 
 function statusLabel(status: Status): string {
@@ -45,7 +65,7 @@ export function renderMarkdown(report: Report): string {
   if (report.needs_owner_review) {
     lines.push(
       `**Needs owner review.** This pull request touches a protected path: ${report.owner_review_paths
-        .map((p) => `\`${p}\``)
+        .map((p) => codeSpan(p))
         .join(
           ", ",
         )}. The bot judged the change with the base-branch rules and config. It does not adopt the pull request's copy.`,
@@ -60,16 +80,15 @@ export function renderMarkdown(report: Report): string {
   );
   for (const result of report.results) {
     const evidence = [
-      result.evidence.command ? `\`${cell(result.evidence.command)}\`` : "",
+      result.evidence.command ? codeSpan(result.evidence.command) : "",
       result.evidence.exit_code === null
         ? ""
         : `exit ${result.evidence.exit_code}`,
-      result.evidence.log_excerpt ? cell(result.evidence.log_excerpt) : "",
     ]
       .filter(Boolean)
       .join(" — ");
     lines.push(
-      `| \`${result.gate_id}\` | ${result.area} | ${statusLabel(result.status)} | ${evidence || "—"} | ${cell(result.fix_hint) || "—"} |`,
+      `| ${codeSpan(result.gate_id)} | ${escapeText(result.area)} | ${statusLabel(result.status)} | ${evidence || "—"} | ${result.fix_hint ? escapeText(result.fix_hint) : "—"} |`,
     );
   }
 
@@ -86,7 +105,7 @@ export function renderMarkdown(report: Report): string {
       const mark = result.status === "fail" ? " " : "x";
       const state = result.status === "fail" ? "missing" : "answered";
       lines.push(
-        `- [${mark}] \`${result.gate_id}\` ${result.title} — ${state}`,
+        `- [${mark}] ${codeSpan(result.gate_id)} ${escapeText(result.title)} — ${state}`,
       );
     }
     const missing = manual.filter((result) => result.status === "fail");
@@ -159,7 +178,7 @@ export function renderIssueComment(
     lines.push("| Suggested label | Gate | Why |", "|---|---|---|");
     for (const suggestion of suggestions) {
       lines.push(
-        `| \`${suggestion.label}\` | \`${suggestion.gate_id}\` | ${suggestion.reason} |`,
+        `| ${codeSpan(suggestion.label)} | ${codeSpan(suggestion.gate_id)} | ${escapeText(suggestion.reason)} |`,
       );
     }
   }

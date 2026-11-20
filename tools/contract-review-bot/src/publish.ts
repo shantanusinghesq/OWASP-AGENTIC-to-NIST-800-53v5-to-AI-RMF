@@ -1,8 +1,10 @@
 import { conclusionOf, renderMarkdown } from "./render.ts";
 import { matchProtected } from "./checks.ts";
+import { parsePrNumber } from "./schema.ts";
 import {
   CHECK_NAME,
   COMMENT_MARKER,
+  DEFAULT_BOT_LOGIN,
   ISSUE_MARKER,
   MINIMUM_PROTECTED_PATHS,
   type CheckResult,
@@ -17,6 +19,8 @@ export interface PullHead {
 export interface CommentRef {
   id: number;
   body: string;
+  authorLogin: string | null;
+  authorType: string | null;
 }
 
 export interface PublishDecision {
@@ -87,8 +91,15 @@ export function readComments(payload: unknown): CommentRef[] {
     if (typeof item !== "object" || item === null) continue;
     const id = (item as { id?: unknown }).id;
     const body = (item as { body?: unknown }).body;
-    if (typeof id === "number" && typeof body === "string")
-      comments.push({ id, body });
+    const user = (item as { user?: { login?: unknown; type?: unknown } }).user;
+    if (typeof id === "number" && typeof body === "string") {
+      comments.push({
+        id,
+        body,
+        authorLogin: user && typeof user.login === "string" ? user.login : null,
+        authorType: user && typeof user.type === "string" ? user.type : null,
+      });
+    }
   }
   return comments;
 }
@@ -97,16 +108,31 @@ export function readPull(payload: unknown): PullHead | null {
   if (typeof payload !== "object" || payload === null) return null;
   const number = (payload as { number?: unknown }).number;
   const head = (payload as { head?: { sha?: unknown } }).head;
-  if (typeof number !== "number" || !head || typeof head.sha !== "string")
+  if (!head || typeof head.sha !== "string") return null;
+  try {
+    return { number: parsePrNumber(number), headSha: head.sha };
+  } catch {
     return null;
-  return { number, headSha: head.sha };
+  }
 }
 
+export function isTrustedBot(
+  comment: CommentRef,
+  botLogin = DEFAULT_BOT_LOGIN,
+): boolean {
+  return comment.authorLogin === botLogin && comment.authorType === "Bot";
+}
+
+/** Only a comment the bot itself posted. A planted marker from a person is ignored. */
 export function findStickyComment(
   comments: CommentRef[],
   marker: string,
+  botLogin = DEFAULT_BOT_LOGIN,
 ): number | null {
-  const found = comments.find((comment) => comment.body.includes(marker));
+  const found = comments.find(
+    (comment) =>
+      comment.body.includes(marker) && isTrustedBot(comment, botLogin),
+  );
   return found ? found.id : null;
 }
 
@@ -116,19 +142,112 @@ export function buildIssueComment(input: {
   issue: number;
   comments: CommentRef[];
   body: string;
-}): { method: "POST" | "PATCH"; path: string; body: string } {
-  const sticky = findStickyComment(input.comments, ISSUE_MARKER);
+  botLogin?: string;
+}): {
+  method: "POST" | "PATCH";
+  path: string;
+  fallbackPath: string;
+  body: string;
+} {
+  const sticky = findStickyComment(
+    input.comments,
+    ISSUE_MARKER,
+    input.botLogin,
+  );
+  const fallbackPath = `/repos/${input.repo}/issues/${input.issue}/comments`;
   if (sticky === null) {
     return {
       method: "POST",
-      path: `/repos/${input.repo}/issues/${input.issue}/comments`,
+      path: fallbackPath,
+      fallbackPath,
       body: input.body,
     };
   }
   return {
     method: "PATCH",
     path: `/repos/${input.repo}/issues/comments/${sticky}`,
+    fallbackPath,
     body: input.body,
+  };
+}
+
+export function failureCheckBody(headSha: string, message: string) {
+  return {
+    name: CHECK_NAME,
+    head_sha: headSha,
+    status: "completed" as const,
+    conclusion: "failure" as const,
+    output: {
+      title: "Contract review failed closed",
+      summary: message.slice(0, 1200),
+    },
+  };
+}
+
+const ADVISORY_HINT =
+  "This command result came from the pull request job and is not bound. The reporter accepts command results only when protected paths, package script bodies, the lockfile, and tool configs are unchanged.";
+
+/**
+ * Structural results from the reporter replace the artifact's copy of the same gate.
+ * Command passes count only when `commandsBound` is true. Otherwise they become failures,
+ * so a forged all-pass artifact is not posted as success.
+ */
+export function bindCommandResults(
+  report: Report,
+  opts: {
+    changedFiles: string[];
+    structural: CheckResult[];
+    commandsBound: boolean;
+  },
+): Report {
+  const base = applyTrustedFiles(report, opts.changedFiles);
+  const structuralIds = new Set(opts.structural.map((item) => item.gate_id));
+  const kept = base.results.filter((item) => !structuralIds.has(item.gate_id));
+  const results = [...kept, ...opts.structural].map((item) => ({
+    ...item,
+    evidence: { ...item.evidence },
+  }));
+  if (!opts.commandsBound) {
+    for (const item of results) {
+      if (structuralIds.has(item.gate_id)) continue;
+      if (
+        item.area !== "lint" &&
+        item.area !== "tests" &&
+        item.area !== "security"
+      )
+        continue;
+      if (item.status !== "pass") continue;
+      item.status = "fail";
+      item.fix_hint = ADVISORY_HINT;
+      item.evidence.log_excerpt = "advisory; not bound";
+    }
+  }
+  const owner = Array.from(
+    new Set([
+      ...base.owner_review_paths,
+      ...opts.structural
+        .filter(
+          (item) => item.status === "fail" && item.gate_id === "hard-tooling",
+        )
+        .flatMap((item) =>
+          item.evidence.log_excerpt
+            .split("\n")
+            .map((line) => {
+              const lock = /(?:lockfile|tool config) changed: (\S+)/.exec(line);
+              return lock ? lock[1] : "";
+            })
+            .filter(Boolean),
+        ),
+    ]),
+  );
+  const toolingFailed = opts.structural.some(
+    (item) => item.gate_id === "hard-tooling" && item.status === "fail",
+  );
+  return {
+    ...base,
+    needs_owner_review: base.needs_owner_review || toolingFailed,
+    owner_review_paths: owner,
+    results,
   };
 }
 
@@ -212,7 +331,12 @@ export function applyTrustedFiles(
 export interface PublishPlan {
   binding: "ok" | "refused" | "stale";
   reason: string;
-  comment: { method: "POST" | "PATCH"; path: string; body: string } | null;
+  comment: {
+    method: "POST" | "PATCH";
+    path: string;
+    fallbackPath: string;
+    body: string;
+  } | null;
   check: {
     path: string;
     body: {
@@ -232,6 +356,10 @@ export function buildPublishPlan(input: {
   changedFiles: string[];
   comments: CommentRef[];
   repo: string;
+  /** Structural recomputation. Command passes are unbound unless this says they are. */
+  structural?: CheckResult[];
+  commandsBound?: boolean;
+  botLogin?: string;
 }): PublishPlan {
   const decision = decidePublish({
     artifactSha: input.report.head_sha,
@@ -240,19 +368,31 @@ export function buildPublishPlan(input: {
   });
   let report = input.report;
   if (!decision.trustResults) report = failureShell(report, decision.reason);
-  else report = applyTrustedFiles(report, input.changedFiles);
+  else {
+    report = bindCommandResults(report, {
+      changedFiles: input.changedFiles,
+      structural: input.structural ?? [],
+      commandsBound: input.commandsBound === true,
+    });
+  }
 
   const conclusion = conclusionOf(report);
   const markdown = renderMarkdown(report);
-  const sticky = findStickyComment(input.comments, COMMENT_MARKER);
+  const sticky = findStickyComment(
+    input.comments,
+    COMMENT_MARKER,
+    input.botLogin,
+  );
+  const fallbackPath = `/repos/${input.repo}/issues/${input.pull.number}/comments`;
   const comment =
     decision.comment && decision.trustResults
       ? {
           method: sticky === null ? ("POST" as const) : ("PATCH" as const),
           path:
             sticky === null
-              ? `/repos/${input.repo}/issues/${input.pull.number}/comments`
+              ? fallbackPath
               : `/repos/${input.repo}/issues/comments/${sticky}`,
+          fallbackPath,
           body: markdown,
         }
       : null;

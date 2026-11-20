@@ -1,0 +1,173 @@
+---
+description: Hard gates coding agents must pass before work is done. Constraints that are not a single command are in agent-constraints.mdc.
+alwaysApply: true
+---
+
+# Quality gates
+
+Work is not done until every gate in this file passes. Constraints that have no single command, and items that do not apply yet, are in `.cursor/rules/agent-constraints.mdc` (also always applied). Read both. Do not restate them elsewhere.
+
+## Hard rules
+
+- Never weaken, skip, or delete a gate, test, or check to get green. Fix the code and re-run.
+- Never edit `.github/`, workflows, CODEOWNERS, branch protection, or repo settings. If a gate needs a CI change, write the proposed workflow change in the PR description for Shanti to apply himself.
+- Open PRs. Never merge.
+
+## Gate 1 — Build passes with zero warnings
+
+**Rule.** The production build, the typecheck, and lint (when a lint script exists) exit 0. Any warning in their output is a failure.
+
+**Verify.** From the repo root, with pnpm (`package.json` `packageManager`):
+
+```bash
+set -euo pipefail
+pnpm check
+pnpm build > /tmp/gate1-build.log 2>&1
+cat /tmp/gate1-build.log
+# Vite has no fail-on-warning flag. Fail on Rollup's "(!)" marker or the word "warning".
+# grep exits 1 when the log is clean; the if-form treats that as a pass.
+if grep -nE '^\(!\)|warning' /tmp/gate1-build.log; then exit 1; fi
+```
+
+`pnpm check` is `tsc --noEmit`. `pnpm build` is `vite build` (`vite.config.ts`). There is no `lint` script and no ESLint or Biome config. Do not add a linter just to satisfy this clause. The moment a `lint` script exists, it joins this gate: exit 0 and zero warnings (ESLint: `--max-warnings 0`).
+
+**Pass.** `pnpm check` exits 0 and prints no diagnostics. `pnpm build` exits 0 and the grep prints nothing.
+
+**Fail.** Fix the code. Re-run both commands. Loop until the pass criterion holds. Do not raise `build.chunkSizeWarningLimit`, do not add a Vite `onwarn` that swallows warnings, and do not add `@ts-ignore`, `@ts-expect-error`, or `eslint-disable` to get green.
+
+### Gate 1 scope (crosswalk rework)
+
+Work that closes the five items below must also satisfy the three gates above, and every later gate and constraint in these rule files.
+
+1. Open Graph and Twitter tags in `client/index.html` still point at `https://haremantra.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/`. The live host is `https://shantanusinghesq.github.io/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/`.
+2. The postmark-mcp evidence link in `packages/crosswalk/src/data.ts` (`https://www.koi.ai/blog/postmark-mcp-npm-malicious-backdoor-email-theft`) redirects to an unrelated Palo Alto Networks page.
+3. The viewport meta in `client/index.html` sets `maximum-scale=1`, which blocks pinch-zoom.
+4. Non-root paths such as `/terms` return HTTP 404 on GitHub Pages.
+5. The analyzer-first front door is PR #42, replayed onto `main` as its own standalone PR. When `analyze` is added to `ViewType`, Gates 2 and 3 cover it the same day.
+
+## Gate 2 — Every route and `?tab=` view has a test
+
+**Rule.** Every wouter route and every `?tab=` view has at least one test that renders that surface and asserts on its content. Adding a route or a tab without that test fails the gate.
+
+**Verify.**
+
+```bash
+rg -n "<Route" client/src/App.tsx
+rg -n "export type ViewType" client/src/components/ViewTabs.tsx
+rg -n --glob '*.test.tsx' "tab=|/terms|/404|TermsOfService|NotFound" client/src
+pnpm test
+```
+
+List routes from `client/src/App.tsx`: every `<Route path="...">` plus the pathless `<Route>` catch-all. Today: `/` (Home), `/terms` (TermsOfService), `/404` (NotFound), catch-all (NotFound). The router base is `import.meta.env.BASE_URL` (Vite `base` in `vite.config.ts`: `/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/`).
+
+List tabs from the `ViewType` union in `client/src/components/ViewTabs.tsx`. `useTabParam` (`client/src/hooks/useTabParam.ts`) reads `?tab=` and defaults to `overview`. Today: `overview`, `matrix`, `aiRmf`, `detail`, `simulator`. When `analyze` joins that union, it is in scope immediately.
+
+Vitest includes `client/src/**/*.test.{ts,tsx}` (`vitest.config.ts`). A surface is covered only when a test mounts the app at that path or `?tab=` value and asserts on content that belongs to that surface. Rendering a child component by itself does not cover the tab. `?risk=` is not a separate view.
+
+**Pass.** `pnpm test` exits 0, and every path and every `ViewType` member has a matching render-and-assert test.
+
+**Fail.** Add the missing test. Re-run `pnpm test` and the `rg` commands. Loop until every route and tab is covered. Do not delete a route or a tab to shrink the list.
+
+## Gate 3 — WCAG 2.2 AA before merge
+
+**Rule.** Automated accessibility checks run against every route and every `?tab=` view. Serious and critical violations are zero. CI must run the same check on pull requests before merge. Agents do not edit `.github/` to install that step; put the proposed job in the PR description for Shanti.
+
+**Verify.** jsdom cannot measure contrast or reflow. The checker is `@axe-core/playwright` (axe-core), run by Playwright, one page per route and per `?tab=`. The script is `pnpm test:a11y`. It is not in `package.json` today. A missing script is a failure. An empty script, a skipped tag, or a shortened page list is a weakened check.
+
+```bash
+set -euo pipefail
+# Fail if pinch-zoom is locked. WCAG 2.2 AA 1.4.4 / 1.4.10.
+# rg exits 1 when the meta is clean; the if-form treats that as a pass.
+if rg -n "maximum-scale|user-scalable" client/index.html; then exit 1; fi
+pnpm test:a11y
+```
+
+`pnpm test:a11y` must, on `/`, `/terms`, `/404`, one unknown catch-all path, and `/?tab=` for each `ViewType` value:
+
+- Run axe and fail on any violation whose impact is `serious` or `critical`.
+- Assert landmarks `header`, `nav`, `main`, and `footer`.
+- Assert a skip link whose target is `main`.
+- Assert every form control and every icon-only button has an accessible name.
+- Assert color contrast at WCAG 2.2 AA.
+- Assert the page is usable at 200% zoom and at 400% (reflow at 320 CSS pixels wide: no clipped primary content, no horizontal scroll for text).
+
+**Pass.** The viewport grep finds nothing. `pnpm test:a11y` exits 0 with zero serious or critical violations on every route and tab. The PR description contains the `ci.yml` step Shanti must add so the command runs on `pull_request` before merge. Do not merge on the strength of a local run alone once that step exists; until Shanti adds it, say in the PR that CI does not run it yet.
+
+**Fail.** Fix the UI. Re-run the grep and `pnpm test:a11y`. Loop until both pass. Do not disable an axe rule, drop a page, or remove `maximum-scale` from the check to get green.
+
+## Gate 4 — Dependencies and secrets
+
+**Rule.** Dependency vulnerabilities at high or critical fail the gate. A leaked secret fails the gate. No secret is read from a `VITE_` variable. Vite inlines `import.meta.env.VITE_*` into the client bundle.
+
+**Verify.**
+
+```bash
+set -euo pipefail
+pnpm audit --audit-level high
+gitleaks detect --source . --redact --no-banner
+# rg exits 1 when there is no match. A match is a failure.
+if rg -n "VITE_[A-Z0-9_]*(KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL)" \
+  client packages --glob '!**/node_modules/**' --glob '!**/dist/**'; then
+  exit 1
+fi
+if git ls-files | rg -n '(^|/)\.env($|\.)'; then exit 1; fi
+```
+
+`gitleaks` is the secret scanner to use. It is not installed by `pnpm install`. If the binary is missing, install it and re-run. Do not skip the scan, and do not substitute a hand-rolled grep for it. Trufflehog is acceptable only when gitleaks cannot be installed; say so in the PR. Low and moderate audit findings do not fail this gate. Do not lower `--audit-level` below `high`, and do not add an audit ignore, to get green.
+
+**Pass.** `pnpm audit --audit-level high` exits 0. `gitleaks detect` exits 0. The `VITE_` grep finds nothing. No `.env` file is tracked.
+
+**Fail.** Upgrade or remove the vulnerable dependency, or rotate and purge the leaked secret, then re-run. Loop until all four commands pass. If a high or critical advisory has no fix, stop and say so in the PR. Shanti decides. Do not silence it.
+
+## Gate 5 — No stack traces in the UI
+
+**Rule.** An error boundary wraps the app and renders a short friendly message. The UI never shows a stack trace.
+
+**Verify.**
+
+```bash
+rg -n "\.stack" client/src --glob '!*.test.ts' --glob '!*.test.tsx'
+```
+
+**Pass.** The command prints nothing (`rg` exits 1 when it finds nothing; that is a pass). `client/src/App.tsx` still mounts an error boundary, and the boundary's rendered output is a friendly message plus a way to reload. `console.error` of the error object in development is allowed. Reading or rendering `.stack` is not.
+
+**Fail.** Remove the stack from the rendered tree. Re-run the grep. Loop until it prints nothing. Do not delete the error boundary to make the grep pass.
+
+## Gate 6 — Bundle budget
+
+**Rule.** The production bundle stays within the gzip ceilings below. Ceilings are 10% above the `main` build measured 2026-11-20 (`gzip -c -9`). Load-time and LCP are not this gate; they are `[manual]` in `agent-constraints.mdc` (no Lighthouse script in this repo).
+
+**Verify.** After `pnpm build`:
+
+```bash
+set -euo pipefail
+fail=0
+check() {
+  local label="$1" limit="$2" bytes="$3"
+  if [ "$bytes" -gt "$limit" ]; then echo "FAIL $label gzip=$bytes limit=$limit"; fail=1
+  else echo "ok $label gzip=$bytes limit=$limit"; fi
+}
+shopt -s nullglob
+mains=(dist/public/assets/index-*.js)
+csss=(dist/public/assets/index-*.css)
+[ "${#mains[@]}" -eq 1 ] && [ "${#csss[@]}" -eq 1 ]
+check "main-js" 242000 "$(gzip -c -9 "${mains[0]}" | wc -c | tr -d ' ')"
+check "css" 15000 "$(gzip -c -9 "${csss[0]}" | wc -c | tr -d ' ')"
+total=0
+for f in dist/public/assets/*.js; do
+  bytes="$(gzip -c -9 "$f" | wc -c | tr -d ' ')"
+  total=$((total + bytes))
+  case "$(basename "$f")" in
+    index-*) ;;
+    *) check "chunk $(basename "$f")" 47000 "$bytes" ;;
+  esac
+done
+check "js-total" 289000 "$total"
+exit "$fail"
+```
+
+Ceilings, in gzip bytes: main entry `index-*.js` ≤ 242000; each other JS chunk ≤ 47000; `index-*.css` ≤ 15000; all JS summed ≤ 289000. Exactly one `index-*.js` and one `index-*.css`. Measured that day: main 220004, CSS 13352, `ScenarioSimulator` chunk 42603, JS total 262607.
+
+**Pass.** The script exits 0.
+
+**Fail.** Shrink the bundle. Re-run Gate 1 and this script. Loop until both pass. Do not raise a ceiling, and do not split chunks only to duck the `index-*` count, to get green. Clearing this gate does not clear Gate 1's raw chunk-size warning.

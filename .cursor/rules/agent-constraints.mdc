@@ -1,0 +1,165 @@
+---
+description: Constraints coding agents must satisfy when no single command can prove them. Gates that have a command are in quality-gates.mdc.
+alwaysApply: true
+---
+
+# Agent constraints
+
+Automated gates are `.cursor/rules/quality-gates.mdc`. This file is everything else. The hard rules there still apply: do not weaken a gate or a test, do not edit `.github/` or repository settings, do not merge.
+
+This is a client-side static SPA on GitHub Pages. There is no backend and no accounts. Do not add a server, a database, a flag vendor, or a telemetry vendor to make an item look done.
+
+An item marked `[manual]` has no single pass/fail command. In every PR description, give each `[manual]` item one line: `satisfied` or `N/A`, and how. A missing line means the work is not done.
+
+## Load time and LCP `[manual]`
+
+**Rule.** Bundle bytes are Gate 6. Perceived load is separate. Target: Lighthouse performance ≥ 90 and LCP ≤ 2.5s on the production build, for `/` and for each `?tab=` view the PR changes.
+
+**Check.** No Lighthouse script, dependency, or CI job exists. The tool to add later is Lighthouse (`npx lighthouse` or `@lhci/cli`) against `pnpm build && pnpm preview`, or against the live Pages URL. Do not add it in a drive-by PR.
+
+**Pass.** The PR description records the tool, the URL, the performance score, and the LCP, for each changed view. Or it says the PR does not change client rendering and the check was not re-run.
+
+**Fail.** Fix the slow path and measure again. Do not lower the target.
+
+## Authentication and authorization
+
+**N/A today.** No accounts, no sessions, no server-side authorization. `localStorage` in this app is single-browser state, not an auth boundary.
+
+**Trigger.** Applies as soon as any user data is stored or sent off this browser, or any account, session, or shared store exists. Until then, do not add an auth system.
+
+## Observability
+
+**N/A today.** No analytics SDK, no error reporter, no log pipeline, and no alerter. The only `console.*` call under `client/src` is an info line in `client/src/features/diagram/engine/diagram-analyzer.ts`. GitHub Pages access logs belong to GitHub, not this repo. CI and the Pages deploy are the only project-owned signals.
+
+**Trigger.** Applies as soon as the client sends errors or events off-device, or any server is added. Then logs are structured, omit stack traces, `localStorage` payloads, and secrets, and name the alert channel the maintainer will watch. Do not add a telemetry vendor just to satisfy this item.
+
+## Schema validation, migrations, backup `[manual]`
+
+**Rule.** Validate at every boundary you touch: URL params, `JSON.parse`, imports, and JSON files. A `schemaVersion` change is code and has a test. Do not delete a stored payload the new code does not understand. There is no server backup. Do not invent one. Assessment recovery that exists today is the JSON export (`client/src/features/assessment/export-json.ts`).
+
+**Check.** No schema library is installed. List the sites:
+
+```bash
+rg -n "JSON\.parse|URLSearchParams|schemaVersion" client/src --glob '!*.test.ts' --glob '!*.test.tsx'
+```
+
+Account for each hit the PR touches.
+
+- `?tab=` in `client/src/hooks/useTabParam.ts` is cast to `ViewType` with no allow-list. Unknown values must fall back to `overview`.
+- `?risk=` in `client/src/pages/Home.tsx` is allow-listed (`VALID_ASI`). Keep that. Any new param gets the same treatment.
+- Assessment `localStorage` and import (`storage.ts`, `export-json.ts`) check `schemaVersion` and shape. An unknown version returns empty and must not wipe the stored string.
+- `diagram-history.ts` only checks `Array.isArray` after `JSON.parse`. A change there needs a real shape check.
+- The diagram analyzer parses model JSON and falls back to manual mode. Keep the fallback.
+- Crosswalk data is TypeScript in `@haremantra/crosswalk`. Do not add a second copy under `client/src/lib`.
+- There is no API. Do not add one to satisfy this item.
+
+**Pass.** The PR description lists every boundary the diff touches and how it was validated, or says the diff touches none.
+
+**Fail.** Add the check and a test. Re-run `pnpm test`. Loop until the new case passes.
+
+**Backup trigger.** A hosted backup and restore story is required as soon as any user data is stored off this browser. Name the backup and the restore steps in that PR.
+
+## Environment parity `[manual]`
+
+**Rule.** Behavior you ship is the production bundle, not the dev server.
+
+The only environments are:
+
+- Local dev: `pnpm dev` (Vite, port 3000).
+- Local production preview: `pnpm build && pnpm preview` (port 4173).
+- GitHub Pages: `.github/workflows/deploy-pages.yml` runs `pnpm build` on push to `main` and publishes `dist/public`.
+
+`vite.config.ts` sets `base` to `/OWASP-AGENTIC-to-NIST-800-53v5-to-AI-RMF/` for all of them. There is no staging environment. Do not create one.
+
+**Pass.** The PR says you ran `pnpm preview` for the change, or why a docs-only change did not need it.
+
+**Trigger.** A third hosted environment, if one is ever added, must run the same `pnpm build` as Pages.
+
+## Feature flags `[manual]`
+
+**Rule.** Do not keep unfinished work on a long-lived branch. No flag service exists. Do not add one.
+
+If a change must land before it is the default, gate it with a default-off boolean next to the feature, in the client, and delete the boolean when the feature is on for everyone.
+
+**Pass.** The PR names that boolean, or says the change has no flag and is fully on.
+
+## Rollback `[manual]`
+
+**Rule.** Every deploy has a way back. Pages deploys from `deploy-pages.yml` on push to `main`, and the workflow also allows `workflow_dispatch`.
+
+Rollback is: re-run **Deploy to GitHub Pages** on the last known-good commit, or open a revert PR. Agents do not push to `main`, do not run the deploy, and do not merge the revert.
+
+**Pass.** The PR description says "revert this PR" and names the previous good SHA when you know it.
+
+## Code review `[manual]`
+
+**Rule.** Land work only as an open pull request. Never merge.
+
+`GOVERNANCE.md` Solo Mode is active: required approvals are zero, and branch protection that would require a review is not on. That is Shanti's setting. Do not enable branch protection, do not edit `.github/CODEOWNERS`, and do not edit `GOVERNANCE.md` to change the merge gate.
+
+**Pass.** The PR is open, targets `main`, and is not merged. The description says the maintainer must review it.
+
+## Definition of done
+
+Work is done only when all of the following are true:
+
+1. Gates 1–6 in `quality-gates.mdc` were re-run after the last commit and each one passed.
+2. Every `[manual]` item in this file has a line in the PR description.
+3. Every N/A item states its trigger and that the trigger has not fired.
+4. The pull request is open and unmerged.
+
+There is no separate tracker. This section is the definition.
+
+## Incident accountability `[manual]`
+
+**Rule.** The owner of an incident is the Maintainer role in `GOVERNANCE.md`, currently `@haremantra`. Do not reassign that role. There is no status page, on-call rotation, or incident tracker. Do not invent one.
+
+Record an incident as a GitHub issue in this repository. If the PR answers an incident, link the issue.
+
+**Pass.** The PR says `no incident`, or links the issue and names the maintainer as owner.
+
+## Design system `[manual]`
+
+**Rule.** UI uses the design system already in the repo. Do not add a second component library.
+
+- shadcn/ui, new-york, neutral, CSS variables: `components.json`, components in `client/src/components/ui/`.
+- Tokens in `client/src/index.css`: `--text-primary`, `--text-secondary`, `--text-caption`, `--bg-surface`, and the shadcn color variables. `--text-caption` is not for body text or interactive labels.
+
+**Pass.** The PR says new UI uses those components and tokens, or that the diff has no UI. Any new raw color is named and justified.
+
+## Empty and error states `[manual]`
+
+**Rule.** A view the PR adds or changes has a designed empty state and a designed error state. Not a blank screen, not the browser's default, and not a stack trace (Gate 5).
+
+Match the existing pattern in kind: the assessment tray zero-state (`data-testid="assessment-tray-zero-state"`), the Scenario Simulator line "No scenario generated yet", and the NotFound copy. Those examples are not proof that every view already complies.
+
+**Pass.** The PR names the empty state and the error state for each view it touches, or says it touches none.
+
+## Responsive behavior `[manual]`
+
+**Rule.** Views the PR changes are checked at a phone width and at a desktop width, on a real device or a real device emulator, not only by dragging a desktop window. `useMobile` is not that check. No device lab and no viewport suite runs in CI. Do not claim CI covered this.
+
+**Pass.** The PR lists the widths or devices you actually looked at, and what you checked (no clipped primary content, no accidental horizontal scroll).
+
+## Internationalization
+
+**N/A today.** The audience is English-only. Copy is English, `client/index.html` sets `<html lang="en">`, and the mapped sources (OWASP ASI, NIST SP 800-53, NIST AI-RMF) are the English publications. No i18n library is installed.
+
+**Trigger.** The first user-facing string in a language other than English, or a `lang` other than `en`. Until then, do not add an i18n framework. Keep `lang="en"`.
+
+## Legal `[manual]`
+
+**Rule.** Do not add tracking, cookies, off-device personal data, or accounts unless the same PR adds a privacy policy, a retention rule, and consent where the law requires it, for Shanti to review. Do not invent that legal text inside an unrelated change.
+
+What the repo has today:
+
+- Terms: `TERMS_OF_SERVICE.md` and `client/src/pages/TermsOfService.tsx` at `/terms`. The privacy section says the service does not use tracking cookies, does not use third-party analytics that collect personal data, and does not require accounts.
+- Privacy policy: none. No `PRIVACY` page or file.
+- Cookie consent: none. No `document.cookie` use, and no analytics SDK. Consent is not required on that fact pattern.
+- Retention: nothing written. On-device `localStorage` stays until the user clears it. Nothing is retained on a project server, because there is no project server.
+
+On-device keys only (not sent to a backend): `agentic_assessment_working_v1`, `agentic_assessments_v1`, `agentic_risk_onboarding_v1`, `diagram-analysis-history`, the diagram privacy acknowledgement, the explorer primer, and heatmap explainer expansion.
+
+**Cookie-consent trigger.** The first cookie, or the first analytics or telemetry call.
+
+**Pass.** The PR says it does not change data collection. If it does, the policy, the retention rule, and any required consent are in the diff and called out for Shanti.

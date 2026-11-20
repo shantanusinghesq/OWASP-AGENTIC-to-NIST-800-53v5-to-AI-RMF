@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Agent quality gates
+
+Hard gates: `.cursor/rules/quality-gates.mdc`. Constraints that are not a single command: `.cursor/rules/agent-constraints.mdc`. Both are `alwaysApply: true`. Satisfy them before treating work as done. Do not restate them here.
+
 ## Commands
 
 Package manager is **pnpm** (see `packageManager` field in `package.json`). The lockfile (`pnpm-lock.yaml`) is committed; CI uses `pnpm install --frozen-lockfile` for reproducibility.

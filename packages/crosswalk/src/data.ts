@@ -283,7 +283,7 @@ export const CROSSWALK: Record<string, CrosswalkEntry> = {
     evidence: [
       { title: "Malicious data-wiping prompt injected into Amazon Q Developer VS Code extension v1.84.0", type: "incident", sourceUrl: "https://www.reversinglabs.com/blog/aws-amazonq-ai-incident", datePublished: "2025-07", dateVerified: "2026-07-11" },
       { title: "MCP Tool Poisoning Attacks — malicious instructions hidden in tool description/metadata", type: "research", sourceUrl: "https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks", datePublished: "2025-04", dateVerified: "2026-07-11" },
-      { title: "Rogue postmark-mcp npm package BCC-exfiltrated emails (first malicious MCP server in the wild)", type: "incident", sourceUrl: "https://www.koi.ai/blog/postmark-mcp-npm-malicious-backdoor-email-theft", datePublished: "2025-09", dateVerified: "2026-07-11" },
+      { title: "Rogue postmark-mcp npm package BCC-exfiltrated emails (first malicious MCP server in the wild)", type: "incident", sourceUrl: "https://postmarkapp.com/blog/information-regarding-malicious-postmark-mcp-package", datePublished: "2025-09-25", dateVerified: "2026-11-20" },
       { title: "AgentSmith: LangSmith Prompt Hub malicious Proxy Provider agent leaks API keys and data", type: "incident", sourceUrl: "https://noma.security/blog/how-an-ai-agent-vulnerability-in-langsmith-could-lead-to-stolen-api-keys-and-hijacked-llm-responses/", datePublished: "2025-06", dateVerified: "2026-07-11" },
     ]
   },

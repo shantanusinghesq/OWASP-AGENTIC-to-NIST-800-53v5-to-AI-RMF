@@ -12,7 +12,11 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["client/src/**/*.test.{ts,tsx}", "packages/**/tests/**/*.test.ts"],
+    include: [
+      "client/src/**/*.test.{ts,tsx}",
+      "packages/**/tests/**/*.test.ts",
+      "tools/contract-review-bot/tests/**/*.test.ts",
+    ],
     environment: "node",
     setupFiles: ["client/src/test/setup.ts"],
   },

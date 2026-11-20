@@ -1,5 +1,9 @@
 {
-  "include": ["client/src/**/*", "packages/crosswalk/src/**/*"],
+  "include": [
+    "client/src/**/*",
+    "packages/crosswalk/src/**/*",
+    "tools/contract-review-bot/src/**/*.ts"
+  ],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
     "incremental": true,

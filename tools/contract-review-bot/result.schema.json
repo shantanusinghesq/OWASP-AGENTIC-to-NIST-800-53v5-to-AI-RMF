@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/contract-review-result.schema.json",
+  "title": "Contract review result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "head_sha",
+    "base_sha",
+    "pr_number",
+    "needs_owner_review",
+    "owner_review_paths",
+    "protected_paths",
+    "summarizer",
+    "summary",
+    "results"
+  ],
+  "properties": {
+    "version": { "const": 1 },
+    "head_sha": { "type": "string" },
+    "base_sha": { "type": "string" },
+    "pr_number": {
+      "type": ["integer", "null"],
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000
+    },
+    "needs_owner_review": { "type": "boolean" },
+    "owner_review_paths": { "type": "array", "items": { "type": "string" } },
+    "protected_paths": { "type": "array", "items": { "type": "string" } },
+    "summarizer": { "enum": ["off", "appended", "ignored"] },
+    "summary": { "type": ["string", "null"] },
+    "results": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/result" }
+    }
+  },
+  "definitions": {
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_id",
+        "gate",
+        "area",
+        "title",
+        "status",
+        "evidence",
+        "fix_hint"
+      ],
+      "properties": {
+        "gate_id": { "type": "string" },
+        "gate": { "type": "string" },
+        "area": {
+          "enum": ["lint", "tests", "security", "manual", "na", "unmapped"]
+        },
+        "title": { "type": "string" },
+        "status": { "enum": ["pass", "fail", "skip", "manual"] },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["command", "exit_code", "log_excerpt"],
+          "properties": {
+            "command": { "type": ["string", "null"] },
+            "exit_code": { "type": ["integer", "null"] },
+            "log_excerpt": { "type": "string" }
+          }
+        },
+        "fix_hint": { "type": "string" }
+      }
+    }
+  }
+}

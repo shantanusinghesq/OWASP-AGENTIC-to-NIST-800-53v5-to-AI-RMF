@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "rules": {
+    "gates": ".cursor/rules/quality-gates.mdc",
+    "constraints": ".cursor/rules/agent-constraints.mdc"
+  },
+  "protected_paths": [
+    ".github/",
+    ".cursor/rules/",
+    "CODEOWNERS",
+    "tools/contract-review-bot/",
+    "contract-review.config.json"
+  ],
+  "summarizer": { "enabled": false },
+  "manual": [
+    {
+      "title_includes": "Load time",
+      "gate_id": "manual-lcp",
+      "anchors": ["manual-lcp", "lcp", "lighthouse", "load time"]
+    },
+    {
+      "title_includes": "Schema validation",
+      "gate_id": "manual-schema",
+      "anchors": ["manual-schema", "schema"]
+    },
+    {
+      "title_includes": "Environment parity",
+      "gate_id": "manual-env",
+      "anchors": ["manual-env", "environment parity", "pnpm preview"]
+    },
+    {
+      "title_includes": "Feature flags",
+      "gate_id": "manual-flags",
+      "anchors": ["manual-flags", "feature flag"]
+    },
+    {
+      "title_includes": "Rollback",
+      "gate_id": "manual-rollback",
+      "anchors": ["manual-rollback", "rollback", "revert this"]
+    },
+    {
+      "title_includes": "Code review",
+      "gate_id": "manual-review",
+      "anchors": ["manual-review", "code review", "maintainer must review"]
+    },
+    {
+      "title_includes": "Incident",
+      "gate_id": "manual-incident",
+      "anchors": ["manual-incident", "incident"]
+    },
+    {
+      "title_includes": "Design system",
+      "gate_id": "manual-design",
+      "anchors": ["manual-design", "design system"]
+    },
+    {
+      "title_includes": "Empty and error",
+      "gate_id": "manual-empty",
+      "anchors": ["manual-empty", "empty state", "error state"]
+    },
+    {
+      "title_includes": "Responsive",
+      "gate_id": "manual-responsive",
+      "anchors": ["manual-responsive", "responsive"]
+    },
+    {
+      "title_includes": "Legal",
+      "gate_id": "manual-legal",
+      "anchors": ["manual-legal", "legal", "data collection", "privacy"]
+    }
+  ],
+  "na": [
+    {
+      "title_includes": "Authentication",
+      "gate_id": "na-auth",
+      "anchors": ["na-auth", "authentication", "authorization"]
+    },
+    {
+      "title_includes": "Observability",
+      "gate_id": "na-observability",
+      "anchors": ["na-observability", "observability"]
+    },
+    {
+      "title_includes": "Internationalization",
+      "gate_id": "na-i18n",
+      "anchors": ["na-i18n", "internationalization", "i18n"]
+    }
+  ],
+  "checks": [
+    {
+      "type": "command",
+      "gate_id": "gate-1-typecheck",
+      "gate": "1",
+      "area": "lint",
+      "title": "Typecheck exits 0 with no diagnostics",
+      "command": "node_modules/.bin/tsc --noEmit",
+      "fail_on_pattern": "\\berror\\b|\\bwarning\\b",
+      "fix_hint": "Fix the type error. Do not add @ts-ignore or @ts-expect-error to get green."
+    },
+    {
+      "type": "command",
+      "gate_id": "gate-1-build",
+      "gate": "1",
+      "area": "lint",
+      "title": "Production build exits 0 with zero warnings",
+      "command": "node_modules/.bin/vite build",
+      "fail_on_pattern": "^\\(!\\)|\\bwarning\\b",
+      "fix_hint": "Fix the build warning. Do not raise the chunk size limit or swallow Vite warnings."
+    },
+    {
+      "type": "command",
+      "gate_id": "gate-1-lint",
+      "gate": "1",
+      "area": "lint",
+      "title": "Lint exits 0 with zero warnings when a lint script exists",
+      "command": "node_modules/.bin/eslint --max-warnings 0 .",
+      "when_package_script": "lint",
+      "skip_reason": "No lint script in package.json. Gate 1 says not to add a linter only to satisfy this clause.",
+      "fail_on_pattern": "\\bwarning\\b",
+      "fix_hint": "Fix the lint warning. Do not add an eslint-disable to get green."
+    },
+    {
+      "type": "command",
+      "gate_id": "gate-2-test",
+      "gate": "2",
+      "area": "tests",
+      "title": "The test suite exits 0",
+      "command": "node_modules/.bin/vitest run",
+      "fix_hint": "Fix the failing test. Do not delete, skip, or weaken it."
+    },
+    {
+      "type": "route-coverage",
+      "gate_id": "gate-2-coverage",
+      "gate": "2",
+      "area": "tests",
+      "title": "Every route and ?tab= view is mentioned by a render test",
+      "routes_file": "client/src/App.tsx",
+      "view_type_file": "client/src/components/ViewTabs.tsx",
+      "view_type_name": "ViewType",
+      "tests_dir": "client/src",
+      "test_suffixes": [".test.tsx"],
+      "route_markers": {
+        "/": ["tab=overview"],
+        "/terms": ["/terms", "TermsOfService"],
+        "/404": ["/404"]
+      },
+      "catch_all_markers": ["NotFound"],
+      "fix_hint": "Add a test that renders the missing route or ?tab= and asserts on its content. A child rendered alone does not cover the tab. This check only proves the marker string is present."
+    },
+    {
+      "type": "test-integrity",
+      "gate_id": "hard-tests-intact",
+      "gate": "hard-tests-intact",
+      "area": "tests",
+      "title": "No test file is deleted, skipped, or weakened",
+      "test_path_pattern": "\\.(test|spec)\\.(ts|tsx)$",
+      "fix_hint": "Restore the test, the assertion, or remove the new skip. A moved assertion can trip the count; say so for the owner. Do not delete a test to get green."
+    },
+    {
+      "type": "command",
+      "gate_id": "gate-4-audit",
+      "gate": "4",
+      "area": "security",
+      "title": "No high or critical dependency advisory",
+      "command": "pnpm audit --audit-level high",
+      "fix_hint": "Upgrade or remove the vulnerable dependency. Do not lower --audit-level and do not add an audit ignore. If there is no fix, stop and say so. The owner decides."
+    },
+    {
+      "type": "command",
+      "gate_id": "gate-4-secrets",
+      "gate": "4",
+      "area": "security",
+      "title": "gitleaks reports no secrets",
+      "command": "gitleaks detect --source . --redact --no-banner",
+      "fix_hint": "Install gitleaks (pin a release and verify the checksum; do not curl | sh) and re-run. A missing binary is a fail, not a skip. Rotate and purge any leaked secret."
+    },
+    {
+      "type": "forbidden-text",
+      "gate_id": "gate-4-vite-secrets",
+      "gate": "4",
+      "area": "security",
+      "title": "No client-exposed VITE_ secret",
+      "roots": ["client", "packages"],
+      "pattern": "VITE_[A-Z0-9_]*(KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL)",
+      "exclude_dir_names": ["node_modules", "dist", ".git"],
+      "fix_hint": "Stop reading a secret from a VITE_ variable. Vite inlines import.meta.env.VITE_* into the client bundle."
+    },
+    {
+      "type": "tracked-env",
+      "gate_id": "gate-4-tracked-env",
+      "gate": "4",
+      "area": "security",
+      "title": "No tracked .env file",
+      "fix_hint": "Remove the .env file from git. Do not commit secrets."
+    },
+    {
+      "type": "forbidden-text",
+      "gate_id": "gate-5-no-stack",
+      "gate": "5",
+      "area": "security",
+      "title": "The UI does not render a stack trace",
+      "roots": ["client/src"],
+      "pattern": "\\.stack",
+      "exclude_suffixes": [".test.ts", ".test.tsx"],
+      "exclude_dir_names": ["node_modules", "dist", ".git"],
+      "fix_hint": "Remove .stack from the rendered tree. Keep the error boundary and its friendly message."
+    },
+    {
+      "type": "tooling-integrity",
+      "gate_id": "hard-tooling",
+      "gate": "hard-protected-paths",
+      "area": "security",
+      "title": "Script bodies, lockfile, and tool configs are unchanged",
+      "package_file": "package.json",
+      "script_names": ["check", "build", "test", "lint"],
+      "fix_hint": "The owner reviews changes to these script bodies, the lockfile, and vite, vitest, or tsconfig files. The bot does not execute package.json script bodies. A lockfile change is included because node_modules/.bin comes from that lockfile."
+    },
+    {
+      "type": "protected-paths",
+      "gate_id": "hard-protected-paths",
+      "gate": "hard-protected-paths",
+      "area": "security",
+      "title": "No edits to protected paths",
+      "fix_hint": "Revert edits under .github/, .cursor/rules/, CODEOWNERS, and this bot. The owner applies workflow changes. This bot flags the pull request needs-owner-review and does not merge."
+    }
+  ]
+}

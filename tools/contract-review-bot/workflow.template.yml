@@ -1,0 +1,365 @@
+# TEMPLATE — not an active workflow.
+#
+# Do not put this file in .github/workflows/ as-is. It is three workflows in one
+# file. Copy each document into its own file:
+#
+#   1. .github/workflows/contract-review.yml
+#   2. .github/workflows/contract-review-report.yml
+#   3. .github/workflows/contract-review-issues.yml
+#
+# A person copies these. Agents must not edit .github/.
+# Actions are pinned by commit SHA. Do not switch the pins to floating tags.
+# The evaluate job runs on pull_request, never pull_request_target.
+# It has contents: read only, and it clears tokens before pull request code runs.
+# The report job runs on workflow_run from the default branch and does not
+# check out the pull request.
+
+# ===== FILE: .github/workflows/contract-review.yml =====
+name: Contract review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contract-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout base (trusted runner, rules, and config)
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: contract
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Checkout pull request (untrusted workspace)
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: workspace
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Fetch the base commit used for diffs
+        working-directory: workspace
+        run: git cat-file -e "${{ github.event.pull_request.base.sha }}^{commit}" || git fetch --no-tags origin "${{ github.event.pull_request.base.sha }}"
+
+      - name: Remove the checkout token before running pull request code
+        working-directory: workspace
+        run: git config --local --unset-all http.https://github.com/.extraheader || true
+
+      # Replace this install block if the repo is not a pnpm app.
+      # gitleaks is intentionally not installed here. A missing binary fails
+      # Gate 4. Pin a release and verify the checksum yourself; do not curl | sh.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.4.0
+        with:
+          package_json_file: workspace/package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: workspace/pnpm-lock.yaml
+
+      # Record the runner's node and pnpm BEFORE install. Later steps call these
+      # absolute paths. An install script must not be able to replace `node`.
+      - name: Record trusted node and pnpm
+        run: |
+          set -euo pipefail
+          command -v node > "$RUNNER_TEMP/trusted-node"
+          command -v pnpm > "$RUNNER_TEMP/trusted-pnpm"
+          [[ -s "$RUNNER_TEMP/trusted-node" && -s "$RUNNER_TEMP/trusted-pnpm" ]]
+
+      - name: Install dependencies
+        working-directory: workspace
+        env:
+          GITHUB_TOKEN: ""
+          GH_TOKEN: ""
+          NPM_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Save the pull request body outside the shell script
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+
+      - name: Run contract checks from the base copy of the runner
+        working-directory: workspace
+        env:
+          GITHUB_TOKEN: ""
+          GH_TOKEN: ""
+          NPM_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+        run: |
+          set -euo pipefail
+          NODE="$(tr -d '[:space:]' < "$RUNNER_TEMP/trusted-node")"
+          PNPM="$(tr -d '[:space:]' < "$RUNNER_TEMP/trusted-pnpm")"
+          [[ "$NODE" == /* && "$PNPM" == /* ]]
+          export CONTRACT_REVIEW_NODE="$NODE"
+          export CONTRACT_REVIEW_PNPM="$PNPM"
+          "$NODE" --experimental-strip-types "$GITHUB_WORKSPACE/contract/tools/contract-review-bot/src/cli.ts" run \
+            --contract-root "$GITHUB_WORKSPACE/contract" \
+            --workspace "$GITHUB_WORKSPACE/workspace" \
+            --config tools/contract-review-bot/contract-review.config.json \
+            --base-sha "${{ github.event.pull_request.base.sha }}" \
+            --head-sha "${{ github.event.pull_request.head.sha }}" \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --pr-body-file "$RUNNER_TEMP/pr-body.md" \
+            --out "$RUNNER_TEMP/contract-review/results.json"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: contract-review-results
+          path: ${{ runner.temp }}/contract-review/results.json
+          if-no-files-found: error
+          retention-days: 7
+
+---
+# ===== FILE: .github/workflows/contract-review-report.yml =====
+name: Contract review report
+
+on:
+  workflow_run:
+    workflows: ["Contract review"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # issues: write posts the comment through the issue-comment API.
+    # pull-requests: read is only for GET /pulls and /pulls/files.
+    # There is no pull-requests: write, so this job cannot approve or edit the PR.
+    permissions:
+      contents: read
+      actions: read
+      issues: write
+      checks: write
+      pull-requests: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout the default branch only
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: Download results
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: contract-review-results
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: results
+
+      - name: Fail closed when the unprivileged job uploaded nothing
+        if: steps.download.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          jq -n \
+            --arg sha "$HEAD_SHA" \
+            '{name:"contract-review",head_sha:$sha,status:"completed",conclusion:"failure",output:{title:"Contract review did not produce results",summary:"The unprivileged job uploaded no artifact. This is a failure, not a skip."}}' \
+            > "$RUNNER_TEMP/check.json"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/check-runs" --input "$RUNNER_TEMP/check.json"
+
+      - name: Publish the status check, then the sticky comment
+        if: steps.download.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT_PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          # Comment failures must not skip the check. set -e is intentionally off.
+          set +e
+          set -u
+          post_check() {
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/check-runs" --input "$1"
+            return 0
+          }
+          [[ "$EVENT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          if [ "$?" -ne 0 ]; then
+            exit 1
+          fi
+          jq -n \
+            --arg sha "$EVENT_SHA" \
+            '{name:"contract-review",head_sha:$sha,status:"completed",conclusion:"failure",output:{title:"Contract review failed closed",summary:"The result artifact could not be validated. This is a failure, not a skip."}}' \
+            > "$RUNNER_TEMP/fallback-check.json"
+          EVENT_PR_ARG=()
+          if [[ "${EVENT_PR:-}" =~ ^[0-9]+$ ]]; then
+            EVENT_PR_ARG=(--event-pr "$EVENT_PR")
+          fi
+          node --experimental-strip-types tools/contract-review-bot/src/cli.ts read-binding \
+            --results results/results.json \
+            --out "$RUNNER_TEMP/binding" \
+            "${EVENT_PR_ARG[@]}"
+          if [ "$?" -ne 0 ]; then
+            post_check "$RUNNER_TEMP/fallback-check.json"
+            exit 0
+          fi
+          PR="$(tr -d '[:space:]' < "$RUNNER_TEMP/binding/pr")"
+          if [[ ! "$PR" =~ ^[0-9]+$ ]]; then
+            post_check "$RUNNER_TEMP/fallback-check.json"
+            exit 0
+          fi
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}" > "$RUNNER_TEMP/pr.json"
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/pulls/${PR}/files" > "$RUNNER_TEMP/files.json"
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" > "$RUNNER_TEMP/comments.json"
+          git fetch --no-tags origin "pull/${PR}/head" || true
+          git fetch --no-tags origin "$(tr -d '[:space:]' < "$RUNNER_TEMP/binding/base")" || true
+          node --experimental-strip-types tools/contract-review-bot/src/cli.ts publish-plan \
+            --results results/results.json \
+            --event-sha "$EVENT_SHA" \
+            --pr "$RUNNER_TEMP/pr.json" \
+            --files "$RUNNER_TEMP/files.json" \
+            --comments "$RUNNER_TEMP/comments.json" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --git-dir "$GITHUB_WORKSPACE" \
+            --contract-root "$GITHUB_WORKSPACE" \
+            --config tools/contract-review-bot/contract-review.config.json \
+            "${EVENT_PR_ARG[@]}" \
+            --out "$RUNNER_TEMP/plan"
+          if [ "$?" -ne 0 ] || [ ! -f "$RUNNER_TEMP/plan/check-body.json" ]; then
+            post_check "$RUNNER_TEMP/fallback-check.json"
+            exit 0
+          fi
+          # The check is posted before any comment request.
+          post_check "$RUNNER_TEMP/plan/check-body.json"
+          method="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-method")"
+          cpath="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-path")"
+          fallback="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-fallback-path")"
+          case "$method" in
+            POST|PATCH) ;;
+            SKIP) exit 0 ;;
+            *) exit 0 ;;
+          esac
+          case "$cpath" in
+            /repos/*) ;;
+            *) exit 0 ;;
+          esac
+          gh api --method "$method" "$cpath" --input "$RUNNER_TEMP/plan/comment-body.json"
+          comment_status="$?"
+          if [ "$comment_status" -ne 0 ]; then
+            case "$fallback" in
+              /repos/*/issues/*/comments)
+                gh api --method POST "$fallback" --input "$RUNNER_TEMP/plan/comment-body.json"
+                ;;
+            esac
+          fi
+          exit 0
+
+---
+# ===== FILE: .github/workflows/contract-review-issues.yml =====
+name: Contract review issues
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout the default branch only
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      # ISSUE_TITLE and ISSUE_BODY are environment values. They are not
+      # interpolated into the shell script. The classifier only searches them.
+      - name: Classify
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types tools/contract-review-bot/src/cli.ts classify-issue > "$RUNNER_TEMP/class.json"
+          node --experimental-strip-types tools/contract-review-bot/src/cli.ts render-issue \
+            --in "$RUNNER_TEMP/class.json" > "$RUNNER_TEMP/comment.md"
+
+      - name: Update the sticky suggestion comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          [[ "$ISSUE" =~ ^[0-9]+$ ]]
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/issues/${ISSUE}/comments" > "$RUNNER_TEMP/comments.json"
+          node --experimental-strip-types tools/contract-review-bot/src/cli.ts issue-plan \
+            --repo "${GITHUB_REPOSITORY}" \
+            --issue "$ISSUE" \
+            --comments "$RUNNER_TEMP/comments.json" \
+            --body "$RUNNER_TEMP/comment.md" \
+            --out "$RUNNER_TEMP/plan"
+          method="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-method")"
+          cpath="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-path")"
+          fallback="$(tr -d '[:space:]' < "$RUNNER_TEMP/plan/comment-fallback-path")"
+          case "$method" in
+            POST|PATCH) ;;
+            *) exit 0 ;;
+          esac
+          case "$cpath" in
+            /repos/*) ;;
+            *) exit 0 ;;
+          esac
+          gh api --method "$method" "$cpath" --input "$RUNNER_TEMP/plan/comment-body.json" || {
+            case "$fallback" in
+              /repos/*/issues/*/comments)
+                gh api --method POST "$fallback" --input "$RUNNER_TEMP/plan/comment-body.json" || true
+                ;;
+            esac
+          }
+          exit 0

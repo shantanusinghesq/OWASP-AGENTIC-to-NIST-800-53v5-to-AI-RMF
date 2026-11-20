@@ -15,6 +15,8 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { OWASP_ASI } from "@/data/crosswalk";
 import { useScenario } from "@/features/simulator/ScenarioContext";
+import { snapshotFromDiagram } from "@/features/diagram/engine/to-snapshot";
+import type { PatternEvaluationOutput } from "@/features/diagram/engine/pattern-evaluator";
 import { useOnboarding } from "@/features/onboarding/OnboardingContext";
 import { useTabParam } from "@/hooks/useTabParam";
 import OnboardingController from "@/features/onboarding/OnboardingController";
@@ -30,6 +32,8 @@ import { AssessmentTray } from "@/features/assessment/AssessmentTray";
 // Code-split: the simulator (plus its DiagramAnalyzer sidebar) is the heaviest
 // view and not part of the default Overview render — load it on tab entry.
 const ScenarioSimulator = lazy(() => import("@/features/simulator/ScenarioSimulator"));
+// The analyzer is the front door but still not on the default render path.
+const DiagramAnalyzer = lazy(() => import("@/features/diagram/DiagramAnalyzer"));
 
 type SeverityFilter = "all" | "Critical" | "High" | "Medium-High";
 const VALID_ASI = new Set(OWASP_ASI.map((a) => a.id));
@@ -42,7 +46,7 @@ export default function Home() {
   const [view, setView] = useTabParam();
   const [selectedASI, setSelectedASI] = useState<string | null>(() => readRiskParam());
   const [overviewSeverity, setOverviewSeverity] = useState<SeverityFilter>("all");
-  const { pendingEvidenceFilter, clearPendingFilter } = useScenario();
+  const { pendingEvidenceFilter, clearPendingFilter, setActiveScenario } = useScenario();
   const { registerTabSwitcher } = useOnboarding();
 
   // Register tab switcher for onboarding orchestration
@@ -99,6 +103,13 @@ export default function Home() {
     setView("detail");
   };
 
+  // Front-door analyzer → generate a report → hand the scenario to the
+  // simulator view, which hydrates and renders the full result.
+  const handleAnalyzeResult = (output: PatternEvaluationOutput): void => {
+    setActiveScenario(snapshotFromDiagram(output));
+    setView("simulator");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* ─── Onboarding Overlay ─── */}
@@ -111,6 +122,21 @@ export default function Home() {
       {/* ─── Content Area ─── */}
       <main className="container py-6">
         <AnimatePresence mode="wait">
+          {/* ─── Analyze Architecture View (front door) ─── */}
+          {view === "analyze" && (
+            <motion.div
+              key="analyze"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <Suspense fallback={<div className="py-16 text-center text-slate-400 text-sm">Loading analyzer…</div>}>
+                <DiagramAnalyzer variant="inline" onResultReady={handleAnalyzeResult} />
+              </Suspense>
+            </motion.div>
+          )}
+
           {/* ─── Overview View ─── */}
           {view === "overview" && (
             <motion.div

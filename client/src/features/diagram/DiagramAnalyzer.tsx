@@ -57,8 +57,11 @@ import type { GovernancePosture } from "@/features/simulator/engine/types";
 // ─── Types & Constants ──────────────────────────────────────────────────────
 
 interface DiagramAnalyzerProps {
-  isOpen: boolean;
-  onClose: () => void;
+  /** "panel" (default) = the slide-in sidebar used inside the Scenario
+   *  Simulator. "inline" = a first-class page surface (the front door). */
+  variant?: "panel" | "inline";
+  isOpen?: boolean;
+  onClose?: () => void;
   onResultReady: (output: PatternEvaluationOutput) => void;
 }
 
@@ -89,8 +92,16 @@ function readPrivacyAcknowledged(): boolean {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export default function DiagramAnalyzer({ isOpen, onClose, onResultReady }: DiagramAnalyzerProps) {
+export default function DiagramAnalyzer({
+  variant = "panel",
+  isOpen,
+  onClose,
+  onResultReady,
+}: DiagramAnalyzerProps) {
   const isMobile = useIsMobile();
+  const inline = variant === "inline";
+  // Inline is always "open" (it is the page); the panel obeys isOpen.
+  const isPanelOpen = inline ? true : Boolean(isOpen);
 
   const [phase, setPhase] = useState<AnalyzerPhase>("idle");
   const [matches, setMatches] = useState<LLMPatternMatch[]>([]);
@@ -111,8 +122,8 @@ export default function DiagramAnalyzer({ isOpen, onClose, onResultReady }: Diag
   const currentResultRef = useRef<DiagramAnalysisResult | null>(null);
 
   useEffect(() => {
-    if (isOpen) setHistory(getHistory());
-  }, [isOpen]);
+    if (isPanelOpen) setHistory(getHistory());
+  }, [isPanelOpen]);
 
   const clearProgressTimers = useCallback(() => {
     progressTimersRef.current.forEach(clearTimeout);
@@ -122,14 +133,15 @@ export default function DiagramAnalyzer({ isOpen, onClose, onResultReady }: Diag
   useEffect(() => clearProgressTimers, [clearProgressTimers]);
 
   // Escape closes the desktop/tablet panel (the mobile Sheet handles its own).
+  // Inline has nothing to close, so it opts out.
   useEffect(() => {
-    if (!isOpen || isMobile) return;
+    if (inline || !isPanelOpen || isMobile) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onClose?.();
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [isOpen, isMobile, onClose]);
+  }, [inline, isPanelOpen, isMobile, onClose]);
 
   // ─── Analysis Flow ────────────────────────────────────────────────────────
 
@@ -278,23 +290,25 @@ export default function DiagramAnalyzer({ isOpen, onClose, onResultReady }: Diag
   // ─── Panel Content ──────────────────────────────────────────────────────────
 
   const content = (
-    <div className="flex h-full flex-col bg-slate-900 text-slate-100">
+    <div className={`flex flex-col bg-slate-900 text-slate-100 ${inline ? "" : "h-full"}`}>
       {/* 1. Header */}
       <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-400" aria-hidden="true" />
           <h2 className="text-sm font-bold tracking-wide text-slate-100">Architecture Analyzer</h2>
         </div>
-        <button
-          onClick={onClose}
-          className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
-          aria-label="Close Architecture Analyzer"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        {!inline && (
+          <button
+            onClick={onClose}
+            className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+            aria-label="Close Architecture Analyzer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+      <div className={`space-y-4 px-4 py-4 ${inline ? "" : "flex-1 overflow-y-auto"}`}>
         {/* Privacy notice — first use only, only when images leave the browser */}
         {VISION_AVAILABLE && !privacyAcknowledged && (
           <div className="rounded-md border border-blue-500/40 bg-blue-500/10 p-3">
@@ -629,9 +643,18 @@ export default function DiagramAnalyzer({ isOpen, onClose, onResultReady }: Diag
 
   // ─── Responsive Shell ─────────────────────────────────────────────────────
 
+  // Inline (front door): a plain, primary page surface — no modal, no overlay.
+  if (inline) {
+    return (
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-lg border border-slate-700/50">
+        {content}
+      </div>
+    );
+  }
+
   if (isMobile) {
     return (
-      <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Sheet open={isPanelOpen} onOpenChange={(open) => !open && onClose?.()}>
         <SheetContent
           side="bottom"
           className="h-[70vh] border-slate-700 bg-slate-900 p-0 [&>button]:hidden"
